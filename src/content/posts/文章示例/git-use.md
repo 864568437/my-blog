@@ -9,7 +9,6 @@ category: 文章示例
 draft: false
 pinned: false
 author: fqzlr
-image: "api"
 ---
 
 # Git 详细使用教程（命令行版，附命令作用解释）

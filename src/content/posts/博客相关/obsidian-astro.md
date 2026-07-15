@@ -9,7 +9,6 @@ tags:
   - astro
 category: 博客相关
 draft: false
-image: "api"
 author: fqzlr
 slug: blog/obsidian-astro
 ---

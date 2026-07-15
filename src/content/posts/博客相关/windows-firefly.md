@@ -6,7 +6,6 @@ image: /src/assets/images/cover.avif
 tags: [Firefly, 环境安装, Windows, 博客搭建]
 category: 博客相关
 draft: false
-image: "api"
 slug: blog/windows-firefly
 ---
 # Firefly 博客部署教程
