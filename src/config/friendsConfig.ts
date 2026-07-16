@@ -39,6 +39,28 @@ export const friendsConfig: FriendLink[] = [
 		  "enabled": true
 		},
 		{
+		  "title": "团子和蛋糕",
+		  "imgurl": "https://re.tsh520.cn/zl/tx.webp",
+		  "desc": "如果你喜欢那么欢迎来到我的世界！",
+		  "siteurl": "https://blog.tsh520.cn/",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "Olinl Blog",
+		  "imgurl": "https://q2.qlogo.cn/headimg_dl?dst_uin=9892214&spec=0",
+		  "desc": "分享、实践、学习",
+		  "siteurl": "https://blog.olinl.com",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
 		  "title": "夏夜流萤",
 		  "imgurl": "https://weavatar.com/avatar/d252655d40d6874417a720bad0a6c5f77f8f6a1fd2f882f8f338402dc37e4190?s=640",
 		  "desc": "飞萤之火自无梦的长夜亮起，绽放在终竟的明天。",
@@ -54,17 +76,6 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://i.stardots.io/784774835/StarDots-2026052116374135506.jpg",
 		  "desc": "哈基米，南北绿豆",
 		  "siteurl": "https://tblog.mmzhiku.xyz/",
-		  "tags": [
-		    "Blog"
-		  ],
-		  "weight": 10,
-		  "enabled": true
-		},
-		{
-		  "title": "团子和蛋糕",
-		  "imgurl": "https://re.tsh520.cn/zl/tx.webp",
-		  "desc": "如果你喜欢那么欢迎来到我的世界！",
-		  "siteurl": "https://blog.tsh520.cn/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -403,9 +414,42 @@ export const friendsConfig: FriendLink[] = [
 		},
 		{
 		  "title": "RAGNote",
-		  "imgurl": "\thttps://ragnote.top/avatar.png",
+		  "imgurl": "https://ragnote.top/avatar.png",
 		  "desc": "一堆水文的小站，记录学习过程、项目实践，以及那些让我感兴趣的事物。Life is code. I will debug it.",
 		  "siteurl": "https://ragnote.top/",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "深渊园丁",
+		  "imgurl": "https://www.minedensity.top/favicon.svg",
+		  "desc": "这个网站是我送给互联网的一本手绘笔记。如果你在这里找到了什么让你停留的东西，那我们就已经是朋友了",
+		  "siteurl": "https://www.minedensity.top",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "落樱大王の小窝",
+		  "imgurl": "https://aclsky.sakurafishermua.top/i/2026/05/26/6a15b692c4cb9.jpg",
+		  "desc": "生如利刃，熔炉竟是我自己。",
+		  "siteurl": "https://acblog.sakurafishermua.top",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "xane",
+		  "imgurl": " https://cloudflare-imgbed-d88.pages.dev/file/1784102742642_头像.jpg",
+		  "desc": "Keep going.",
+		  "siteurl": " https://xane.eu.cc",
 		  "tags": [
 		    "Blog"
 		  ],
