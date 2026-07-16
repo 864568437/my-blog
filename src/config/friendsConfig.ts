@@ -38,6 +38,17 @@ export const friendsConfig: FriendLink[] = [
 		  "weight": 10,
 		  "enabled": true
 		},
+				{
+		  "title": "MmzMing的知识库",
+		  "imgurl": "https://i.stardots.io/784774835/StarDots-2026052116374135506.jpg",
+		  "desc": "哈基米，南北绿豆",
+		  "siteurl": "https://tblog.mmzhiku.xyz/",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
 		{
 		  "title": "团子和蛋糕",
 		  "imgurl": "https://re.tsh520.cn/zl/tx.webp",
@@ -65,17 +76,6 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://weavatar.com/avatar/d252655d40d6874417a720bad0a6c5f77f8f6a1fd2f882f8f338402dc37e4190?s=640",
 		  "desc": "飞萤之火自无梦的长夜亮起，绽放在终竟的明天。",
 		  "siteurl": "https://blog.cuteleaf.cn/",
-		  "tags": [
-		    "Blog"
-		  ],
-		  "weight": 10,
-		  "enabled": true
-		},
-		{
-		  "title": "MmzMing的知识库",
-		  "imgurl": "https://i.stardots.io/784774835/StarDots-2026052116374135506.jpg",
-		  "desc": "哈基米，南北绿豆",
-		  "siteurl": "https://tblog.mmzhiku.xyz/",
 		  "tags": [
 		    "Blog"
 		  ],
