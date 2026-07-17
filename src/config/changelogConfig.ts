@@ -37,6 +37,26 @@ export const changelogConfig: ChangelogItem[] = [
 		body: "",
 		enabled: true,
 	},
+			{
+		id: "2026-07-17-v1-0-1",
+		version: "v1.0.1",
+		date: "2026-07-17",	
+		time: "22:00",
+		type: "feature",
+		description: "评论系统迁移",
+		body: "",
+		enabled: true,
+	},
+		{
+		id: "2026-07-18-v1-0-2",
+		version: "v1.0.2",
+		date: "2026-07-18",	
+		time: "22:00",
+		type: "feature",
+		description: "新增留言板聊天功能，支持用户与博主进行实时互动，快捷按钮新增",
+		body: "",
+		enabled: true,
+	},
 ];
 
 export function getEnabledChangelog(): ChangelogItem[] {

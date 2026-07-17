@@ -73,7 +73,7 @@ export const profileConfig: ProfileConfig = {
 	// ============================================================
 	homeHero: {
 		// ---------- 头像 ----------
-		showAvatar: true, // 左侧圆形头像
+		showAvatar: false, // 左侧圆形头像
 		// 头像位置：default=默认（左侧面板里），bottom-left=左下角，bottom-right=右下角
 		avatarPosition: "bottom-right",
 		showWorkStatus: true, // 头像右下角工作状态徽章（上班中/下班了）

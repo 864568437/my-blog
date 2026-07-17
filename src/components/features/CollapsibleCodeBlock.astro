@@ -1,0 +1,170 @@
+---
+interface Props {
+  title?: string;
+  language?: string;
+  filename?: string;
+}
+
+const {
+  title = '点击查看完整源代码',
+  language = 'html',
+  filename,
+} = Astro.props;
+---
+
+<div class="ccb-wrapper">
+  <button class="ccb-toggle" type="button" aria-expanded="false">
+    <span class="ccb-toggle-icon">&#9654;</span>
+    <span class="ccb-toggle-text">{title}</span>
+  </button>
+  <div class="ccb-content" hidden>
+    {filename && <div class="ccb-filename">{filename}</div>}
+    <div class="ccb-code-header">
+      <span class="ccb-lang">{language.toUpperCase()}</span>
+      <button class="ccb-copy-btn" type="button" aria-label="复制代码">
+        <span class="ccb-copy-text">复制</span>
+      </button>
+    </div>
+    <pre class="ccb-pre"><code class="ccb-code"><slot /></code></pre>
+  </div>
+</div>
+
+<style>
+  .ccb-wrapper {
+    margin: 1.25rem 0;
+    border: 1px solid var(--line-divider);
+    border-radius: var(--radius-medium);
+    overflow: hidden;
+  }
+  .ccb-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--float-panel-bg);
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--deep-text);
+    text-align: left;
+  }
+  .ccb-toggle:hover {
+    background: var(--btn-regular-bg-hover);
+  }
+  .ccb-toggle-icon {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    font-size: 0.7rem;
+    color: var(--content-meta);
+  }
+  .ccb-toggle[aria-expanded='true'] .ccb-toggle-icon {
+    transform: rotate(90deg);
+  }
+  .ccb-content {
+    border-top: 1px solid var(--line-divider);
+  }
+  .ccb-filename {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    color: var(--content-meta);
+    background: var(--codeblock-topbar-bg);
+  }
+  .ccb-code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.35rem 1rem;
+    background: var(--codeblock-topbar-bg);
+    border-bottom: 1px solid var(--line-divider);
+  }
+  .ccb-lang {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--content-meta);
+    letter-spacing: 0.05em;
+  }
+  .ccb-copy-btn {
+    padding: 0.25rem 0.75rem;
+    background: var(--btn-regular-bg);
+    border: 1px solid var(--line-divider);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--deep-text);
+    transition: background 0.15s ease;
+  }
+  .ccb-copy-btn:hover {
+    background: var(--btn-regular-bg-hover);
+  }
+  .ccb-copy-btn.ccb-copied {
+    color: #059669;
+    border-color: #059669;
+  }
+  :global(html.dark) .ccb-copy-btn.ccb-copied {
+    color: #34d399;
+    border-color: #34d399;
+  }
+  .ccb-pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+    background: var(--codeblock-bg);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    tab-size: 2;
+  }
+  .ccb-code {
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    color: var(--deep-text);
+    white-space: pre;
+    word-break: normal;
+    word-wrap: normal;
+  }
+</style>
+
+<script>
+  function init() {
+    document.querySelectorAll('.ccb-wrapper').forEach((wrapper) => {
+      const toggle = wrapper.querySelector('.ccb-toggle') as HTMLButtonElement;
+      const content = wrapper.querySelector('.ccb-content') as HTMLDivElement;
+      const copyBtn = wrapper.querySelector('.ccb-copy-btn') as HTMLButtonElement;
+      const copyText = wrapper.querySelector('.ccb-copy-text') as HTMLSpanElement;
+      const codeEl = wrapper.querySelector('.ccb-code') as HTMLElement;
+
+      toggle.addEventListener('click', () => {
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        if (expanded) {
+          content.setAttribute('hidden', '');
+        } else {
+          content.removeAttribute('hidden');
+        }
+      });
+
+      copyBtn.addEventListener('click', async () => {
+        if (!codeEl) return;
+        try {
+          await navigator.clipboard.writeText(codeEl.textContent || '');
+          copyText.textContent = '已复制!';
+          copyBtn.classList.add('ccb-copied');
+          setTimeout(() => {
+            copyText.textContent = '复制';
+            copyBtn.classList.remove('ccb-copied');
+          }, 2000);
+        } catch {
+          copyText.textContent = '复制失败';
+          setTimeout(() => {
+            copyText.textContent = '复制';
+          }, 2000);
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>

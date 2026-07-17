@@ -27,6 +27,19 @@ export const daohangPageConfig: DaohangPageConfig = {
 
 export const daohangConfig: DaohangItem[] = [
 	{
+		id: "dh-01-fqzlr-home",
+		name: "番茄的主页",
+		url: "https://home.fqzlr.com/",
+		icon: "material-symbols:home",
+		description: "fqzlr的主页",
+		category: "常用网站",
+		tags: ["fqzlr"],
+		color: "#f97316",
+		featured: true,
+		order: 10,
+		enabled: true,
+	},
+	{
 		id: "dh-10-cloudflare",
 		name: "Cloudflare",
 		url: "https://dash.cloudflare.com/",

@@ -1,0 +1,340 @@
+---
+// Twikoo → Waline 转换工具（内嵌交互式组件）
+---
+
+<div class="twk2wal-tool">
+  <div class="twk2wal-box">
+    <h3 class="twk2wal-title">Twikoo → Waline 转换器</h3>
+    <p class="twk2wal-desc">
+      1. 粘贴 Twikoo 导出 JSON 数组 / 上传 json 文件<br />
+      2. 转换自动给所有 url 末尾加 <code>/</code>，匹配前台带斜杠路径<br />
+      3. 页面路径变动可批量替换 url 前缀
+    </p>
+    <textarea id="twk2wal-input" class="twk2wal-textarea" placeholder="粘贴 Twikoo 完整导出 JSON 数组..."></textarea>
+    <div class="twk2wal-url-fix">
+      <span>批量替换 url 前缀：</span>
+      <input id="twk2wal-oldUrl" class="twk2wal-input" placeholder="原路径前缀，如 /post/" />
+      <input id="twk2wal-newUrl" class="twk2wal-input" placeholder="新路径前缀，如 /archives/" />
+      <button id="twk2wal-fixUrlBtn" class="twk2wal-btn twk2wal-btn--warn">一键替换全部 url</button>
+    </div>
+    <div class="twk2wal-btns">
+      <button id="twk2wal-uploadBtn" class="twk2wal-btn twk2wal-btn--blue">上传本地 JSON</button>
+      <button id="twk2wal-convertBtn" class="twk2wal-btn twk2wal-btn--green">开始转换</button>
+      <button id="twk2wal-downloadBtn" class="twk2wal-btn twk2wal-btn--purple" disabled>下载 waline-import.json</button>
+      <button id="twk2wal-clearBtn" class="twk2wal-btn twk2wal-btn--red">清空全部</button>
+    </div>
+    <p id="twk2wal-msg" class="twk2wal-tip"></p>
+  </div>
+
+  <div class="twk2wal-box">
+    <h3 class="twk2wal-subtitle">转换结果预览（自动补尾斜杠）</h3>
+    <textarea id="twk2wal-output" class="twk2wal-textarea" readonly placeholder="转换后标准 JSON"></textarea>
+  </div>
+
+  <input type="file" id="twk2wal-fileInput" accept=".json" style="display:none" />
+</div>
+
+<style>
+  .twk2wal-tool {
+    margin: 1.5rem 0;
+  }
+  .twk2wal-box {
+    background: var(--float-panel-bg);
+    border: 1px solid var(--line-divider);
+    border-radius: var(--radius-medium);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .twk2wal-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--deep-text);
+  }
+  .twk2wal-subtitle {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--deep-text);
+  }
+  .twk2wal-desc {
+    color: var(--content-meta);
+    font-size: 0.85rem;
+    line-height: 1.7;
+    margin-bottom: 0.75rem;
+  }
+  .twk2wal-desc code {
+    background: var(--inline-code-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+  .twk2wal-textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 0.75rem;
+    border: 1px solid var(--line-divider);
+    border-radius: var(--radius-small);
+    background: var(--codeblock-bg);
+    color: var(--deep-text);
+    font-family: monospace;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+  .twk2wal-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  .twk2wal-url-fix {
+    margin: 0.75rem 0;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .twk2wal-url-fix span {
+    font-size: 0.85rem;
+    color: var(--deep-text);
+    white-space: nowrap;
+  }
+  .twk2wal-input {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--line-divider);
+    border-radius: var(--radius-small);
+    background: var(--float-panel-bg);
+    color: var(--deep-text);
+    font-size: 0.8rem;
+    min-width: 10rem;
+    flex: 1;
+  }
+  .twk2wal-input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  .twk2wal-btns {
+    margin: 0.75rem 0;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .twk2wal-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #fff;
+    transition: opacity 0.15s ease;
+  }
+  .twk2wal-btn:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+  .twk2wal-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .twk2wal-btn--blue { background: #3b82f6; }
+  .twk2wal-btn--green { background: #10b981; }
+  .twk2wal-btn--purple { background: #8b5cf6; }
+  .twk2wal-btn--red { background: #ef4444; }
+  .twk2wal-btn--warn { background: #f59e0b; }
+  .twk2wal-tip {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--content-meta);
+    min-height: 1.2rem;
+  }
+  .twk2wal-tip.twk2wal-success {
+    color: #059669;
+    font-weight: 500;
+  }
+  :global(html.dark) .twk2wal-tip.twk2wal-success {
+    color: #34d399;
+  }
+  .twk2wal-tip.twk2wal-error {
+    color: #dc2626;
+  }
+  :global(html.dark) .twk2wal-tip.twk2wal-error {
+    color: #f87171;
+  }
+</style>
+
+<script>
+  type TwalineJson = {
+    type: string;
+    version: number;
+    time: number;
+    tables: string[];
+    data: {
+      Comment: Record<string, unknown>[];
+      Counter: unknown[];
+      Users: unknown[];
+    };
+  };
+
+  function formatISO(ts: unknown): string {
+    if (!ts || isNaN(Number(ts))) return new Date().toISOString();
+    const date = new Date(Number(ts));
+    if (isNaN(date.getTime())) return new Date().toISOString();
+    return date.toISOString();
+  }
+
+  function normalizeUrl(path: string | undefined): string {
+    let url = path?.trim() || '/';
+    if (url === '/') return url;
+    if (!url.endsWith('/')) url += '/';
+    return url;
+  }
+
+  function init() {
+    const inputEl = document.getElementById('twk2wal-input') as HTMLTextAreaElement | null;
+    const outputEl = document.getElementById('twk2wal-output') as HTMLTextAreaElement | null;
+    const msgEl = document.getElementById('twk2wal-msg');
+    const uploadBtn = document.getElementById('twk2wal-uploadBtn');
+    const convertBtn = document.getElementById('twk2wal-convertBtn');
+    const downloadBtn = document.getElementById('twk2wal-downloadBtn') as HTMLButtonElement | null;
+    const clearBtn = document.getElementById('twk2wal-clearBtn');
+    const fixUrlBtn = document.getElementById('twk2wal-fixUrlBtn');
+    const oldUrlInput = document.getElementById('twk2wal-oldUrl') as HTMLInputElement | null;
+    const newUrlInput = document.getElementById('twk2wal-newUrl') as HTMLInputElement | null;
+    const fileInput = document.getElementById('twk2wal-fileInput') as HTMLInputElement | null;
+
+    if (!inputEl || !outputEl || !msgEl || !uploadBtn || !convertBtn || !downloadBtn || !clearBtn || !fixUrlBtn || !oldUrlInput || !newUrlInput || !fileInput) {
+      return;
+    }
+
+    let walineJson: TwalineJson | null = null;
+
+    const showMsg = (text: string, type: 'success' | 'error' | '') => {
+      msgEl!.textContent = text;
+      msgEl!.className = 'twk2wal-tip' + (type ? ' twk2wal-' + type : '');
+    };
+
+    uploadBtn.onclick = () => fileInput.click();
+    fileInput.onchange = async (e) => {
+      const f = (e.target as HTMLInputElement).files?.[0];
+      if (!f) return;
+      inputEl.value = await f.text();
+      showMsg(`已加载文件：${f.name}`, 'success');
+    };
+
+    clearBtn.onclick = () => {
+      inputEl.value = outputEl.value = '';
+      oldUrlInput.value = newUrlInput.value = '';
+      walineJson = null;
+      downloadBtn.disabled = true;
+      showMsg('', '');
+    };
+
+    fixUrlBtn.onclick = () => {
+      if (!walineJson) {
+        showMsg('请先转换数据再替换路径', 'error');
+        return;
+      }
+      const oldPre = oldUrlInput.value.trim();
+      const newPre = newUrlInput.value.trim();
+      if (!oldPre || !newPre) {
+        showMsg('请填写原路径和新路径前缀', 'error');
+        return;
+      }
+      let count = 0;
+      walineJson.data.Comment.forEach((item) => {
+        const url = item.url as string;
+        if (url.includes(oldPre)) {
+          item.url = normalizeUrl(url.replace(oldPre, newPre));
+          count++;
+        }
+      });
+      outputEl.value = JSON.stringify(walineJson, null, 2);
+      showMsg(`路径替换完成，共修改 ${count} 条评论 url`, 'success');
+    };
+
+    convertBtn.onclick = () => {
+      try {
+        const raw = inputEl.value.trim();
+        if (!raw) throw '输入内容不能为空';
+        const twikooList = JSON.parse(raw);
+        if (!Array.isArray(twikooList)) throw 'Twikoo 导出数据必须是数组格式';
+
+        let idSeq = 1;
+        const commentArr = twikooList.map((tk: Record<string, any>) => {
+          const status = tk.isSpam === 1 ? 'spam' : 'approved';
+          const comment = tk.comment?.trim() || '无评论内容';
+          const pid = tk.pid || null;
+          const rid = tk.rid || null;
+          const url = normalizeUrl(tk.url);
+          const insertedAt = formatISO(tk.created);
+          const updatedAt = formatISO(tk.updated);
+          const createdAt = insertedAt;
+          const sticky = tk.top ? 1 : null;
+
+          return {
+            user_id: 1,
+            objectId: idSeq++,
+            nick: tk.nick || '访客',
+            mail: tk.mail || '',
+            link: tk.link || '',
+            ua: tk.ua || '',
+            ip: tk.ip || '',
+            url,
+            comment,
+            pid,
+            rid,
+            sticky,
+            status,
+            like: null,
+            insertedAt,
+            createdAt,
+            updatedAt,
+          };
+        });
+
+        walineJson = {
+          type: 'waline',
+          version: 1,
+          time: Date.now(),
+          tables: ['Comment', 'Counter', 'Users'],
+          data: {
+            Comment: commentArr,
+            Counter: [],
+            Users: [],
+          },
+        };
+
+        outputEl.value = JSON.stringify(walineJson, null, 2);
+        downloadBtn.disabled = false;
+        showMsg(`转换成功，共 ${commentArr.length} 条评论，已自动给所有 url 末尾补斜杠`, 'success');
+      } catch (err) {
+        outputEl.value = '';
+        walineJson = null;
+        downloadBtn.disabled = true;
+        showMsg('转换失败：' + err, 'error');
+      }
+    };
+
+    downloadBtn.onclick = () => {
+      if (!walineJson) {
+        showMsg('请先执行转换！', 'error');
+        return;
+      }
+      const jsonStr = JSON.stringify(walineJson, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'waline-import.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showMsg('文件下载完成，所有 url 已自动补尾斜杠', 'success');
+    };
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>

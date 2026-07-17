@@ -1,18 +1,17 @@
 <script lang="ts">
 	import { onMount, tick } from "svelte";
 	import Icon from "@/components/common/Icon.svelte";
-	import { commentConfig } from "@/config";
+	import GuestbookChat from "@/components/features/GuestbookChat.svelte";
 
 	let isOpen = $state(false);
-	let walineEl: HTMLDivElement;
-	let initialized = $state(false);
+	let chatMounted = $state(false);
 
 	export function toggle() {
 		isOpen = !isOpen;
 		(window as any).__guestbookModalOpen = isOpen;
 		if (isOpen) {
 			tick().then(() => {
-				initWaline();
+				chatMounted = true;
 			});
 		}
 	}
@@ -20,27 +19,6 @@
 	function close() {
 		isOpen = false;
 		(window as any).__guestbookModalOpen = false;
-	}
-
-	async function initWaline() {
-		if (initialized || !walineEl) return;
-
-		const config = {
-			...commentConfig.waline,
-			el: walineEl,
-			path: "/guestbook/",
-			dark: "html.dark",
-			wordLimit: ["2", "300"],
-			...(commentConfig.waline?.visitorCount ? { pageview: true } : {}),
-		};
-
-		try {
-			const mod = await import(/* @vite-ignore */ "https://unpkg.com/@waline/client@v3/dist/waline.js");
-			mod.init(config);
-			initialized = true;
-		} catch (err) {
-			console.error("Waline init failed:", err);
-		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -61,12 +39,8 @@
 </script>
 
 {#if isOpen}
-	<link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
 	<div class="ai-overlay guestbook-modal-overlay" onclick={close}>
-		<div
-			class="ai-panel guestbook-modal-panel"
-			onclick={(e) => e.stopPropagation()}
-		>
+		<div class="ai-panel guestbook-modal-panel" onclick={(e) => e.stopPropagation()}>
 			<!-- 标题栏 -->
 			<div class="ai-header">
 				<div class="ai-header__left">
@@ -77,7 +51,7 @@
 					<span class="ai-header__model">有什么想说的，留个言吧~</span>
 				</div>
 				<div class="ai-header__actions">
-					<a href="/life/guestbook/" class="ai-icon-btn" title="打开完整页面">
+					<a href="/guestbook/" class="ai-icon-btn" title="打开完整页面">
 						<Icon icon="material-symbols:open-in-new" />
 					</a>
 					<button class="ai-icon-btn" onclick={close} title="关闭">
@@ -86,9 +60,11 @@
 				</div>
 			</div>
 
-			<!-- Waline 评论区 -->
+			<!-- 聊天室内容 -->
 			<div class="guestbook-modal-content">
-				<div bind:this={walineEl} class="guestbook-modal-waline"></div>
+				{#if chatMounted}
+					<GuestbookChat />
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -104,45 +80,136 @@
 		color: var(--primary);
 	}
 
-	.guestbook-modal-panel {
-		padding: 0;
+	.guestbook-modal-content {
+		flex: 1;
 		overflow: hidden;
 		display: flex;
 		flex-direction: column;
 	}
 
-	.guestbook-modal-content {
+	.guestbook-modal-content :global(.guestbook-chat) {
 		flex: 1;
-		overflow-y: auto;
-		padding: 1rem;
-		scrollbar-gutter: stable;
-	}
-
-	.guestbook-modal-waline {
-		width: 100%;
-		min-height: 100%;
-	}
-
-	.guestbook-modal-waline :global(.wl-empty) {
+		display: flex;
+		flex-direction: column;
 		min-height: 0;
-		padding: 2rem 0;
+		border: none;
+		border-radius: 0;
+		background: transparent;
 	}
 
-	.guestbook-modal-waline :global(.wl-comment-actions) {
-		display: none;
+	.guestbook-modal-content :global(.guestbook-chat__header) {
+		padding: 0.5rem 1rem;
+		border-bottom: 1px solid var(--line-divider);
+		flex-shrink: 0;
 	}
 
-	.guestbook-modal-waline :global(.wl-editor) {
-		min-height: 80px;
+	.guestbook-modal-content :global(.guestbook-chat__title-row h2) {
+		font-size: 1rem;
 	}
 
-	.guestbook-modal-waline :global(.wl-card .wl-main) {
-		padding: 0.5rem 0.75rem;
+	.guestbook-modal-content {
+		--guestbook-sidebar-width: 14rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__workspace) {
+		flex: 1;
+		min-height: 0;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) var(--guestbook-sidebar-width);
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__conversation) {
+		min-height: 0;
+		height: auto;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__messages) {
+		padding: 0.75rem 1rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__composer-area) {
+		padding: 0.5rem 1rem 0.75rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-composer__editor) {
+		border-radius: var(--radius-default);
+	}
+
+	.guestbook-modal-content :global(.guestbook-composer__footer) {
+		padding: 0.35rem 0.6rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-message__bubble) {
+		max-width: 88%;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__sidebar) {
+		position: relative;
+		top: auto;
+		right: auto;
+		bottom: auto;
+		transform: none;
+		pointer-events: auto;
+		border-left: 1px solid var(--line-divider);
+		background: var(--float-panel);
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__sidebar-toggle),
+	.guestbook-modal-content :global(.guestbook-chat__sidebar-overlay) {
+		display: none !important;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__sidebar-heading) {
+		display: flex;
+		min-height: 2.5rem;
+		padding: 0 0.75rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__sidebar-heading strong) {
+		font-size: 0.85rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__panel-title) {
+		padding: 0.5rem 0.75rem 0.25rem;
+		font-size: 0.75rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__announcement) {
+		padding: 0.4rem 0.75rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__announcement strong) {
+		font-size: 0.8rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__announcement p) {
+		font-size: 0.7rem;
+	}
+
+	.guestbook-modal-content :global(.guestbook-chat__member) {
+		padding: 0.3rem 0.75rem;
+		font-size: 0.75rem;
 	}
 
 	@media (max-width: 640px) {
 		.guestbook-modal-content {
-			padding: 0.75rem;
+			--guestbook-sidebar-width: 12rem;
+		}
+
+		.guestbook-modal-content :global(.guestbook-chat__header) {
+			padding: 0.4rem 0.75rem;
+		}
+
+		.guestbook-modal-content :global(.guestbook-chat__messages) {
+			padding: 0.5rem 0.75rem;
+		}
+
+		.guestbook-modal-content :global(.guestbook-chat__composer-area) {
+			padding: 0.4rem 0.75rem 0.6rem;
+		}
+
+		.guestbook-modal-content :global(.guestbook-message__bubble) {
+			max-width: 92%;
 		}
 	}
 </style>
