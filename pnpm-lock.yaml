@@ -80,6 +80,9 @@ importers:
       '@vfx-js/core':
         specifier: ^1.1.0
         version: 1.1.0
+      '@waline/api':
+        specifier: ^1.1.2
+        version: 1.1.2
       '@waline/client':
         specifier: ^3.13.0
         version: 3.13.0(typescript@5.9.3)
@@ -119,6 +122,9 @@ importers:
       katex:
         specifier: ^0.16.28
         version: 0.16.28
+      lucide-svelte:
+        specifier: ^1.0.1
+        version: 1.0.1(svelte@5.50.3)
       lunar-typescript:
         specifier: ^1.8.6
         version: 1.8.6
@@ -2961,6 +2967,10 @@ packages:
     resolution: {integrity: sha512-mLBwZ6iicZHx1VUzthO+pk+2uD6byPRHjK+OI0pLH7PP+Qx3Gtx9xuiKL6Xxi58WrcAi8CIN2HyGVJbkNESwnA==}
     engines: {node: '>=18'}
 
+  '@waline/api@1.1.2':
+    resolution: {integrity: sha512-r1H+XL+/Ww4qXv8vjq09HJQtMvYqMofgfueuokgsDW1kJ9/6CYY7g6LkksYlDJmWm0aqkLR/9ZTI/bbozL4FBA==}
+    engines: {node: '>=22'}
+
   '@waline/client@3.13.0':
     resolution: {integrity: sha512-iBVAjf1j4wgxNB8zF3/IPprJvC6cD+OlCwfuoRZWoe6x6dc/NiPXe8LrtZLL0foLiD7Unsc71JvQJASg2vlWfw==}
     engines: {node: '>=18'}
@@ -4830,6 +4840,12 @@ packages:
   lru-cache@7.18.3:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
+
+  lucide-svelte@1.0.1:
+    resolution: {integrity: sha512-WvzZgk0pqzgda+AErLvgWxHkfg/+GgUwqKMRHvzt0IqyMdmyEDzDCk3Z+Wo/3y753oIgx8u9Q4eUbWkghFa8Jg==}
+    deprecated: Package deprecated. Please use @lucide/svelte instead.
+    peerDependencies:
+      svelte: ^3 || ^4 || ^5.0.0-next.42
 
   lunar-typescript@1.8.6:
     resolution: {integrity: sha512-5Eo4T/cnuXfrgO4k5LCpOGHIUOuz5hCF/IfNv0T29WY2shR36Hiz+ecN9WjnUuxUKhql9gbOkPaQoqLFKtPRNA==}
@@ -10100,6 +10116,8 @@ snapshots:
 
   '@waline/api@1.1.0': {}
 
+  '@waline/api@1.1.2': {}
+
   '@waline/client@3.13.0(typescript@5.9.3)':
     dependencies:
       '@vueuse/core': 14.2.1(vue@3.5.30(typescript@5.9.3))
@@ -12304,6 +12322,10 @@ snapshots:
       yallist: 4.0.0
 
   lru-cache@7.18.3: {}
+
+  lucide-svelte@1.0.1(svelte@5.50.3):
+    dependencies:
+      svelte: 5.50.3
 
   lunar-typescript@1.8.6: {}
 

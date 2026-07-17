@@ -337,6 +337,8 @@ export type CommentConfig = {
 		lang?: string;
 		login?: "enable" | "force" | "disable";
 		visitorCount?: boolean; // 是否统计访问量，true 启用访问量，false 关闭
+		emoji?: string[];
+		imageUploadURL?: string;
 	};
 	artalk?: {
 		// 后端程序 API 地址
@@ -994,4 +996,16 @@ export type CalendarConfig = {
 	schedules: ScheduleItem[];
 	show: CalendarShowConfig;
 	overview: CalendarOverviewConfig;
+};
+
+export type GuestbookAnnouncementItem = {
+	id: string;
+	title: string;
+	summary: string;
+	lead?: string;
+	rules: string[];
+};
+
+export type GuestbookConfig = {
+	announcements: GuestbookAnnouncementItem[];
 };

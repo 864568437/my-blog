@@ -51,6 +51,7 @@
 @import './components/animated-tabs.css';
 @import './components/article-catalog.css';
 @import './components/page-loader.css';
+@import './components/guestbook-chat.css';
 
 /* --- 功能样式 --- */
 @import './features/content.css';
@@ -66,6 +67,7 @@
 @import './features/movies-games.css';
 @import './pages/music-visualizer.css';
 @import './pages/article-list.css';
+@import './pages/categories.css';
 
 /* --- 布局样式 --- */
 @import './layout/layout-styles.css';
