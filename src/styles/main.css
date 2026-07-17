@@ -51,6 +51,7 @@
 @import './components/animated-tabs.css';
 @import './components/article-catalog.css';
 @import './components/page-loader.css';
+@import './components/privacy-modal.css';
 @import './components/guestbook-chat.css';
 
 /* --- 功能样式 --- */
