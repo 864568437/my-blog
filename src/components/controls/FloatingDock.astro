@@ -4,6 +4,7 @@ import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import Search from "@/components/controls/Search.svelte";
 import AISearch from "@/components/controls/AISearch.svelte";
+import GuestbookModal from "@/components/controls/GuestbookModal.svelte";
 import MusicPlayer from "@/components/features/MusicPlayer.astro";
 import PostDirectoryList from "@/components/widget/PostDirectoryList.astro";
 import { musicPlayerConfig } from "@/config/musicConfig";
@@ -102,10 +103,10 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
       </button>
 
 
-      <!-- 笔记本 -->
-      <button class="dock-btn" id="dock-notebook-btn" aria-label="Notebook" type="button">
-        <span class="dock-btn-icon"><Icon name="material-symbols:book-outline-rounded" class="text-2xl" /></span>
-        <span class="dock-btn-label">笔记</span>
+      <!-- 留言板 -->
+      <button class="dock-btn" id="dock-guestbook-btn" aria-label="留言板" type="button">
+        <span class="dock-btn-icon"><Icon name="material-symbols:edit-note" class="text-2xl" /></span>
+        <span class="dock-btn-label">留言</span>
       </button>
 
       <!-- 回首页 -->
@@ -210,6 +211,9 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 
 <!-- AI 搜索组件 -->
 <AISearch client:load />
+
+<!-- 留言板弹窗组件 -->
+<GuestbookModal client:load />
 
 <!-- TOC 抽屉 -->
 <div class="dock-drawer dock-drawer-closed" id="dock-drawer-toc">
@@ -336,10 +340,10 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 
     // 主题切换已移至事件委托（见脚本底部）
 
-    // 笔记本
-    document.getElementById("dock-notebook-btn")?.addEventListener("click", (e) => {
+    // 留言板
+    document.getElementById("dock-guestbook-btn")?.addEventListener("click", (e) => {
       e.stopPropagation();
-      window.location.href = "/life/notebooks/";
+      window.dispatchEvent(new CustomEvent("toggle-guestbook"));
     });
 
     // 回顶
