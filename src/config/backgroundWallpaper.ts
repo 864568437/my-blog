@@ -130,6 +130,20 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			// 是否允许用户通过控制面板切换水波纹动画
 			switchable: true,
 		},
+		// 壁纸底部渐变过渡配置（与水波纹二选一，水波纹开启时自动隐藏）
+		// 从壁纸底部到背景色提供平滑过渡，避免硬边
+		gradient: {
+			enable: {
+				// 桌面端是否启用渐变过渡
+				desktop: true,
+				// 移动端是否启用渐变过渡
+				mobile: true,
+			},
+			// 是否允许用户通过控制面板切换渐变过渡
+			switchable: true,
+			// 渐变区域高度（CSS 值）
+			height: "30vh",
+		},
 		// 壁纸轮播配置
 		carousel: {
 			enable: false,

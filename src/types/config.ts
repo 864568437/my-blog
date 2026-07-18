@@ -713,6 +713,17 @@ export type BackgroundWallpaperConfig = {
 				  }; // 是否启用水波纹动画效果，支持布尔值或分别设置桌面端和移动端
 			switchable?: boolean; // 是否允许用户通过控制面板切换水波纹动画
 		};
+		// 壁纸渐变过渡配置：从壁纸底部到背景色的平滑过渡（用于全屏壁纸模式且未启用水波纹时）
+		gradient?: {
+			enable:
+				| boolean
+				| {
+						desktop: boolean; // 桌面端是否启用渐变过渡
+						mobile: boolean; // 移动端是否启用渐变过渡
+				  }; // 是否启用渐变过渡，支持布尔值或分别设置桌面端和移动端
+			switchable?: boolean; // 是否允许用户通过控制面板切换渐变过渡
+			height?: string; // 渐变区域高度，如 "30vh"、"200px"，默认 "30vh"
+		};
 		carousel?: {
 			enable?: boolean; // 是否启用壁纸轮播
 			switchable?: boolean; // 是否允许用户通过控制面板切换壁纸轮播

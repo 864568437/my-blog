@@ -47,15 +47,17 @@ html[data-wallpaper-mode="fullscreen"] body:not(.lg\:is-home) #navbar-wrapper {
 }
 
 /* Fullscreen 模式下滚动向下指示器（移植自 Firefly ScrollDownIndicator） */
-/* 默认隐藏：仅在 fullscreen 模式时显示 */
-#scroll-down-indicator {
+#wallpaper-wrapper .scroll-down-indicator {
     display: none;
-    opacity: 0;
-    position: fixed;
+}
+
+#wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator {
+    display: flex;
+    position: absolute;
     bottom: 5rem;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 30;
+    z-index: 10;
     cursor: pointer;
     pointer-events: auto;
     color: rgba(255, 255, 255, 0.8);
@@ -63,35 +65,64 @@ html[data-wallpaper-mode="fullscreen"] body:not(.lg\:is-home) #navbar-wrapper {
 }
 
 @media (max-width: 1023px) {
-    #scroll-down-indicator {
+    #wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator {
         bottom: 10rem;
     }
 }
 
-#scroll-down-indicator .scroll-down-icon {
+#wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator .scroll-down-icon {
     font-size: 5rem;
     animation: scroll-down-bounce 2s ease-in-out infinite;
     filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 }
 
-#scroll-down-indicator:hover {
+#wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator:hover {
     color: rgba(255, 255, 255, 1);
 }
 
-/* 滚动后淡出隐藏 */
-#scroll-down-indicator.hide {
+/* 滚动后淡出隐藏：opacity 0 配合 transition 形成渐变过渡 */
+#wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator.hide {
     opacity: 0;
     pointer-events: none;
 }
 
-/* Fullscreen 模式下显示 */
-html[data-wallpaper-mode="fullscreen"] #scroll-down-indicator {
-    display: flex;
+@keyframes scroll-down-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
 }
 
-@keyframes scroll-down-bounce {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(8px); }
+/* 壁纸底部渐变过渡（移植自 Firefly） */
+/* 默认隐藏，仅在用户启用（默认 true）时显示 */
+#wallpaper-gradient {
+    display: none;
+    z-index: 12;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+/* 用户启用渐变过渡时显示 */
+html[data-gradient-enabled="true"] #wallpaper-gradient {
+    display: block !important;
+}
+
+/* 用户禁用渐变过渡时隐藏 */
+html[data-gradient-enabled="false"] #wallpaper-gradient {
+    display: none !important;
+}
+
+/* 水波纹开启时自动隐藏渐变（二选一） */
+html[data-waves-enabled="true"] #wallpaper-gradient {
+    display: none !important;
+}
+
+/* overlay 模式下隐藏渐变（透明模式不需要） */
+#wallpaper-wrapper.wallpaper-overlay #wallpaper-gradient {
+    display: none !important;
+}
+
+/* 纯色背景模式下隐藏渐变 */
+html[data-wallpaper-mode="none"] #wallpaper-gradient {
+    display: none !important;
 }
 
 /* Fullscreen 模式下图片全屏覆盖，无模糊 */

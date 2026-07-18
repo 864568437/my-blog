@@ -10,25 +10,24 @@ import { Icon } from "astro-icon/components";
   <Icon is:inline name="material-symbols:keyboard-arrow-down-rounded" class="scroll-down-icon" />
 </div>
 
-<script>
-  function updateScrollDownVisibility() {
-    const indicator = document.getElementById("scroll-down-indicator");
-    if (!indicator) return;
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    if (scrollTop > 100) {
-      indicator.classList.add("hide");
-    } else {
-      indicator.classList.remove("hide");
+<script is:inline>
+  (function () {
+    // 防止重复初始化（Swup 页面切换时可能重复执行）
+    if (window.__scrollDownIndicatorInit) return;
+    window.__scrollDownIndicatorInit = true;
+
+    function updateVisibility() {
+      var indicator = document.getElementById("scroll-down-indicator");
+      if (!indicator) return;
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      if (scrollTop > 100) {
+        indicator.classList.add("hide");
+      } else {
+        indicator.classList.remove("hide");
+      }
     }
-  }
 
-  // 初次加载 + 每次 Swup 页面切换后重新绑定滚动监听
-  function initScrollDownIndicator() {
-    window.removeEventListener("scroll", updateScrollDownVisibility);
-    window.addEventListener("scroll", updateScrollDownVisibility, { passive: true });
-    updateScrollDownVisibility();
-  }
-
-  initScrollDownIndicator();
-  document.addEventListener("astro:page-load", initScrollDownIndicator);
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    updateVisibility();
+  })();
 </script>

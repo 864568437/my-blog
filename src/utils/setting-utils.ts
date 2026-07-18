@@ -906,7 +906,15 @@ export function setWallpaperCarouselEnabled(enabled: boolean): void {
 
 // Gradient transition functions
 export function getDefaultGradientEnabled(): boolean {
-	return true;
+	const gradientConfig = backgroundWallpaper.banner?.gradient?.enable;
+	if (typeof gradientConfig === "object") {
+		const isMobile =
+			typeof window !== "undefined" ? window.innerWidth < 768 : false;
+		return isMobile
+			? (gradientConfig.mobile ?? true)
+			: (gradientConfig.desktop ?? true);
+	}
+	return gradientConfig ?? true;
 }
 
 export function getStoredGradientEnabled(): boolean {
@@ -931,7 +939,26 @@ export function setGradientEnabled(enabled: boolean): void {
 		return;
 	}
 	localStorage.setItem("gradientEnabled", String(enabled));
+	applyGradientEnabledToDocument(enabled);
+}
+
+export function applyGradientEnabledToDocument(enabled: boolean): void {
+	if (typeof document === "undefined") {
+		return;
+	}
+	// 更新 html 属性，CSS 会立即生效
 	document.documentElement.setAttribute("data-gradient-enabled", String(enabled));
+	// 同时更新元素样式（兼容性）
+	const gradientElement = document.getElementById("wallpaper-gradient");
+	if (gradientElement) {
+		if (enabled) {
+			gradientElement.style.display = "";
+			gradientElement.classList.remove("gradient-disabled");
+		} else {
+			gradientElement.style.display = "none";
+			gradientElement.classList.add("gradient-disabled");
+		}
+	}
 }
 
 // Overlay opacity functions
