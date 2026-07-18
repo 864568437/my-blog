@@ -831,6 +831,28 @@ function disableAnimation() {
         navEl.setAttribute("data-is-home", isHome.toString());
       }
 
+      // Swup 转换后重新同步壁纸模式状态，确保首页 HomeHero / 主内容位置正确
+      // 首页时强制重置 HomeHero 显示并恢复主内容位置
+      const homeHeroEl = document.getElementById("home-hero");
+      if (homeHeroEl) {
+        // 首页时 HomeHero 必须显示（首页不依赖 wallpaper-wrapper）
+        homeHeroEl.style.display = isHome ? "" : "none";
+      }
+      const mainContentEl = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement | null;
+      if (mainContentEl) {
+        // 重置内联样式，让 CSS / 后续壁纸模式切换重新控制
+        mainContentEl.style.position = "";
+        mainContentEl.style.top = "";
+        mainContentEl.style.marginTop = "";
+        mainContentEl.style.zIndex = "";
+        // 重新触发壁纸模式应用以应用正确的 mainContent 位置
+        // 通过 import 动态调用
+        import("@/utils/setting-utils").then(({ applyWallpaperModeToDocument }) => {
+          const currentMode = (document.documentElement.getAttribute("data-wallpaper-mode") || "banner") as any;
+          try { applyWallpaperModeToDocument(currentMode); } catch (e) { /* ignore */ }
+        });
+      }
+
       // 更新侧边栏组件的可见性（根据新页面的 URL）
       updateSidebarComponentsVisibility();
 

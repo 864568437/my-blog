@@ -514,22 +514,29 @@ function showOverlayMode() {
 }
 
 function showFullscreenMode() {
+	// 首页时不显示 wallpaper-wrapper（首页用 HomeHero 作为主视觉，不依赖壁纸）
+	const isHomeForFullscreenWallpaper = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
 	// 全屏壁纸模式：壁纸铺满全屏，内容正常显示（不透明）
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
 		// 移除 overlay 模式类，添加 fullscreen 模式类
 		wallpaperWrapper.classList.remove("wallpaper-overlay");
 		wallpaperWrapper.classList.add("wallpaper-fullscreen");
-		// 显示壁纸，铺满全屏
-		wallpaperWrapper.style.display = "block";
-		wallpaperWrapper.style.setProperty("display", "block", "important");
-		wallpaperWrapper.style.top = "";
-		requestAnimationFrame(() => {
-			wallpaperWrapper.classList.remove("hidden");
-			wallpaperWrapper.classList.remove("opacity-0");
-			wallpaperWrapper.classList.add("opacity-100");
-			wallpaperWrapper.classList.remove("mobile-hide-banner");
-		});
+		if (isHomeForFullscreenWallpaper) {
+			// 首页：保持 wallpaper-wrapper 隐藏，避免在公告/HomeHero 后面出现壁纸
+			wallpaperWrapper.style.setProperty("display", "none", "important");
+		} else {
+			// 非首页：显示壁纸，铺满全屏
+			wallpaperWrapper.style.display = "block";
+			wallpaperWrapper.style.setProperty("display", "block", "important");
+			wallpaperWrapper.style.top = "";
+			requestAnimationFrame(() => {
+				wallpaperWrapper.classList.remove("hidden");
+				wallpaperWrapper.classList.remove("opacity-0");
+				wallpaperWrapper.classList.add("opacity-100");
+				wallpaperWrapper.classList.remove("mobile-hide-banner");
+			});
+		}
 	}
 
 	// 隐藏横幅图片来源文本
@@ -549,10 +556,16 @@ function showFullscreenMode() {
 		}
 	}
 
-	// 隐藏首页 HomeHero，避免与全屏壁纸重叠
+	// 首页时不隐藏 HomeHero（首页使用 HomeHero 作为主视觉，不依赖 wallpaper-wrapper）
+	// 非首页时隐藏 HomeHero 避免与全屏壁纸重叠
+	const isHomePageFullscreen = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
 	const homeHero = document.getElementById("home-hero");
 	if (homeHero) {
-		homeHero.style.display = "none";
+		if (isHomePageFullscreen) {
+			homeHero.style.display = "";
+		} else {
+			homeHero.style.display = "none";
+		}
 	}
 
 	// 不启用透明效果，内容正常显示
@@ -677,10 +690,20 @@ function adjustMainContentPosition(
 			break;
 		case "fullscreen":
 			mainContent.classList.add("no-banner-layout");
-			mainContent.style.position = "relative";
-			mainContent.style.zIndex = "30";
-			mainContent.style.top = "0";
-			mainContent.style.marginTop = "1rem";
+			// 首页时使用 absolute 定位以保证 HomeHero 正常全宽破出
+			// 非首页时使用 relative 避免与全屏壁纸重叠
+			const isHomeForFullscreen = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
+			if (isHomeForFullscreen) {
+				mainContent.style.position = "";
+				mainContent.style.zIndex = "";
+				mainContent.style.marginTop = "";
+				mainContent.style.top = "0";
+			} else {
+				mainContent.style.position = "relative";
+				mainContent.style.zIndex = "30";
+				mainContent.style.top = "0";
+				mainContent.style.marginTop = "1rem";
+			}
 			break;
 		case "none":
 			// 无壁纸模式：主内容从导航栏下方开始
