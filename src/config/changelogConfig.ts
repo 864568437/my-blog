@@ -57,6 +57,16 @@ export const changelogConfig: ChangelogItem[] = [
 		body: "",
 		enabled: true,
 	},
+			{
+		id: "2026-07-18-v1-0-2",
+		version: "v1.0.2",
+		date: "2026-07-18",	
+		time: "22:00",
+		type: "feature",
+		description: "新增4种壁纸模式，可调节颜色",
+		body: "",
+		enabled: true,
+	},	
 ];
 
 export function getEnabledChangelog(): ChangelogItem[] {

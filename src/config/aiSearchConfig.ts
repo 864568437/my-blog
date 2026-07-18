@@ -12,7 +12,7 @@ export const aiSearchConfig = {
 	modelName: "DeepSeek-V3",
 
 	/** AI 名称 */
-	aiName: "番茄助手",
+	aiName: "番茄秘书",
 
 	/** AI 头像路径 */
 	aiAvatar: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",

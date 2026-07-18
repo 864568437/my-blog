@@ -14,7 +14,7 @@ export const friendsPageConfig: FriendsPageConfig = {
 		name: "fqzlr",
 		desc: "坐而言不如起而行.",
 		url: "https://fqzlr.com/",
-		avatar: "https://fqzlr.com/avatar.png",
+		avatar: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
 		email: "",
 	},
 	notes: [
