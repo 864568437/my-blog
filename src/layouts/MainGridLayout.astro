@@ -558,9 +558,6 @@ const mobileQuality = Math.round(configQuality * 0.9);
     )}
     </div>
 
-    <!-- Fullscreen 模式下的滚动向下指示器（移植自 Firefly） -->
-    {isFullscreenMode && isHomePageCheck && <ScrollDownIndicator />}
-
     <!-- Water waves effect - 如果允许切换或任一设备启用则渲染 -->
     {shouldRenderWaves ? (
     <div class={`waves absolute -bottom-px h-[10vh] max-h-37.5 min-h-12.5 w-full md:h-[15vh]
@@ -721,6 +718,9 @@ const mobileQuality = Math.round(configQuality * 0.9);
         {live2dModelConfig.enable && <Live2DWidget config={live2dModelConfig} />}
     </div>
 </div>
+
+<!-- Fullscreen 模式下的滚动向下指示器（移植自 Firefly） -->
+<ScrollDownIndicator />
 
 {commentConfig.type === 'waline' && commentConfig.waline?.visitorCount && <script type="module" is:inline define:vars={{ serverURL: commentConfig.waline.serverURL }}>
   import { pageviewCount } from 'https://unpkg.com/@waline/client@v3/dist/waline.js';
