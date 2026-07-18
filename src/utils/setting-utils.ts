@@ -414,11 +414,19 @@ function showBannerMode() {
 		homeHero.style.display = "";
 	}
 
-	// 显示横幅图片来源文本
+	// 横幅图片来源文本（首页隐藏，因为首页用HomeHero）
 	const creditDesktop = document.getElementById("banner-credit-desktop");
 	const creditMobile = document.getElementById("banner-credit-mobile");
-	if (creditDesktop) creditDesktop.style.display = "";
-	if (creditMobile) creditMobile.style.display = "";
+	const bannerCredit = document.getElementById("banner-credit");
+	if (isHomeForBanner) {
+		if (creditDesktop) creditDesktop.style.display = "none";
+		if (creditMobile) creditMobile.style.display = "none";
+		if (bannerCredit) bannerCredit.style.display = "none";
+	} else {
+		if (creditDesktop) creditDesktop.style.display = "";
+		if (creditMobile) creditMobile.style.display = "";
+		if (bannerCredit) bannerCredit.style.display = "";
+	}
 
 	// 显示横幅首页文本（如果启用且是首页）
 	const bannerTextOverlay = document.querySelector(".banner-home-text-overlay");
@@ -426,11 +434,8 @@ function showBannerMode() {
 		// 检查是否启用 homeText
 		const homeTextEnabled = backgroundWallpaper.banner?.homeText?.enable;
 
-		// 检查当前是否为首页
-		const isHomePage = checkIsHomePage(window.location.pathname);
-
 		// 只有在启用且在首页时才显示
-		if (homeTextEnabled && isHomePage) {
+		if (homeTextEnabled && isHomeForBanner) {
 			bannerTextOverlay.classList.remove("hidden");
 		} else {
 			bannerTextOverlay.classList.add("hidden");
@@ -438,15 +443,26 @@ function showBannerMode() {
 	}
 
 	// 调整主内容位置
-	adjustMainContentPosition("banner");
+	if (isHomeForBanner) {
+		// 首页：主内容从顶部开始（因为用HomeHero）
+		const mainContent = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement;
+		if (mainContent) {
+			mainContent.classList.add("no-banner-layout");
+			mainContent.style.position = "";
+			mainContent.style.zIndex = "";
+			mainContent.style.marginTop = "";
+			mainContent.style.top = "0";
+		}
+	} else {
+		adjustMainContentPosition("banner");
+	}
 
 	// 处理移动端非首页主内容区域位置
 	const mainContentWrapper = document.querySelector(".w-full.z-30.pointer-events-none");
-	if (mainContentWrapper) {
-		const isHomePage = checkIsHomePage(window.location.pathname);
+	if (mainContentWrapper && !isHomeForBanner) {
 		const isMobile = window.innerWidth < 1024;
 		// 只在移动端非首页时调整主内容位置
-		if (isMobile && !isHomePage) {
+		if (isMobile) {
 			mainContentWrapper.classList.add("mobile-main-no-banner");
 		} else {
 			mainContentWrapper.classList.remove("mobile-main-no-banner");
@@ -506,11 +522,19 @@ function showOverlayMode() {
 		homeHero.style.display = "";
 	}
 
-	// 隐藏横幅图片来源文本
+	// 横幅图片来源文本（首页隐藏，因为首页用HomeHero）
 	const creditDesktop = document.getElementById("banner-credit-desktop");
 	const creditMobile = document.getElementById("banner-credit-mobile");
-	if (creditDesktop) creditDesktop.style.display = "none";
-	if (creditMobile) creditMobile.style.display = "none";
+	const bannerCredit = document.getElementById("banner-credit");
+	if (isHomeForOverlay) {
+		if (creditDesktop) creditDesktop.style.display = "none";
+		if (creditMobile) creditMobile.style.display = "none";
+		if (bannerCredit) bannerCredit.style.display = "none";
+	} else {
+		if (creditDesktop) creditDesktop.style.display = "none";
+		if (creditMobile) creditMobile.style.display = "none";
+		if (bannerCredit) bannerCredit.style.display = "none";
+	}
 
 	// 隐藏横幅首页文本
 	const bannerTextOverlay = document.querySelector(".banner-home-text-overlay");
@@ -521,8 +545,21 @@ function showOverlayMode() {
 	// 调整主内容透明度
 	adjustMainContentTransparency(true);
 
-	// 调整布局为紧凑模式
-	adjustMainContentPosition("overlay");
+	// 调整布局
+	if (isHomeForOverlay) {
+		// 首页：主内容从顶部开始（因为用HomeHero）
+		const mainContent = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement;
+		if (mainContent) {
+			mainContent.classList.add("no-banner-layout");
+			mainContent.style.position = "";
+			mainContent.style.zIndex = "";
+			mainContent.style.marginTop = "";
+			mainContent.style.top = "0";
+		}
+	} else {
+		// 非首页：紧凑布局
+		adjustMainContentPosition("overlay");
+	}
 }
 
 function showFullscreenMode() {
@@ -554,8 +591,10 @@ function showFullscreenMode() {
 	// 隐藏横幅图片来源文本
 	const creditDesktop = document.getElementById("banner-credit-desktop");
 	const creditMobile = document.getElementById("banner-credit-mobile");
+	const bannerCredit = document.getElementById("banner-credit");
 	if (creditDesktop) creditDesktop.style.display = "none";
 	if (creditMobile) creditMobile.style.display = "none";
+	if (bannerCredit) bannerCredit.style.display = "none";
 
 	// 显示横幅首页文本（如果是首页且启用）
 	const bannerTextOverlay = document.querySelector(".banner-home-text-overlay");
@@ -601,8 +640,10 @@ function hideAllWallpapers() {
 	// 隐藏横幅图片来源文本
 	const creditDesktop = document.getElementById("banner-credit-desktop");
 	const creditMobile = document.getElementById("banner-credit-mobile");
+	const bannerCredit = document.getElementById("banner-credit");
 	if (creditDesktop) creditDesktop.style.display = "none";
 	if (creditMobile) creditMobile.style.display = "none";
+	if (bannerCredit) bannerCredit.style.display = "none";
 
 	// 隐藏横幅首页文本
 	const bannerTextOverlay = document.querySelector(".banner-home-text-overlay");
