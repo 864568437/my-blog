@@ -165,20 +165,26 @@ const randomSubtitle = getRandomSubtitle();
 
 // 主页横幅文本只在首页且全局开关为 true 时显示，不区分设备
 const homeTextEnable = backgroundWallpaper.banner?.homeText?.enable;
-const showHomeText = isBannerMode && !!homeTextEnable && isHomePageCheck;
+// 横幅类模式（banner / fullscreen）共用横幅覆盖元素（参考 Firefly：全屏壁纸模式同样显示居中标题）
+const isBannerLikeMode = isBannerMode || isFullscreenMode;
+// 是否渲染横幅覆盖层（页面标题 / 文章元信息 / 暗层）。
+// 允许切换壁纸模式时必须始终渲染（SSR 默认 mode 可能是 none），
+// 渲染后由 CSS 按当前模式（banner/fullscreen/overlay/none）控制显示
+const shouldRenderBannerOverlays =
+	isWallpaperSwitchable || (isBackgroundEnabled && isBannerLikeMode);
+
+const showHomeText = isBannerLikeMode && !!homeTextEnable && isHomePageCheck;
 
 const showBannerPostMeta =
-	isBannerMode &&
-	isBackgroundEnabled &&
+	shouldRenderBannerOverlays &&
 	!isHomePageCheck &&
 	isPostPage &&
 	!!bannerPostMeta;
 
-const showBannerDim = isBannerMode && isBackgroundEnabled;
+const showBannerDim = shouldRenderBannerOverlays;
 
 const showBannerPageTitle =
-	isBannerMode &&
-	isBackgroundEnabled &&
+	shouldRenderBannerOverlays &&
 	!isHomePageCheck &&
 	!isPostPage &&
 	!!title;

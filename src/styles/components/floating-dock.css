@@ -47,6 +47,10 @@
 .dock-btn .dock-btn-icon > [astro-icon].hidden {
   display: none !important;
 }
+/* 确保带 hidden 标记的 label 完全隐藏，避免 .dock-btn-label{display:flex} 覆盖 .hidden */
+.dock-btn-label.hidden {
+  display: none !important;
+}
 .dock-btn .dock-btn-icon {
   position: absolute;
   inset: 0;
@@ -91,8 +95,8 @@
   transform: translateY(-6px);
   opacity: 0;
 }
-.dock-btn:hover .dock-btn-label,
-.dock-btn:focus-visible .dock-btn-label {
+.dock-btn:hover .dock-btn-label:not(.hidden),
+.dock-btn:focus-visible .dock-btn-label:not(.hidden) {
   transform: translateY(0);
   opacity: 1;
 }

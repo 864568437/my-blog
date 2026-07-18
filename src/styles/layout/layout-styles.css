@@ -972,3 +972,8 @@ html.is-page-transitioning .banner-home-text-overlay {
 #wallpaper-wrapper.wallpaper-overlay #header-waves {
     display: none !important;
 }
+
+/* Overlay 模式隐藏横幅暗层，保持透明壁纸原有观感 */
+#wallpaper-wrapper.wallpaper-overlay #banner-dim-container {
+    display: none !important;
+}

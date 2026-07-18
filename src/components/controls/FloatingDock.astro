@@ -522,8 +522,10 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 		}
 
 		// 页面切换后重新绑定
+		// 注意：@swup/astro 只发射 astro:page-load / astro:after-swap / astro:before-swap
+		// 不存在 swup:contentReplaced 事件，使用 astro:after-swap 在内容替换后立即重新绑定
 		document.addEventListener("astro:page-load", () => bindDockEvents(), { signal });
-		document.addEventListener("swup:contentReplaced", () => bindDockEvents(), { signal });
+		document.addEventListener("astro:after-swap", () => bindDockEvents(), { signal });
 	}
 
 	bindDockEvents();
