@@ -373,7 +373,8 @@ function ensureWallpaperState(mode: WALLPAPER_MODE) {
 }
 
 function showBannerMode() {
-	// 显示 wallpaper-wrapper 并切换为 banner 模式
+	// 首页时不显示 wallpaper-wrapper（首页用 HomeHero 作为主视觉，不依赖壁纸）
+	const isHomeForBanner = checkIsHomePage(window.location.pathname);
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
 		// 移除其他模式类
@@ -382,24 +383,28 @@ function showBannerMode() {
 		// 恢复 banner 模式的 top 定位
 		wallpaperWrapper.style.top = `-${BANNER_HEIGHT_EXTEND}vh`;
 
-		// 检查当前是否为首页
-		const isHomePage = checkIsHomePage(window.location.pathname);
-		const isMobile = window.innerWidth < 1024;
-
-		// 移动端非首页时，不显示banner；桌面端始终显示
-		if (isMobile && !isHomePage) {
-			wallpaperWrapper.style.display = "none";
-			wallpaperWrapper.classList.add("mobile-hide-banner");
+		if (isHomeForBanner) {
+			// 首页：保持 wallpaper-wrapper 隐藏，避免与 HomeHero 重叠
+			wallpaperWrapper.style.setProperty("display", "none", "important");
 		} else {
-			// 首页或桌面端：先设置display，然后使用requestAnimationFrame确保渲染
-			wallpaperWrapper.style.display = "block";
-			wallpaperWrapper.style.setProperty("display", "block", "important");
-			requestAnimationFrame(() => {
-				wallpaperWrapper.classList.remove("hidden");
-				wallpaperWrapper.classList.remove("opacity-0");
-				wallpaperWrapper.classList.add("opacity-100");
-				wallpaperWrapper.classList.remove("mobile-hide-banner");
-			});
+			// 非首页：显示 banner
+			const isMobile = window.innerWidth < 1024;
+
+			// 移动端非首页时，不显示banner；桌面端始终显示
+			if (isMobile) {
+				wallpaperWrapper.style.display = "none";
+				wallpaperWrapper.classList.add("mobile-hide-banner");
+			} else {
+				// 桌面端：先设置display，然后使用requestAnimationFrame确保渲染
+				wallpaperWrapper.style.display = "block";
+				wallpaperWrapper.style.setProperty("display", "block", "important");
+				requestAnimationFrame(() => {
+					wallpaperWrapper.classList.remove("hidden");
+					wallpaperWrapper.classList.remove("opacity-0");
+					wallpaperWrapper.classList.add("opacity-100");
+					wallpaperWrapper.classList.remove("mobile-hide-banner");
+				});
+			}
 		}
 	}
 
@@ -470,22 +475,29 @@ function showBannerMode() {
 }
 
 function showOverlayMode() {
-	// 切换 wallpaper-wrapper 为 overlay 模式
+	// 首页时不显示 wallpaper-wrapper（首页用 HomeHero 作为主视觉，不依赖壁纸）
+	const isHomeForOverlay = checkIsHomePage(window.location.pathname);
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
 		// 移除其他模式类，添加 overlay 模式类
 		wallpaperWrapper.classList.remove("wallpaper-fullscreen");
 		wallpaperWrapper.classList.add("wallpaper-overlay");
-		// 显示壁纸
-		wallpaperWrapper.style.display = "block";
-		wallpaperWrapper.style.setProperty("display", "block", "important");
-		wallpaperWrapper.style.top = "";
-		requestAnimationFrame(() => {
-			wallpaperWrapper.classList.remove("hidden");
-			wallpaperWrapper.classList.remove("opacity-0");
-			wallpaperWrapper.classList.add("opacity-100");
-			wallpaperWrapper.classList.remove("mobile-hide-banner");
-		});
+
+		if (isHomeForOverlay) {
+			// 首页：保持 wallpaper-wrapper 隐藏，避免与 HomeHero 重叠
+			wallpaperWrapper.style.setProperty("display", "none", "important");
+		} else {
+			// 非首页：显示壁纸
+			wallpaperWrapper.style.display = "block";
+			wallpaperWrapper.style.setProperty("display", "block", "important");
+			wallpaperWrapper.style.top = "";
+			requestAnimationFrame(() => {
+				wallpaperWrapper.classList.remove("hidden");
+				wallpaperWrapper.classList.remove("opacity-0");
+				wallpaperWrapper.classList.add("opacity-100");
+				wallpaperWrapper.classList.remove("mobile-hide-banner");
+			});
+		}
 	}
 
 	// 恢复显示首页 HomeHero
