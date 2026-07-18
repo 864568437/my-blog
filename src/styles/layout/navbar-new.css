@@ -23,7 +23,7 @@
 	flex-shrink: 0;
 	border-radius: 9999px;
 	padding: 0.25rem 0.5rem;
-	background: color-mix(in oklch, var(--card-bg) 60%, transparent);
+	background: color-mix(in oklch, var(--float-panel-bg) 72%, transparent);
 	backdrop-filter: blur(12px) saturate(1.2);
 	-webkit-backdrop-filter: blur(12px) saturate(1.2);
 	border: none;

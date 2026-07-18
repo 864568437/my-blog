@@ -9,6 +9,7 @@ import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import ImageWrapper from "@/components/common/ImageWrapper.astro";
 import FloatingDock from "@/components/controls/FloatingDock.astro";
+import ScrollDownIndicator from "@/components/controls/ScrollDownIndicator.astro";
 import TypewriterText from "@/components/features/TypewriterText.astro";
 import NavMenuPanel from "@components/layout/NavMenuPanel.astro";
 import {
@@ -556,6 +557,9 @@ const mobileQuality = Math.round(configQuality * 0.9);
         </div>
     )}
     </div>
+
+    <!-- Fullscreen 模式下的滚动向下指示器（移植自 Firefly） -->
+    {isFullscreenMode && isHomePageCheck && <ScrollDownIndicator />}
 
     <!-- Water waves effect - 如果允许切换或任一设备启用则渲染 -->
     {shouldRenderWaves ? (

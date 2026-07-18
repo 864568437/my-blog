@@ -617,16 +617,13 @@ function updateNavbarTransparency(mode: WALLPAPER_MODE) {
 	let enableBlur: boolean;
 
 	// 根据当前壁纸模式设置导航栏透明模式和模糊效果
-	if (mode === WALLPAPER_OVERLAY || mode === WALLPAPER_FULLSCREEN) {
-		// 全屏壁纸/透明模式
-		transparentMode = "none";
-		enableBlur = false;
-	} else if (mode === WALLPAPER_NONE) {
+	if (mode === WALLPAPER_NONE) {
 		// 纯色背景模式
 		transparentMode = "none";
 		enableBlur = false;
 	} else {
-		// Banner模式：使用配置的透明模式和模糊效果
+		// Banner / Overlay / Fullscreen 模式：统一使用配置的透明模式和模糊效果
+		// 使导航栏在所有页面下保持一致的半透明背景
 		transparentMode =
 			backgroundWallpaper.banner?.navbar?.transparentMode || "semi";
 		enableBlur = backgroundWallpaper.banner?.navbar?.enableBlur ?? true;

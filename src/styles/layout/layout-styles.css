@@ -46,6 +46,53 @@ html[data-wallpaper-mode="fullscreen"] body:not(.lg\:is-home) #navbar-wrapper {
     padding-top: 0.625rem;
 }
 
+/* Fullscreen 模式下滚动向下指示器（移植自 Firefly ScrollDownIndicator） */
+/* 默认隐藏：仅在 fullscreen 模式时显示 */
+#wallpaper-wrapper .scroll-down-indicator {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+#wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator {
+    display: flex;
+    position: absolute;
+    bottom: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    cursor: pointer;
+    pointer-events: auto;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 1023px) {
+    #wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator {
+        bottom: 10rem;
+    }
+}
+
+#wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator .scroll-down-icon {
+    font-size: 5rem;
+    animation: scroll-down-bounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+}
+
+#wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator:hover {
+    color: rgba(255, 255, 255, 1);
+}
+
+/* 滚动后淡出隐藏 */
+#wallpaper-wrapper.wallpaper-fullscreen .scroll-down-indicator.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes scroll-down-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+}
+
 /* Fullscreen 模式下图片全屏覆盖，无模糊 */
 #wallpaper-wrapper.wallpaper-fullscreen img,
 #wallpaper-wrapper.wallpaper-fullscreen img[class*="object-cover"] {
