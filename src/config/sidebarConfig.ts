@@ -55,16 +55,6 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			showOnPostPage: false,
 		},
 		{
-			// 组件类型：音乐播放器
-			type: "music",
-			// 是否启用该组件
-			enable: false,
-			// 组件位置
-			position: "sticky",
-			// 是否在文章详情页显示
-			showOnPostPage: false,
-		},
-		{
 			// 组件类型：全站文章目录（只在文章详情页显示）
 			type: "postDirectory",
 			enable: true,
@@ -79,6 +69,21 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			position: "sticky",
 			showOnPostPage: true,
 			showOnNonPostPage: true,
+		},
+		{
+			// 组件类型：音乐播放器
+			type: "music",
+			enable: true,
+			position: "sticky",
+			showOnPostPage: true,
+			showOnNonPostPage: true,
+		},
+		{
+			// 组件类型：站点统计组件
+			type: "stats",
+			enable: true,
+			position: "sticky",
+			showOnPostPage: false,
 		},
 		{
 			// 组件类型：文章目录（已移至右侧边栏，此处禁用）
@@ -145,16 +150,6 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			type: "calendar",
 			// 是否启用该组件
 			enable: false,
-			// 组件位置
-			position: "sticky",
-			// 是否在文章详情页显示
-			showOnPostPage: false,
-		},
-		{
-			// 组件类型：站点统计组件
-			type: "stats",
-			// 是否启用该组件
-			enable: true,
 			// 组件位置
 			position: "sticky",
 			// 是否在文章详情页显示
@@ -276,7 +271,7 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			// 组件类型：音乐播放器
 			type: "music",
 			// 是否启用该组件
-			enable: false,
+			enable: true,
 			// 是否在文章详情页显示
 			showOnPostPage: true,
 		},

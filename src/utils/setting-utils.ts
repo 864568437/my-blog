@@ -323,6 +323,8 @@ export function applyWallpaperModeToDocument(mode: WALLPAPER_MODE) {
 			case WALLPAPER_OVERLAY:
 				body.classList.add("wallpaper-transparent");
 				showOverlayMode();
+				// 把已存储的 overlay 值同步到 DOM,避免内联样式遮挡滑块效果
+				applyStoredOverlayValues();
 				break;
 			case WALLPAPER_NONE:
 				hideAllWallpapers();
@@ -362,6 +364,8 @@ function ensureWallpaperState(mode: WALLPAPER_MODE) {
 		case WALLPAPER_OVERLAY:
 			body.classList.add("wallpaper-transparent");
 			showOverlayMode();
+			// 把已存储的 overlay 值同步到 DOM,确保用户设置生效
+			applyStoredOverlayValues();
 			break;
 		case WALLPAPER_NONE:
 			hideAllWallpapers();
@@ -1014,6 +1018,18 @@ export function applyGradientEnabledToDocument(enabled: boolean): void {
 	}
 }
 
+// 应用 overlay CSS 变量到 documentElement 与 #wallpaper-wrapper,
+// 因为 wallpaper-wrapper 元素在 SSR 阶段存在内联样式,内联样式优先级高于
+// documentElement 上的同名变量,这里需要同时更新两者才能让滑块设置生效
+function applyOverlayVarToRootAndWrapper(name: string, value: string): void {
+	if (typeof document === "undefined") return;
+	document.documentElement.style.setProperty(name, value);
+	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
+	if (wallpaperWrapper) {
+		wallpaperWrapper.style.setProperty(name, value);
+	}
+}
+
 // Overlay opacity functions
 export function getDefaultOverlayOpacity(): number {
 	return backgroundWallpaper.overlay?.opacity ?? 80;
@@ -1038,18 +1054,12 @@ export function setOverlayOpacity(opacity: number): void {
 		return;
 	}
 	localStorage.setItem("overlayOpacity", String(opacity));
-	document.documentElement.style.setProperty(
-		"--overlay-opacity",
-		`${opacity}%`,
-	);
+	applyOverlayVarToRootAndWrapper("--overlay-opacity", `${opacity}%`);
 }
 
 export function applyOverlayOpacityToDocument(opacity: number): void {
 	if (typeof document === "undefined") return;
-	document.documentElement.style.setProperty(
-		"--overlay-opacity",
-		`${opacity}%`,
-	);
+	applyOverlayVarToRootAndWrapper("--overlay-opacity", `${opacity}%`);
 }
 
 // Overlay blur functions
@@ -1076,18 +1086,12 @@ export function setOverlayBlur(blur: number): void {
 		return;
 	}
 	localStorage.setItem("overlayBlur", String(blur));
-	document.documentElement.style.setProperty(
-		"--overlay-blur",
-		`${blur}px`,
-	);
+	applyOverlayVarToRootAndWrapper("--overlay-blur", `${blur}px`);
 }
 
 export function applyOverlayBlurToDocument(blur: number): void {
 	if (typeof document === "undefined") return;
-	document.documentElement.style.setProperty(
-		"--overlay-blur",
-		`${blur}px`,
-	);
+	applyOverlayVarToRootAndWrapper("--overlay-blur", `${blur}px`);
 }
 
 // Overlay card opacity functions
@@ -1116,18 +1120,20 @@ export function setOverlayCardOpacity(opacity: number): void {
 		return;
 	}
 	localStorage.setItem("overlayCardOpacity", String(opacity));
-	document.documentElement.style.setProperty(
-		"--overlay-card-opacity",
-		`${opacity}%`,
-	);
+	applyOverlayVarToRootAndWrapper("--overlay-card-opacity", `${opacity}%`);
 }
 
 export function applyOverlayCardOpacityToDocument(opacity: number): void {
 	if (typeof document === "undefined") return;
-	document.documentElement.style.setProperty(
-		"--overlay-card-opacity",
-		`${opacity}%`,
-	);
+	applyOverlayVarToRootAndWrapper("--overlay-card-opacity", `${opacity}%`);
+}
+
+// 在切换到 overlay 模式或初始化时,把已存储的 overlay 值同步到
+// documentElement 与 #wallpaper-wrapper,避免内联样式遮挡滑块效果
+export function applyStoredOverlayValues(): void {
+	applyOverlayOpacityToDocument(getStoredOverlayOpacity());
+	applyOverlayBlurToDocument(getStoredOverlayBlur());
+	applyOverlayCardOpacityToDocument(getStoredOverlayCardOpacity());
 }
 
 // Sakura effect functions
