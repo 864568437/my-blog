@@ -1031,3 +1031,28 @@
 		display: none;
 	}
 }
+
+/* ============================================
+   首页全屏壁纸模式：独立渲染的横幅标题
+   在 HomeHero 上方居中显示，避免与 HomeHero 主标题重叠
+   ============================================ */
+#banner-home-text-overlay-external {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 22 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+    /* 向上偏移避开 HomeHero 主标题区域 */
+    transform: translateY(-15vh);
+}
+
+#banner-home-text-overlay-external .banner-title {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    font-weight: bold;
+}
+
+#banner-home-text-overlay-external .banner-subtitle {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}

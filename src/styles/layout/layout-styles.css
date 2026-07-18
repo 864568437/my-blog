@@ -41,6 +41,11 @@ html[data-wallpaper-mode="fullscreen"] .w-full.z-30.pointer-events-none {
     top: 0 !important;
 }
 
+/* Fullscreen 模式下为导航栏添加顶部间距，避免导航栏紧贴顶部 */
+html[data-wallpaper-mode="fullscreen"] #navbar-wrapper {
+    padding-top: 0.625rem;
+}
+
 /* Fullscreen 模式下图片全屏覆盖，无模糊 */
 #wallpaper-wrapper.wallpaper-fullscreen img,
 #wallpaper-wrapper.wallpaper-fullscreen img[class*="object-cover"] {

@@ -40,13 +40,31 @@
 .dock-btn.hide {
   display: none !important;
 }
+/* 确保多图标按钮内被 hidden 标记的 svg/icon 完全不占空间 */
+.dock-btn .dock-btn-icon > svg.hidden,
+.dock-btn .dock-btn-icon > .inline-icon.hidden,
+.dock-btn .dock-btn-icon > [data-icon].hidden,
+.dock-btn .dock-btn-icon > [astro-icon].hidden {
+  display: none !important;
+}
 .dock-btn .dock-btn-icon {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  overflow: hidden;
   transition: transform 200ms ease-out, opacity 200ms ease-out;
+}
+/* 让 dock-btn-icon 内的所有 svg/icon 元素绝对定位堆叠在同一点，避免 flex 并排错位 */
+.dock-btn .dock-btn-icon > svg,
+.dock-btn .dock-btn-icon > .inline-icon,
+.dock-btn .dock-btn-icon > [data-icon],
+.dock-btn .dock-btn-icon > [astro-icon] {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 1.875rem;
+  max-height: 1.875rem;
 }
 .dock-btn .dock-btn-label {
   position: absolute;
@@ -63,6 +81,10 @@
   transform: translateY(8px);
   transition: transform 200ms ease-out 30ms, opacity 200ms ease-out 30ms;
   pointer-events: none;
+  z-index: 2;
+  color: inherit;
+  background: transparent;
+  line-height: 1;
 }
 .dock-btn:hover .dock-btn-icon,
 .dock-btn:focus-visible .dock-btn-icon {
