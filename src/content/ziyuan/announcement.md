@@ -1,6 +1,6 @@
 ---
 title: "公告"
-content: "如果你喜欢，那么欢迎来到我的世界！"
+content: "疯狂修改中"
 closable: true
 link:
   enable: true

@@ -61,100 +61,110 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 ---
 
 <div class="floating-dock" id="floating-dock">
-  <!-- 可展开堆叠 -->
-  <div class="dock-stack" id="dock-stack" data-expanded="false">
-    <div class="dock-buttons">
-      <!-- 搜索 -->
-      <button class="dock-btn" id="dock-search-btn" aria-label={i18n(I18nKey.search)} type="button">
-        <span class="dock-btn-icon"><Icon name="material-symbols:search" class="text-2xl" /></span>
-        <span class="dock-btn-label">搜索</span>
-      </button>
+	<!-- 日夜切换 (常驻) -->
+	<button class="dock-btn" id="dock-theme-btn" aria-label="切换主题" type="button" data-tooltip="切换暗色" data-theme-state="light">
+		<span class="dock-btn-icon">
+			<Icon name="material-symbols:wb-sunny-outline-rounded" class="text-3xl dock-theme-icon-light" />
+			<Icon name="material-symbols:dark-mode-outline-rounded" class="text-3xl dock-theme-icon-dark hidden" />
+		</span>
+		<span class="dock-btn-label dock-theme-label-light">亮色</span>
+		<span class="dock-btn-label dock-theme-label-dark hidden">暗色</span>
+	</button>
 
-      <!-- 标签 -->
-      <button class="dock-btn" id="dock-tags-btn" aria-label={i18n(I18nKey.tags)} type="button">
-        <span class="dock-btn-icon"><Icon name="material-symbols:label-outline" class="text-2xl" /></span>
-        <span class="dock-btn-label">标签</span>
-      </button>
+	<!-- 留言板 (常驻) -->
+	<button class="dock-btn" id="dock-guestbook-btn" aria-label="留言板" type="button" data-tooltip="留言板">
+		<span class="dock-btn-icon"><Icon name="material-symbols:edit-note" class="text-3xl" /></span>
+		<span class="dock-btn-label">留言</span>
+	</button>
 
-      <!-- 分类 -->
-      <button class="dock-btn" id="dock-categories-btn" aria-label={i18n(I18nKey.categories)} type="button">
-        <span class="dock-btn-icon"><Icon name="material-symbols:folder-outline" class="text-2xl" /></span>
-        <span class="dock-btn-label">分类</span>
-      </button>
+	<!-- 跳到评论 (条件显示) -->
+	<button class="dock-btn dock-btn-comment hide" id="dock-comment-btn" aria-label="Comments" type="button" data-tooltip="跳到评论">
+		<span class="dock-btn-icon"><Icon name="material-symbols:chat-bubble-outline" class="text-3xl" /></span>
+		<span class="dock-btn-label">评论</span>
+	</button>
 
-      <!-- 公告 -->
-      <button class="dock-btn" id="dock-announcement-btn" aria-label="公告" type="button">
-        <span class="dock-btn-icon"><Icon name="material-symbols:campaign-outline-rounded" class="text-2xl" /></span>
-        <span class="dock-btn-label">公告</span>
-      </button>
+	<!-- 可展开堆叠 -->
+	<div class="dock-stack" id="dock-stack" data-expanded="false">
+		<div class="dock-buttons">
+			<!-- AI 搜索 -->
+			<button class="dock-btn" id="dock-ai-btn" aria-label="AI 助手" type="button" data-tooltip="AI 搜索">
+				<span class="dock-btn-icon"><Icon name="material-symbols:smart-toy-outline" class="text-3xl" /></span>
+				<span class="dock-btn-label">AI</span>
+			</button>
 
-      <!-- 音乐 -->
-      {musicPlayerConfig.showInNavbar !== false && (
-        <button class="dock-btn" id="dock-music-btn" aria-label={i18n(I18nKey.music)} type="button">
-          <span class="dock-btn-icon"><Icon name="material-symbols:music-note-rounded" class="text-2xl" /></span>
-          <span class="dock-btn-label">音乐</span>
-        </button>
-      )}
+			<!-- 音乐 -->
+			{musicPlayerConfig.showInNavbar !== false && (
+				<button class="dock-btn dock-btn-music" id="dock-music-btn" aria-label={i18n(I18nKey.music)} type="button" data-tooltip={i18n(I18nKey.music)}>
+					<span class="dock-btn-icon"><Icon name="material-symbols:music-note-rounded" class="text-3xl" /></span>
+					<span class="dock-btn-label">音乐</span>
+				</button>
+			)}
 
-      <!-- AI 搜索 -->
-      <button class="dock-btn" id="dock-ai-btn" aria-label="AI 助手" type="button">
-        <span class="dock-btn-icon"><Icon name="material-symbols:smart-toy-outline" class="text-2xl" /></span>
-        <span class="dock-btn-label">AI</span>
-      </button>
+			<!-- 搜索 -->
+			<button class="dock-btn" id="dock-search-btn" aria-label={i18n(I18nKey.search)} type="button" data-tooltip={i18n(I18nKey.search)}>
+				<span class="dock-btn-icon"><Icon name="material-symbols:search" class="text-3xl" /></span>
+				<span class="dock-btn-label">搜索</span>
+			</button>
 
+			<!-- 标签 -->
+			<button class="dock-btn" id="dock-tags-btn" aria-label={i18n(I18nKey.tags)} type="button" data-tooltip={i18n(I18nKey.tags)}>
+				<span class="dock-btn-icon"><Icon name="material-symbols:label-outline" class="text-3xl" /></span>
+				<span class="dock-btn-label">标签</span>
+			</button>
 
-      <!-- 留言板 -->
-      <button class="dock-btn" id="dock-guestbook-btn" aria-label="留言板" type="button">
-        <span class="dock-btn-icon"><Icon name="material-symbols:edit-note" class="text-2xl" /></span>
-        <span class="dock-btn-label">留言</span>
-      </button>
+			<!-- 分类 -->
+			<button class="dock-btn" id="dock-categories-btn" aria-label={i18n(I18nKey.categories)} type="button" data-tooltip={i18n(I18nKey.categories)}>
+				<span class="dock-btn-icon"><Icon name="material-symbols:folder-outline" class="text-3xl" /></span>
+				<span class="dock-btn-label">分类</span>
+			</button>
 
-      <!-- 回首页 -->
-      <button class="dock-btn dock-btn-home hide" id="dock-home-btn" aria-label={i18n(I18nKey.home)} type="button">
-        <span class="dock-btn-icon"><Icon name="material-symbols:home-outline-rounded" class="text-2xl" /></span>
-        <span class="dock-btn-label">首页</span>
-      </button>
-    </div>
+			<!-- 公告 -->
+			<button class="dock-btn" id="dock-announcement-btn" aria-label="公告" type="button" data-tooltip="公告">
+				<span class="dock-btn-icon"><Icon name="material-symbols:campaign-outline-rounded" class="text-3xl" /></span>
+				<span class="dock-btn-label">公告</span>
+			</button>
 
-    <!-- 展开/收起切换 -->
-    <button class="dock-btn dock-toggle" id="dock-toggle-btn" aria-label="Toggle" type="button">
-      <span class="dock-btn-icon">
-        <Icon name="material-symbols:more-horiz" class="text-2xl dock-icon-collapsed" />
-        <Icon name="material-symbols:close" class="text-2xl dock-icon-expanded hidden" />
-      </span>
-      <span class="dock-btn-label" id="dock-toggle-label">展开</span>
-    </button>
-  </div>
+			<!-- 回首页 -->
+			<button class="dock-btn dock-btn-home hide" id="dock-home-btn" aria-label={i18n(I18nKey.home)} type="button" data-tooltip={i18n(I18nKey.home)}>
+				<span class="dock-btn-icon"><Icon name="material-symbols:home-outline-rounded" class="text-3xl" /></span>
+				<span class="dock-btn-label">首页</span>
+			</button>
 
-  <!-- 回到顶部 -->
-  <button class="dock-btn dock-btn-top hide" id="dock-top-btn" aria-label="Top" type="button">
-    <span class="dock-btn-icon"><Icon name="material-symbols:keyboard-arrow-up-rounded" class="text-2xl" /></span>
-    <span class="dock-btn-label">Top</span>
-  </button>
+			<!-- 目录 (文章页) -->
+			<button class="dock-btn dock-btn-toc hide" id="dock-toc-btn" aria-label="TOC" type="button" data-tooltip="目录">
+				<span class="dock-btn-icon"><Icon name="material-symbols:format-list-bulleted" class="text-3xl" /></span>
+				<span class="dock-btn-label">目录</span>
+			</button>
 
-  <!-- 直达评论区（仅在 moments 页面滚动后显示） -->
-  <button class="dock-btn hide" id="dock-comment-btn" aria-label="Comment" type="button">
-    <span class="dock-btn-icon"><Icon name="material-symbols:chat-bubble-outline" class="text-2xl" /></span>
-    <span class="dock-btn-label">评论</span>
-  </button>
+			<!-- 全部文章 (文章页) -->
+			<button class="dock-btn hide dock-btn-posts" id="dock-posts-btn" aria-label="全部文章" type="button" data-tooltip="文章">
+				<span class="dock-btn-icon"><Icon name="material-symbols:list-alt-outline" class="text-3xl" /></span>
+				<span class="dock-btn-label">文章</span>
+			</button>
 
-  <!-- 返回书架（仅在书籍详情页显示） -->
-  <button class="dock-btn hide" id="dock-bookshelf-btn" aria-label="Back to bookshelf" type="button">
-    <span class="dock-btn-icon"><Icon name="material-symbols:arrow-back-rounded" class="text-2xl" /></span>
-    <span class="dock-btn-label">书架</span>
-  </button>
+			<!-- 返回书架 (书籍详情页) -->
+			<button class="dock-btn hide" id="dock-bookshelf-btn" aria-label="Back to bookshelf" type="button" data-tooltip="书架">
+				<span class="dock-btn-icon"><Icon name="material-symbols:arrow-back-rounded" class="text-3xl" /></span>
+				<span class="dock-btn-label">书架</span>
+			</button>
+		</div>
 
-  <!-- 全部文章（文章页显示） -->
-  <button class="dock-btn hide dock-btn-posts" id="dock-posts-btn" aria-label="全部文章" type="button">
-    <span class="dock-btn-icon"><Icon name="material-symbols:list-alt-outline" class="text-2xl" /></span>
-    <span class="dock-btn-label">文章</span>
-  </button>
+		<!-- 展开/收起切换按钮 -->
+		<button class="dock-btn dock-toggle" id="dock-toggle-btn" aria-label="Toggle dock" type="button" data-tooltip="工具坞">
+			<span class="dock-btn-icon">
+				<Icon name="material-symbols:more-horiz" class="text-3xl dock-icon-collapsed" />
+				<Icon name="material-symbols:close" class="text-3xl dock-icon-expanded hidden" />
+			</span>
+			<span class="dock-btn-label dock-toggle-label-collapsed">展开</span>
+			<span class="dock-btn-label dock-toggle-label-expanded hidden">收起</span>
+		</button>
+	</div>
 
-  <!-- 目录（文章页显示） -->
-  <button class="dock-btn hide dock-btn-toc" id="dock-toc-btn" aria-label="TOC" type="button">
-    <span class="dock-btn-icon"><Icon name="material-symbols:format-list-bulleted" class="text-2xl" /></span>
-    <span class="dock-btn-label">目录</span>
-  </button>
+	<!-- 回到顶部 (条件显示) -->
+	<button class="dock-btn dock-btn-top hide" id="dock-top-btn" aria-label="Back to Top" type="button" data-tooltip="回到顶部">
+		<span class="dock-btn-icon"><Icon name="material-symbols:keyboard-arrow-up-rounded" class="text-3xl" /></span>
+		<span class="dock-btn-label">顶部</span>
+	</button>
 </div>
 
 <!-- 移动端抽屉遮罩 -->
@@ -162,51 +172,51 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 
 <!-- 标签抽屉 -->
 <div class="dock-drawer dock-drawer-closed" id="dock-drawer-tags">
-  <div class="dock-drawer-title">[ {i18n(I18nKey.tags)} ]</div>
-  <div class="dock-tags-list">
-    {tags.map((t) => (
-      <a href={getTagUrl(t.name)} class="dock-tag-item">
-        <span class="dock-tag-name"># {t.name.trim()}</span>
-        <span class="dock-tag-count">{t.count}</span>
-      </a>
-    ))}
-  </div>
+	<div class="dock-drawer-title">[ {i18n(I18nKey.tags)} ]</div>
+	<div class="dock-tags-list">
+		{tags.map((t) => (
+			<a href={getTagUrl(t.name)} class="dock-tag-item">
+				<span class="dock-tag-name"># {t.name.trim()}</span>
+				<span class="dock-tag-count">{t.count}</span>
+			</a>
+		))}
+	</div>
 </div>
 
 <!-- 分类抽屉 -->
 <div class="dock-drawer dock-drawer-closed" id="dock-drawer-categories">
-  <div class="dock-drawer-title">[ {i18n(I18nKey.categories)} ]</div>
-  <div class="dock-tags-list">
-    {categories.map((c) => (
-      <a href={getCategoryUrl(c.name)} class="dock-tag-item">
-        <span class="dock-tag-name"># {c.name.trim()}</span>
-        <span class="dock-tag-count">{c.count}</span>
-      </a>
-    ))}
-  </div>
+	<div class="dock-drawer-title">[ {i18n(I18nKey.categories)} ]</div>
+	<div class="dock-tags-list">
+		{categories.map((c) => (
+			<a href={getCategoryUrl(c.name)} class="dock-tag-item">
+				<span class="dock-tag-name"># {c.name.trim()}</span>
+				<span class="dock-tag-count">{c.count}</span>
+			</a>
+		))}
+	</div>
 </div>
 
 <!-- 公告抽屉 -->
 <div class="dock-drawer dock-drawer-closed" id="dock-drawer-announcement">
-  <div class="dock-drawer-title">[ 公告 ]</div>
-  <div class="px-1">
-    <p class="text-sm leading-relaxed mb-3" style="color: var(--deep-text);">{announcementContent}</p>
-    {announcementLink?.enable !== false && announcementLink?.url ? (
-      <a href={announcementLink.url} target={announcementLink.external ? "_blank" : "_self"} rel={announcementLink.external ? "noopener noreferrer" : undefined} class="dock-tag-item inline-flex" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
-        {announcementLink.text || "了解更多"}
-      </a>
-    ) : null}
-  </div>
+	<div class="dock-drawer-title">[ 公告 ]</div>
+	<div class="px-1">
+		<p class="text-sm leading-relaxed mb-3" style="color: var(--deep-text);">{announcementContent}</p>
+		{announcementLink?.enable !== false && announcementLink?.url ? (
+			<a href={announcementLink.url} target={announcementLink.external ? "_blank" : "_self"} rel={announcementLink.external ? "noopener noreferrer" : undefined} class="dock-tag-item inline-flex" style="padding: 0.25rem 0.75rem; font-size: 0.8rem;">
+				{announcementLink.text || "了解更多"}
+			</a>
+		) : null}
+	</div>
 </div>
 
 {musicPlayerConfig.showInNavbar !== false && (
 <div class="dock-drawer dock-drawer-closed" id="dock-drawer-music">
-  <div class="dock-drawer-title">[ {i18n(I18nKey.music)} ]</div>
-  <MusicPlayer lazy externalPlaylist={dockMusicPlaylist} />
+	<div class="dock-drawer-title">[ {i18n(I18nKey.music)} ]</div>
+	<MusicPlayer lazy externalPlaylist={dockMusicPlaylist} />
 </div>
 )}
 
-<!-- Search 组件（创建 #search-panel，由 dock 按钮触发） -->
+<!-- Search 组件 -->
 <Search client:load />
 
 <!-- AI 搜索组件 -->
@@ -217,253 +227,271 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 
 <!-- TOC 抽屉 -->
 <div class="dock-drawer dock-drawer-closed" id="dock-drawer-toc">
-  <div class="dock-drawer-title">[ contents ]</div>
-  <div id="dock-toc-content" class="text-sm leading-relaxed relative">
-    <div id="dock-toc-indicator" class="toc-active-indicator"></div>
-  </div>
+	<div class="dock-drawer-title">[ contents ]</div>
+	<div id="dock-toc-content" class="text-sm leading-relaxed relative">
+		<div id="dock-toc-indicator" class="toc-active-indicator"></div>
+	</div>
 </div>
 
 <!-- 全部文章抽屉 -->
 <div class="dock-drawer dock-drawer-closed" id="dock-drawer-posts">
-  <div class="dock-drawer-title">[ 全部文章 ]</div>
-  <PostDirectoryList />
+	<div class="dock-drawer-title">[ 全部文章 ]</div>
+	<PostDirectoryList />
 </div>
 
 <script id="dock-music-playlist" type="application/json" set:html={dockMusicPlaylist}></script>
 
 <script is:inline>
-  (function() {
-    try {
-      var el = document.getElementById('dock-music-playlist');
-      window.__dockMusicPlaylist = el ? JSON.parse(el.textContent) : [];
-    } catch(e) {
-      window.__dockMusicPlaylist = [];
-    }
-  })();
+	(function() {
+		try {
+			var el = document.getElementById('dock-music-playlist');
+			window.__dockMusicPlaylist = el ? JSON.parse(el.textContent) : [];
+		} catch(e) {
+			window.__dockMusicPlaylist = [];
+		}
+	})();
 </script>
 
 <script>
-  let _dockAbort: AbortController | null = null;
+	let _dockAbort: AbortController | null = null;
 
-  // 重新绑定所有事件（支持 Swup 页面切换后重新初始化）
-  function bindDockEvents() {
-    // 清理上一次绑定的全局监听器
-    if (_dockAbort) _dockAbort.abort();
-    _dockAbort = new AbortController();
-    const signal = _dockAbort.signal;
+	function bindDockEvents() {
+		if (_dockAbort) _dockAbort.abort();
+		_dockAbort = new AbortController();
+		const signal = _dockAbort.signal;
 
-    const stack = document.getElementById("dock-stack");
-    const toggleBtn = document.getElementById("dock-toggle-btn");
-    if (!stack || !toggleBtn) return;
+		const stack = document.getElementById("dock-stack");
+		const toggleBtn = document.getElementById("dock-toggle-btn");
+		if (!stack || !toggleBtn) return;
 
-    const collapsedIcon = toggleBtn.querySelector(".dock-icon-collapsed");
-    const expandedIcon = toggleBtn.querySelector(".dock-icon-expanded");
-    const toggleLabel = document.getElementById("dock-toggle-label");
+		const collapsedIcon = toggleBtn.querySelector(".dock-icon-collapsed");
+		const expandedIcon = toggleBtn.querySelector(".dock-icon-expanded");
+		const collapsedLabel = toggleBtn.querySelector(".dock-toggle-label-collapsed");
+		const expandedLabel = toggleBtn.querySelector(".dock-toggle-label-expanded");
 
-    function setExpanded(expanded: boolean) {
-      stack!.setAttribute("data-expanded", String(expanded));
-      collapsedIcon?.classList.toggle("hidden", expanded);
-      expandedIcon?.classList.toggle("hidden", !expanded);
-      if (toggleLabel) toggleLabel.textContent = expanded ? "收起" : "展开";
-    }
+		function setExpanded(expanded: boolean) {
+			stack!.setAttribute("data-expanded", String(expanded));
+			collapsedIcon?.classList.toggle("hidden", expanded);
+			expandedIcon?.classList.toggle("hidden", !expanded);
+			collapsedLabel?.classList.toggle("hidden", expanded);
+			expandedLabel?.classList.toggle("hidden", !expanded);
+		}
 
-    function closeAllDrawers() {
-      document.querySelectorAll(".dock-drawer").forEach((d) => d.classList.add("dock-drawer-closed"));
-      document.getElementById("dock-drawer-overlay")?.classList.remove("active");
-    }
+		function closeAllDrawers() {
+			document.querySelectorAll(".dock-drawer").forEach((d) => d.classList.add("dock-drawer-closed"));
+			document.getElementById("dock-drawer-overlay")?.classList.remove("active");
+		}
 
-    function openDrawer(drawer: Element) {
-      drawer.classList.remove("dock-drawer-closed");
-      document.getElementById("dock-drawer-overlay")?.classList.add("active");
-    }
+		function openDrawer(drawer: Element) {
+			drawer.classList.remove("dock-drawer-closed");
+			document.getElementById("dock-drawer-overlay")?.classList.add("active");
+		}
 
-    toggleBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      setExpanded(stack.getAttribute("data-expanded") !== "true");
-    });
+		toggleBtn.addEventListener("click", (e) => {
+			e.stopPropagation();
+			setExpanded(stack.getAttribute("data-expanded") !== "true");
+		});
 
-    // 搜索
-    document.getElementById("dock-search-btn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const searchPanel = document.getElementById("search-panel");
-      if (searchPanel) {
-        searchPanel.classList.remove("float-panel-closed");
-        const input = searchPanel.querySelector("input") as HTMLInputElement;
-        if (input) setTimeout(() => input.focus(), 100);
-      }
-    });
+		// 搜索
+		document.getElementById("dock-search-btn")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			const searchPanel = document.getElementById("search-panel");
+			if (searchPanel) {
+				searchPanel.classList.remove("float-panel-closed");
+				const input = searchPanel.querySelector("input") as HTMLInputElement;
+				if (input) setTimeout(() => input.focus(), 100);
+			}
+		});
 
-    // AI 搜索
-    document.getElementById("dock-ai-btn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      window.dispatchEvent(new CustomEvent("toggle-ai-search"));
-    });
+		// AI 搜索
+		document.getElementById("dock-ai-btn")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			window.dispatchEvent(new CustomEvent("toggle-ai-search"));
+			closeAllDrawers();
+			setExpanded(false);
+		});
 
-    // 标签 & 音乐 & TOC & 文章 抽屉
-    const drawerMap: Record<string, string> = {
-      "dock-tags-btn": "dock-drawer-tags",
-      "dock-categories-btn": "dock-drawer-categories",
-      "dock-announcement-btn": "dock-drawer-announcement",
-      "dock-music-btn": "dock-drawer-music",
-      "dock-toc-btn": "dock-drawer-toc",
-      "dock-posts-btn": "dock-drawer-posts",
-    };
-    Object.entries(drawerMap).forEach(([btnId, drawerId]) => {
-      const btn = document.getElementById(btnId);
-      const drawer = document.getElementById(drawerId);
-      if (!btn || !drawer) return;
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const isOpen = !drawer.classList.contains("dock-drawer-closed");
-        closeAllDrawers();
-        if (!isOpen) openDrawer(drawer);
-      });
-    });
+		// 抽屉按钮（音乐/AI 在堆叠内，打开抽屉时收起堆叠）
+		const drawerMap: Record<string, string> = {
+			"dock-tags-btn": "dock-drawer-tags",
+			"dock-categories-btn": "dock-drawer-categories",
+			"dock-announcement-btn": "dock-drawer-announcement",
+			"dock-music-btn": "dock-drawer-music",
+			"dock-toc-btn": "dock-drawer-toc",
+			"dock-posts-btn": "dock-drawer-posts",
+		};
+		Object.entries(drawerMap).forEach(([btnId, drawerId]) => {
+			const btn = document.getElementById(btnId);
+			const drawer = document.getElementById(drawerId);
+			if (!btn || !drawer) return;
+			btn.addEventListener("click", (e) => {
+				e.stopPropagation();
+				const isOpen = !drawer.classList.contains("dock-drawer-closed");
+				closeAllDrawers();
+				if (!isOpen) {
+					openDrawer(drawer);
+					setExpanded(false);
+				}
+			});
+		});
 
-    // 点击遮罩关闭
-    document.getElementById("dock-drawer-overlay")?.addEventListener("click", () => {
-      closeAllDrawers();
-      setExpanded(false);
-    });
+		// 点击遮罩关闭
+		document.getElementById("dock-drawer-overlay")?.addEventListener("click", () => {
+			closeAllDrawers();
+			setExpanded(false);
+		});
 
-    // 点击外部关闭
-    document.addEventListener("click", (e) => {
-      const target = e.target as Node;
-      if (!target) return;
-      const isInDrawer = document.querySelector(".dock-drawer:not(.dock-drawer-closed)")?.contains(target);
-      const isInDock = document.getElementById("floating-dock")?.contains(target);
-      if (!isInDrawer && !isInDock) {
-        closeAllDrawers();
-        setExpanded(false);
-      }
-    }, { signal });
+		// 点击外部关闭
+		document.addEventListener("click", (e) => {
+			const target = e.target as Node;
+			if (!target) return;
+			const isInDrawer = document.querySelector(".dock-drawer:not(.dock-drawer-closed)")?.contains(target);
+			const isInDock = document.getElementById("floating-dock")?.contains(target);
+			if (!isInDrawer && !isInDock) {
+				closeAllDrawers();
+				setExpanded(false);
+			}
+		}, { signal });
 
-    // 主题切换已移至事件委托（见脚本底部）
+		// 留言板
+		document.getElementById("dock-guestbook-btn")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			window.dispatchEvent(new CustomEvent("toggle-guestbook"));
+		});
 
-    // 留言板
-    document.getElementById("dock-guestbook-btn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      window.dispatchEvent(new CustomEvent("toggle-guestbook"));
-    });
+		// 回顶
+		document.getElementById("dock-top-btn")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			window.scroll({ top: 0, behavior: "smooth" });
+		});
 
-    // 回顶
-    document.getElementById("dock-top-btn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      window.scroll({ top: 0, behavior: "smooth" });
-    });
+		// 回首页
+		document.getElementById("dock-home-btn")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			window.location.href = "/";
+		});
 
-    // 回首页
-    document.getElementById("dock-home-btn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      window.location.href = "/";
-    });
+		// 跳评论
+		document.getElementById("dock-comment-btn")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			const target = document.getElementById("scissor-divider") || document.getElementById("album-comments");
+			if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+		});
 
-    // 跳评论
-    document.getElementById("dock-comment-btn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const target = document.getElementById("scissor-divider") || document.getElementById("album-comments");
-      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+		// 返回书架
+		document.getElementById("dock-bookshelf-btn")?.addEventListener("click", (e) => {
+			e.stopPropagation();
+			window.location.href = "/books/";
+		});
 
-    // 返回书架
-    document.getElementById("dock-bookshelf-btn")?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      window.location.href = "/books/";
-    });
+		// TOC 懒加载
+		document.getElementById("dock-toc-btn")?.addEventListener("click", () => {
+			import("@/utils/tocUtils").then(({ TOCManager }) => {
+				try {
+					new TOCManager({
+						contentId: "dock-toc-content",
+						indicatorId: "dock-toc-indicator",
+						maxLevel: 3,
+						scrollOffset: 80,
+					}).init();
+				} catch (err) {
+					console.error("TOC init failed:", err);
+				}
+			});
+		});
 
-    // TOC 懒加载
-    document.getElementById("dock-toc-btn")?.addEventListener("click", () => {
-      import("@/utils/tocUtils").then(({ TOCManager }) => {
-        try {
-          new TOCManager({
-            contentId: "dock-toc-content",
-            indicatorId: "dock-toc-indicator",
-            maxLevel: 3,
-            scrollOffset: 80,
-          }).init();
-        } catch (err) {
-          console.error("TOC init failed:", err);
-        }
-      });
-    });
+		// 主题切换
+		const themeBtnEl = document.getElementById("dock-theme-btn");
+		if (themeBtnEl) {
+			const themeBtn = themeBtnEl;
+			const lightIcon = themeBtn.querySelector(".dock-theme-icon-light");
+			const darkIcon = themeBtn.querySelector(".dock-theme-icon-dark");
+			const lightLabel = themeBtn.querySelector(".dock-theme-label-light");
+			const darkLabel = themeBtn.querySelector(".dock-theme-label-dark");
 
-    // 更新可见性
-    function updateVisibility() {
-      const scrolled = window.scrollY > 200;
-      document.getElementById("dock-top-btn")?.classList.toggle("hide", !scrolled);
-      const isHome = window.location.pathname === "/" || window.location.pathname === "";
-      document.getElementById("dock-home-btn")?.classList.toggle("hide", isHome);
-      const isPost = /\/posts?\//.test(window.location.pathname);
-      // 文章页显示全部文章 + 目录按钮
-      document.getElementById("dock-posts-btn")?.classList.toggle("hide", !isPost);
-      document.getElementById("dock-toc-btn")?.classList.toggle("hide", !isPost);
-      // 评论按钮
-      const isPostDetail = /\/posts\/.+\//.test(window.location.pathname);
-      const isMoments = /\/moments/.test(window.location.pathname);
-      const isAlbum = /\/album\//.test(window.location.pathname) && !/\/album\/?$/.test(window.location.pathname);
-      const showComment = isPostDetail || (isMoments && scrolled) || (isAlbum && scrolled);
-      document.getElementById("dock-comment-btn")?.classList.toggle("hide", !showComment);
-      // 书籍详情页显示返回书架按钮
-      const isBookDetail = /\/books\/book\//.test(window.location.pathname);
-      document.getElementById("dock-bookshelf-btn")?.classList.toggle("hide", !isBookDetail);
-    }
-    updateVisibility();
-    window.addEventListener("scroll", updateVisibility, { passive: true, signal });
+			function updateThemeIcon() {
+				const isDark = document.documentElement.classList.contains("dark");
+				lightIcon?.classList.toggle("hidden", isDark);
+				darkIcon?.classList.toggle("hidden", !isDark);
+				lightLabel?.classList.toggle("hidden", isDark);
+				darkLabel?.classList.toggle("hidden", !isDark);
+				themeBtn.setAttribute("data-tooltip", isDark ? "切换亮色" : "切换暗色");
+			}
 
-    // 音乐按钮播放旋转
-    const musicBtn = document.getElementById("dock-music-btn");
-    function updateMusicIconSpin() {
-      if (!musicBtn) return;
-      const mgr = (window as any).__fireflyMusic;
-      const isPlaying = mgr?.getState()?.isPlaying ?? false;
-      musicBtn.classList.toggle("is-playing", isPlaying);
-    }
-    updateMusicIconSpin();
-    window.addEventListener("fm:play-state", updateMusicIconSpin, { signal });
+			themeBtn.addEventListener("click", (e) => {
+				e.stopPropagation();
+				import("@/utils/setting-utils").then(({ setTheme, getStoredTheme }) => {
+					const current = getStoredTheme();
+					const resolved = current === "system"
+						? (document.documentElement.classList.contains("dark") ? "dark" : "light")
+						: current;
+					const next = resolved === "light" ? "dark" : "light";
+					setTheme(next as any);
+					updateThemeIcon();
+				});
+			});
 
-    // 音乐抽屉懒加载：首次打开时触发 MusicManager 初始化
-    const musicDrawerBtn = musicBtn;
-    const musicDrawerEl = document.getElementById("dock-drawer-music");
-    if (musicDrawerBtn && musicDrawerEl) {
-      musicDrawerBtn.addEventListener("click", () => {
-        const mgr = (window as any).__fireflyMusic;
-        if (mgr && !mgr.getState().initialized) {
-          const widget = musicDrawerEl.querySelector(".music-player-widget");
-          const loadingEl = widget?.querySelector(".music-loading") as HTMLElement | null;
-          if (loadingEl) {
-            loadingEl.classList.remove("opacity-0", "pointer-events-none");
-          }
-          const playlistData = (window as any).__dockMusicPlaylist;
-          if (playlistData && playlistData.length > 0) {
-            mgr.setExternalPlaylist(playlistData, false);
-          } else {
-            mgr.init();
-          }
-        }
-      });
-    }
+			updateThemeIcon();
+			window.addEventListener("theme-change", updateThemeIcon, { signal });
+		}
 
-    // 页面切换后重新绑定
-    document.addEventListener("astro:page-load", () => bindDockEvents(), { signal });
-    document.addEventListener("swup:contentReplaced", () => bindDockEvents(), { signal });
-  }
+		// 更新可见性
+		function updateVisibility() {
+			const scrolled = window.scrollY > 200;
+			document.getElementById("dock-top-btn")?.classList.toggle("hide", !scrolled);
+			const isHome = window.location.pathname === "/" || window.location.pathname === "";
+			document.getElementById("dock-home-btn")?.classList.toggle("hide", isHome);
+			const isPost = /\/posts?\//.test(window.location.pathname);
+			document.getElementById("dock-posts-btn")?.classList.toggle("hide", !isPost);
+			document.getElementById("dock-toc-btn")?.classList.toggle("hide", !isPost);
+			const isPostDetail = /\/posts\/.+\//.test(window.location.pathname);
+			const isMoments = /\/moments/.test(window.location.pathname);
+			const isAlbum = /\/album\//.test(window.location.pathname) && !/\/album\/?$/.test(window.location.pathname);
+			const showComment = isPostDetail || (isMoments && scrolled) || (isAlbum && scrolled);
+			document.getElementById("dock-comment-btn")?.classList.toggle("hide", !showComment);
+			const isBookDetail = /\/books\/book\//.test(window.location.pathname);
+			document.getElementById("dock-bookshelf-btn")?.classList.toggle("hide", !isBookDetail);
+		}
+		updateVisibility();
+		window.addEventListener("scroll", updateVisibility, { passive: true, signal });
 
-  // 初始化
-  bindDockEvents();
+		// 音乐按钮播放旋转
+		const musicBtn = document.getElementById("dock-music-btn");
+		function updateMusicIconSpin() {
+			if (!musicBtn) return;
+			const mgr = (window as any).__fireflyMusic;
+			const isPlaying = mgr?.getState()?.isPlaying ?? false;
+			musicBtn.classList.toggle("is-playing", isPlaying);
+		}
+		updateMusicIconSpin();
+		window.addEventListener("fm:play-state", updateMusicIconSpin, { signal });
 
-  // 主题切换事件委托（注册在 document 上，不受 Swup DOM 替换影响）
-  document.addEventListener("click", (e) => {
-    const themeBtn = (e.target as HTMLElement)?.closest?.("#sun-moon-theme-btn");
-    if (!themeBtn) return;
-    const isDark = document.documentElement.classList.contains("dark");
-    const next = isDark ? "light" : "dark";
-    localStorage.setItem("theme", next);
-    if (next === "dark") {
-      document.documentElement.classList.add("dark");
-      document.documentElement.setAttribute("data-theme", "one-dark-pro");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.setAttribute("data-theme", "one-light");
-    }
-  });
+		// 音乐抽屉懒加载
+		const musicDrawerBtn = musicBtn;
+		const musicDrawerEl = document.getElementById("dock-drawer-music");
+		if (musicDrawerBtn && musicDrawerEl) {
+			musicDrawerBtn.addEventListener("click", () => {
+				const mgr = (window as any).__fireflyMusic;
+				if (mgr && !mgr.getState().initialized) {
+					const widget = musicDrawerEl.querySelector(".music-player-widget");
+					const loadingEl = widget?.querySelector(".music-loading") as HTMLElement | null;
+					if (loadingEl) {
+						loadingEl.classList.remove("opacity-0", "pointer-events-none");
+					}
+					const playlistData = (window as any).__dockMusicPlaylist;
+					if (playlistData && playlistData.length > 0) {
+						mgr.setExternalPlaylist(playlistData, false);
+					} else {
+						mgr.init();
+					}
+				}
+			});
+		}
+
+		// 页面切换后重新绑定
+		document.addEventListener("astro:page-load", () => bindDockEvents(), { signal });
+		document.addEventListener("swup:contentReplaced", () => bindDockEvents(), { signal });
+	}
+
+	bindDockEvents();
 </script>

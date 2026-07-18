@@ -8,6 +8,25 @@ export const projectsPageConfig: CollectionsApiConfig = {
 	description: "收录个人网站、常用工具和收藏网站",
 	apis: [
 		{
+			category: "番茄主理人",
+			items: [
+				{
+					name: "番茄の主页",
+					url: "https://home.fqzlr.com/",
+					description: "个人主页导航站",
+					icon: favicon("home.fqzlr.com"),
+					enabled: true,
+				},
+				{
+					name: "番茄の笔记",
+					url: "https://bj.fqzlr.com/",
+					description: "在线笔记应用",
+					icon: favicon("bj.fqzlr.com"),
+					enabled: true,
+				},
+			],
+		},
+		{
 			category: "工具箱",
 			items: [
 				{
