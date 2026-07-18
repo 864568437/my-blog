@@ -2,9 +2,9 @@ import type { BackgroundWallpaperConfig } from "@/types/config";
 
 export const backgroundWallpaper: BackgroundWallpaperConfig = {
 	// 壁纸模式："banner" 横幅壁纸，"overlay" 全屏透明，"none" 纯色背景无壁纸
-	mode: "none",
+	mode: "banner",
 	// 是否允许用户通过导航栏切换壁纸模式，设为false可提升性能（只渲染当前模式）
-	switchable: false,
+	switchable: true,
 	/**
 	 * 背景图片配置
 	 * 图片路径支持三种格式：
@@ -40,13 +40,15 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 		// desktop: "assets/images/DesktopWallpaper/d1.avif",
 		desktop: [
 			// "assets/images/DesktopWallpaper/003.jpeg",
-			"https://fqzlr.com/img/DesktopWallpaper/003.webp",
+			// "https://fqzlr.com/img/DesktopWallpaper/003.webp",
+			"/assets/images/home/home.webp",
 		],
 		// 移动背景图片（支持单张或多张随机）
 		// mobile: "assets/images/MobileWallpaper/m1.avif",
 		mobile: [
 			// "assets/images/MobileWallpaper/18188682411036032.jpeg",
-			"https://fqzlr.com/img/MobileWallpaper/18188682411036032.webp",
+			// "https://fqzlr.com/img/MobileWallpaper/18188682411036032.webp",
+			"/assets/images/home/18188682411036032.webp",
 		],
 	},
 	// Banner模式特有配置
@@ -128,14 +130,24 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			// 是否允许用户通过控制面板切换水波纹动画
 			switchable: true,
 		},
+		// 壁纸轮播配置
+		carousel: {
+			enable: false,
+			switchable: true,
+			interval: 10000,
+		},
 	},
 	// 全屏透明覆盖模式特有配置
 	overlay: {
 		// 层级，确保壁纸在背景层
 		zIndex: -1,
-		// 壁纸透明度
-		opacity: 0.8,
-		// 背景模糊程度
-		blur: 1,
+		// 壁纸透明度（0-100）
+		opacity: 80,
+		// 背景模糊程度（px）
+		blur: 0,
+		// 卡片透明度（0-100）
+		cardOpacity: 99,
+		// 是否允许用户通过控制面板切换全屏透明模式
+		switchable: true,
 	},
 };

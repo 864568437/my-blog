@@ -245,10 +245,27 @@ enum I18nKey {
 	// 壁纸模式
 	wallpaperMode = "wallpaperMode",
 	wallpaperBannerMode = "wallpaperBannerMode",
+	wallpaperFullscreenMode = "wallpaperFullscreenMode",
 	wallpaperOverlayMode = "wallpaperOverlayMode",
 	wallpaperNoneMode = "wallpaperNoneMode",
 
-	// 横幅设置
+	// 壁纸设置
+	wallpaperSettings = "wallpaperSettings",
+	wallpaperTitle = "wallpaperTitle",
+	wallpaperCarousel = "wallpaperCarousel",
+	gradientTransition = "gradientTransition",
+
+	// 透明设置
+	overlaySettings = "overlaySettings",
+	overlayOpacity = "overlayOpacity",
+	overlayBlur = "overlayBlur",
+	overlayCardOpacity = "overlayCardOpacity",
+
+	// 特效设置
+	effectsSettings = "effectsSettings",
+	sakuraEffect = "sakuraEffect",
+
+	// 横幅设置（旧，兼容）
 	bannerSettings = "bannerSettings",
 	bannerTitle = "bannerTitle",
 	wavesAnimation = "wavesAnimation",

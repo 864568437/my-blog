@@ -80,6 +80,7 @@ const {
 
 // 检查背景壁纸模式和是否允许切换
 const isBannerMode = backgroundWallpaper.mode === "banner";
+const isFullscreenMode = backgroundWallpaper.mode === "fullscreen";
 const isOverlayMode = backgroundWallpaper.mode === "overlay";
 const isBackgroundEnabled = backgroundWallpaper.mode !== "none";
 const isWallpaperSwitchable = backgroundWallpaper.switchable ?? true;
@@ -318,16 +319,20 @@ const mobileQuality = Math.round(configQuality * 0.9);
 <NavMenuPanel links={navBarConfig.links} />
 
 <!-- Wallpaper - 如果允许切换则始终渲染，否则只渲染当前模式 -->
-{(isWallpaperSwitchable || isBannerMode || isOverlayMode) && (
+{(isWallpaperSwitchable || isBannerMode || isFullscreenMode || isOverlayMode) && (
 <div id="wallpaper-wrapper" class:list={[
-	`absolute z-10 w-full transition duration-700 overflow-hidden ${mobileNonHomeBannerClass}`,
-	(isOverlayMode && !isWallpaperSwitchable) || (isWallpaperSwitchable && !isBannerMode) ? 'wallpaper-overlay' : ''
+	`z-10 w-full transition duration-700 overflow-hidden ${mobileNonHomeBannerClass}`,
+	isFullscreenMode ? 'wallpaper-fullscreen' : '',
+	(isOverlayMode && !isWallpaperSwitchable) || (isWallpaperSwitchable && !isBannerMode && !isFullscreenMode) ? 'wallpaper-overlay' : '',
+	!isFullscreenMode && !isOverlayMode ? 'absolute' : ''
 ]} style={
 	isWallpaperSwitchable
 		? `top: -${BANNER_HEIGHT_EXTEND}vh; display: none; --overlay-opacity: ${backgroundWallpaper.overlay?.opacity ?? 0.8}; --overlay-z-index: ${backgroundWallpaper.overlay?.zIndex ?? -1}; --overlay-blur: ${backgroundWallpaper.overlay?.blur ?? 0}px;`
 		: isOverlayMode
 			? `--overlay-opacity: ${backgroundWallpaper.overlay?.opacity ?? 0.8}; --overlay-z-index: ${backgroundWallpaper.overlay?.zIndex ?? -1}; --overlay-blur: ${backgroundWallpaper.overlay?.blur ?? 0}px;`
-			: `top: -${BANNER_HEIGHT_EXTEND}vh`
+			: isFullscreenMode
+				? ``
+				: `top: -${BANNER_HEIGHT_EXTEND}vh`
 }>
     <!-- 背景图片显示 -->
     <div class="relative h-full w-full" id="banner-images-container"
@@ -614,7 +619,13 @@ const mobileQuality = Math.round(configQuality * 0.9);
 )}
 
 <!-- Main content -->
-<div class={`absolute w-full z-30 pointer-events-none ${mobileNonHomeBannerClass ? 'mobile-main-no-banner' : ''} ${!(isBannerMode && isBackgroundEnabled) ? 'no-banner-layout' : ''} ${transparentClass}`} style={`top: ${isHomePageCheck ? '0' : finalMainPanelTop}`}>
+<div class:list={[
+	`w-full z-30 pointer-events-none`,
+	mobileNonHomeBannerClass ? 'mobile-main-no-banner' : '',
+	!(isBannerMode && isBackgroundEnabled) ? 'no-banner-layout' : '',
+	transparentClass,
+	isFullscreenMode ? '' : 'absolute'
+]} style={isFullscreenMode ? 'position: relative; top: 0; margin-top: 1rem;' : `top: ${isHomePageCheck ? '0' : finalMainPanelTop}`}>
     <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
     <div class="relative max-w-(--page-width) mx-auto pointer-events-auto">
         <div id="main-grid"
@@ -670,7 +681,6 @@ const mobileQuality = Math.round(configQuality * 0.9);
                     <slot></slot>
 
                 </div>
-                <FloatingDock headings={headings} />
             </main>
             </div>
 
@@ -718,6 +728,8 @@ const mobileQuality = Math.round(configQuality * 0.9);
     update: true,
   });
 </script>}
+
+<FloatingDock headings={headings} />
 
 </Layout>
 

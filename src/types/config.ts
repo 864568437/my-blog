@@ -382,6 +382,7 @@ export type LIGHT_DARK_MODE =
 
 export type WALLPAPER_MODE =
 	| typeof WALLPAPER_BANNER
+	| typeof WALLPAPER_FULLSCREEN
 	| typeof WALLPAPER_OVERLAY
 	| typeof WALLPAPER_NONE;
 
@@ -712,12 +713,19 @@ export type BackgroundWallpaperConfig = {
 				  }; // 是否启用水波纹动画效果，支持布尔值或分别设置桌面端和移动端
 			switchable?: boolean; // 是否允许用户通过控制面板切换水波纹动画
 		};
+		carousel?: {
+			enable?: boolean; // 是否启用壁纸轮播
+			switchable?: boolean; // 是否允许用户通过控制面板切换壁纸轮播
+			interval?: number; // 轮播间隔时间（毫秒），默认10000
+		};
 	};
 	// 全屏透明覆盖模式特有配置
 	overlay?: {
 		zIndex?: number; // 层级，确保壁纸在合适的层级显示
-		opacity?: number; // 壁纸透明度，0-1之间
+		opacity?: number; // 壁纸透明度，0-100之间
 		blur?: number; // 背景模糊程度，单位px
+		cardOpacity?: number; // 卡片透明度，0-100之间
+		switchable?: boolean; // 是否允许用户通过控制面板切换全屏透明模式
 	};
 };
 

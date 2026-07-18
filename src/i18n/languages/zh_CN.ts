@@ -250,10 +250,27 @@ export const zh_CN: Translation = {
 	// 壁纸模式
 	[Key.wallpaperMode]: "壁纸模式",
 	[Key.wallpaperBannerMode]: "横幅壁纸",
+	[Key.wallpaperFullscreenMode]: "全屏壁纸",
 	[Key.wallpaperOverlayMode]: "全屏透明",
 	[Key.wallpaperNoneMode]: "纯色背景",
 
-	// 横幅设置
+	// 壁纸设置
+	[Key.wallpaperSettings]: "壁纸设置",
+	[Key.wallpaperTitle]: "首页壁纸标题",
+	[Key.wallpaperCarousel]: "壁纸轮播",
+	[Key.gradientTransition]: "渐变过渡",
+
+	// 透明设置
+	[Key.overlaySettings]: "透明设置",
+	[Key.overlayOpacity]: "壁纸透明度",
+	[Key.overlayBlur]: "背景模糊度",
+	[Key.overlayCardOpacity]: "卡片透明度",
+
+	// 特效设置
+	[Key.effectsSettings]: "特效设置",
+	[Key.sakuraEffect]: "樱花特效",
+
+	// 横幅设置（旧，兼容）
 	[Key.bannerSettings]: "横幅设置",
 	[Key.bannerTitle]: "首页横幅标题",
 	[Key.wavesAnimation]: "水波纹动画",

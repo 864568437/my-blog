@@ -1,5 +1,76 @@
 /* Layout specific styles */
 
+/* 用户关闭时隐藏横幅标题 */
+html[data-banner-title-enabled="false"] #wallpaper-wrapper.wallpaper-fullscreen .banner-home-text-overlay,
+html[data-banner-title-enabled="false"] #wallpaper-wrapper.wallpaper-overlay .banner-home-text-overlay {
+    display: none !important;
+}
+
+/* ============================================
+ * Fullscreen 模式 - 全屏壁纸
+ * 使用 position: relative 高度 100vh
+ * 壁纸铺满首屏，文章在壁纸下方（下滑后才显示）
+ * ============================================ */
+#wallpaper-wrapper.wallpaper-fullscreen {
+    position: relative !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    top: 0 !important;
+    transform: none !important;
+    overflow: hidden !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+    transition: none !important;
+}
+
+/* Fullscreen 模式下非 sticky 导航栏：隐藏 top-row 占位，避免顶部空白 */
+html[data-wallpaper-mode="fullscreen"] body:not(.sticky-navbar) #top-row {
+    height: 0 !important;
+    min-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    overflow: visible !important;
+    transition: none !important;
+}
+
+/* Fullscreen 模式下主内容紧跟壁纸下方 */
+html[data-wallpaper-mode="fullscreen"] .w-full.z-30.pointer-events-none {
+    top: 0 !important;
+}
+
+/* Fullscreen 模式下图片全屏覆盖，无模糊 */
+#wallpaper-wrapper.wallpaper-fullscreen img,
+#wallpaper-wrapper.wallpaper-fullscreen img[class*="object-cover"] {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    filter: none !important;
+    opacity: 1 !important;
+}
+
+/* Fullscreen 模式下隐藏 overlay 专属的半透明效果 */
+#wallpaper-wrapper.wallpaper-fullscreen .banner-home-text-overlay,
+#wallpaper-wrapper.wallpaper-fullscreen .banner-page-title-overlay,
+#wallpaper-wrapper.wallpaper-fullscreen .banner-post-meta-overlay {
+    display: flex !important;
+}
+
+/* Fullscreen 模式下非首页隐藏主页标题文字 */
+#wallpaper-wrapper.wallpaper-fullscreen .banner-home-text-overlay.hidden {
+    display: none !important;
+}
+
+/* Fullscreen 模式下 waves 显示在底部 */
+#wallpaper-wrapper.wallpaper-fullscreen .waves {
+    position: absolute !important;
+    bottom: -1px !important;
+    z-index: 15 !important;
+}
+
 /* === Grid item 溢出修复 ===
  * 防止主内容区的 grid item 被内容（特别是 grid 布局和 form 控件）撑大
  * 导致内容溢出到侧边栏区域

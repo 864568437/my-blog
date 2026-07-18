@@ -157,6 +157,15 @@
   opacity: 0.6;
 }
 
+/* 色相面板定位 */
+#display-setting {
+  z-index: 75;
+  position: fixed;
+  bottom: 12rem;
+  right: 5rem;
+  top: auto;
+}
+
 /* 音乐按钮播放时旋转 */
 @keyframes spin-slow {
   from { transform: rotate(0deg); }

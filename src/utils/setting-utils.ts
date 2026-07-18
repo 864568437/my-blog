@@ -5,6 +5,7 @@ import {
 	LIGHT_MODE,
 	SYSTEM_MODE,
 	WALLPAPER_BANNER,
+	WALLPAPER_FULLSCREEN,
 	WALLPAPER_NONE,
 	WALLPAPER_OVERLAY,
 } from "@constants/constants";
@@ -315,6 +316,10 @@ export function applyWallpaperModeToDocument(mode: WALLPAPER_MODE) {
 				body.classList.add("enable-banner");
 				showBannerMode();
 				break;
+			case WALLPAPER_FULLSCREEN:
+				body.classList.add("enable-banner");
+				showFullscreenMode();
+				break;
 			case WALLPAPER_OVERLAY:
 				body.classList.add("wallpaper-transparent");
 				showOverlayMode();
@@ -350,6 +355,10 @@ function ensureWallpaperState(mode: WALLPAPER_MODE) {
 			body.classList.add("enable-banner");
 			showBannerMode();
 			break;
+		case WALLPAPER_FULLSCREEN:
+			body.classList.add("enable-banner");
+			showFullscreenMode();
+			break;
 		case WALLPAPER_OVERLAY:
 			body.classList.add("wallpaper-transparent");
 			showOverlayMode();
@@ -367,8 +376,8 @@ function showBannerMode() {
 	// 显示 wallpaper-wrapper 并切换为 banner 模式
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
-		// 移除 overlay 模式类
-		wallpaperWrapper.classList.remove("wallpaper-overlay");
+		// 移除其他模式类
+		wallpaperWrapper.classList.remove("wallpaper-overlay", "wallpaper-fullscreen");
 
 		// 恢复 banner 模式的 top 定位
 		wallpaperWrapper.style.top = `-${BANNER_HEIGHT_EXTEND}vh`;
@@ -392,6 +401,12 @@ function showBannerMode() {
 				wallpaperWrapper.classList.remove("mobile-hide-banner");
 			});
 		}
+	}
+
+	// 恢复显示首页 HomeHero
+	const homeHero = document.getElementById("home-hero");
+	if (homeHero) {
+		homeHero.style.display = "";
 	}
 
 	// 显示横幅图片来源文本
@@ -421,7 +436,7 @@ function showBannerMode() {
 	adjustMainContentPosition("banner");
 
 	// 处理移动端非首页主内容区域位置
-	const mainContentWrapper = document.querySelector(".absolute.w-full.z-30");
+	const mainContentWrapper = document.querySelector(".w-full.z-30.pointer-events-none");
 	if (mainContentWrapper) {
 		const isHomePage = checkIsHomePage(window.location.pathname);
 		const isMobile = window.innerWidth < 1024;
@@ -458,7 +473,8 @@ function showOverlayMode() {
 	// 切换 wallpaper-wrapper 为 overlay 模式
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
-		// 添加 overlay 模式类
+		// 移除其他模式类，添加 overlay 模式类
+		wallpaperWrapper.classList.remove("wallpaper-fullscreen");
 		wallpaperWrapper.classList.add("wallpaper-overlay");
 		// 显示壁纸
 		wallpaperWrapper.style.display = "block";
@@ -470,6 +486,12 @@ function showOverlayMode() {
 			wallpaperWrapper.classList.add("opacity-100");
 			wallpaperWrapper.classList.remove("mobile-hide-banner");
 		});
+	}
+
+	// 恢复显示首页 HomeHero
+	const homeHero = document.getElementById("home-hero");
+	if (homeHero) {
+		homeHero.style.display = "";
 	}
 
 	// 隐藏横幅图片来源文本
@@ -489,6 +511,55 @@ function showOverlayMode() {
 
 	// 调整布局为紧凑模式
 	adjustMainContentPosition("overlay");
+}
+
+function showFullscreenMode() {
+	// 全屏壁纸模式：壁纸铺满全屏，内容正常显示（不透明）
+	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
+	if (wallpaperWrapper) {
+		// 移除 overlay 模式类，添加 fullscreen 模式类
+		wallpaperWrapper.classList.remove("wallpaper-overlay");
+		wallpaperWrapper.classList.add("wallpaper-fullscreen");
+		// 显示壁纸，铺满全屏
+		wallpaperWrapper.style.display = "block";
+		wallpaperWrapper.style.setProperty("display", "block", "important");
+		wallpaperWrapper.style.top = "";
+		requestAnimationFrame(() => {
+			wallpaperWrapper.classList.remove("hidden");
+			wallpaperWrapper.classList.remove("opacity-0");
+			wallpaperWrapper.classList.add("opacity-100");
+			wallpaperWrapper.classList.remove("mobile-hide-banner");
+		});
+	}
+
+	// 隐藏横幅图片来源文本
+	const creditDesktop = document.getElementById("banner-credit-desktop");
+	const creditMobile = document.getElementById("banner-credit-mobile");
+	if (creditDesktop) creditDesktop.style.display = "none";
+	if (creditMobile) creditMobile.style.display = "none";
+
+	// 显示横幅首页文本（如果是首页且启用）
+	const bannerTextOverlay = document.querySelector(".banner-home-text-overlay");
+	if (bannerTextOverlay) {
+		const isHome = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
+		if (isHome) {
+			bannerTextOverlay.classList.remove("hidden");
+		} else {
+			bannerTextOverlay.classList.add("hidden");
+		}
+	}
+
+	// 隐藏首页 HomeHero，避免与全屏壁纸重叠
+	const homeHero = document.getElementById("home-hero");
+	if (homeHero) {
+		homeHero.style.display = "none";
+	}
+
+	// 不启用透明效果，内容正常显示
+	adjustMainContentTransparency(false);
+
+	// 调整布局为全屏模式
+	adjustMainContentPosition("fullscreen");
 }
 
 function hideAllWallpapers() {
@@ -514,6 +585,12 @@ function hideAllWallpapers() {
 		bannerTextOverlay.classList.add("hidden");
 	}
 
+	// 恢复显示首页 HomeHero
+	const homeHero = document.getElementById("home-hero");
+	if (homeHero) {
+		homeHero.style.display = "";
+	}
+
 	// 调整主内容位置和透明度
 	adjustMainContentPosition("none");
 	adjustMainContentTransparency(false);
@@ -527,8 +604,8 @@ function updateNavbarTransparency(mode: WALLPAPER_MODE) {
 	let enableBlur: boolean;
 
 	// 根据当前壁纸模式设置导航栏透明模式和模糊效果
-	if (mode === WALLPAPER_OVERLAY) {
-		// 全屏壁纸模式
+	if (mode === WALLPAPER_OVERLAY || mode === WALLPAPER_FULLSCREEN) {
+		// 全屏壁纸/透明模式
 		transparentMode = "none";
 		enableBlur = false;
 	} else if (mode === WALLPAPER_NONE) {
@@ -572,10 +649,10 @@ function updateNavbarTransparency(mode: WALLPAPER_MODE) {
 }
 
 function adjustMainContentPosition(
-	mode: WALLPAPER_MODE | "banner" | "none" | "overlay",
+	mode: WALLPAPER_MODE | "banner" | "none" | "overlay" | "fullscreen",
 ) {
 	const mainContent = document.querySelector(
-		".absolute.w-full.z-30",
+		".w-full.z-30.pointer-events-none",
 	) as HTMLElement;
 	if (!mainContent) return;
 
@@ -585,26 +662,45 @@ function adjustMainContentPosition(
 	switch (mode) {
 		case "banner":
 			// Banner模式：主内容在banner下方
+			mainContent.style.position = "";
+			mainContent.style.zIndex = "";
+			mainContent.style.marginTop = "";
 			mainContent.style.top = "calc(var(--banner-height) - 3rem)";
 			break;
 		case "overlay":
 			// Overlay模式：使用紧凑布局，主内容从导航栏下方开始
 			mainContent.classList.add("no-banner-layout");
+			mainContent.style.position = "";
+			mainContent.style.zIndex = "";
+			mainContent.style.marginTop = "";
 			mainContent.style.top = "5.5rem";
+			break;
+		case "fullscreen":
+			mainContent.classList.add("no-banner-layout");
+			mainContent.style.position = "relative";
+			mainContent.style.zIndex = "30";
+			mainContent.style.top = "0";
+			mainContent.style.marginTop = "1rem";
 			break;
 		case "none":
 			// 无壁纸模式：主内容从导航栏下方开始
 			mainContent.classList.add("no-banner-layout");
+			mainContent.style.position = "";
+			mainContent.style.zIndex = "";
+			mainContent.style.marginTop = "";
 			mainContent.style.top = "5.5rem";
 			break;
 		default:
+			mainContent.style.position = "";
+			mainContent.style.zIndex = "";
+			mainContent.style.marginTop = "";
 			mainContent.style.top = "5.5rem";
 			break;
 	}
 }
 
 function adjustMainContentTransparency(enable: boolean) {
-	const mainContent = document.querySelector(".absolute.w-full.z-30");
+	const mainContent = document.querySelector(".w-full.z-30.pointer-events-none");
 	const body = document.body;
 
 	if (!mainContent || !body) return;
@@ -757,4 +853,208 @@ export function applyBannerTitleEnabledToDocument(enabled: boolean): void {
 			bannerTextOverlay.classList.add("user-hidden");
 		}
 	}
+}
+
+// Wallpaper carousel functions
+export function getDefaultWallpaperCarouselEnabled(): boolean {
+	return backgroundWallpaper.banner?.carousel?.enable ?? false;
+}
+
+export function getStoredWallpaperCarouselEnabled(): boolean {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.getItem !== "function"
+	) {
+		return getDefaultWallpaperCarouselEnabled();
+	}
+	const stored = localStorage.getItem("wallpaperCarouselEnabled");
+	if (stored === null) {
+		return getDefaultWallpaperCarouselEnabled();
+	}
+	return stored === "true";
+}
+
+export function setWallpaperCarouselEnabled(enabled: boolean): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("wallpaperCarouselEnabled", String(enabled));
+}
+
+// Gradient transition functions
+export function getDefaultGradientEnabled(): boolean {
+	return true;
+}
+
+export function getStoredGradientEnabled(): boolean {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.getItem !== "function"
+	) {
+		return getDefaultGradientEnabled();
+	}
+	const stored = localStorage.getItem("gradientEnabled");
+	if (stored === null) {
+		return getDefaultGradientEnabled();
+	}
+	return stored === "true";
+}
+
+export function setGradientEnabled(enabled: boolean): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("gradientEnabled", String(enabled));
+	document.documentElement.setAttribute("data-gradient-enabled", String(enabled));
+}
+
+// Overlay opacity functions
+export function getDefaultOverlayOpacity(): number {
+	return backgroundWallpaper.overlay?.opacity ?? 80;
+}
+
+export function getStoredOverlayOpacity(): number {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.getItem !== "function"
+	) {
+		return getDefaultOverlayOpacity();
+	}
+	const stored = localStorage.getItem("overlayOpacity");
+	return stored ? Number.parseInt(stored, 10) : getDefaultOverlayOpacity();
+}
+
+export function setOverlayOpacity(opacity: number): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("overlayOpacity", String(opacity));
+	document.documentElement.style.setProperty(
+		"--overlay-opacity",
+		`${opacity}%`,
+	);
+}
+
+export function applyOverlayOpacityToDocument(opacity: number): void {
+	if (typeof document === "undefined") return;
+	document.documentElement.style.setProperty(
+		"--overlay-opacity",
+		`${opacity}%`,
+	);
+}
+
+// Overlay blur functions
+export function getDefaultOverlayBlur(): number {
+	return backgroundWallpaper.overlay?.blur ?? 0;
+}
+
+export function getStoredOverlayBlur(): number {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.getItem !== "function"
+	) {
+		return getDefaultOverlayBlur();
+	}
+	const stored = localStorage.getItem("overlayBlur");
+	return stored ? Number.parseInt(stored, 10) : getDefaultOverlayBlur();
+}
+
+export function setOverlayBlur(blur: number): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("overlayBlur", String(blur));
+	document.documentElement.style.setProperty(
+		"--overlay-blur",
+		`${blur}px`,
+	);
+}
+
+export function applyOverlayBlurToDocument(blur: number): void {
+	if (typeof document === "undefined") return;
+	document.documentElement.style.setProperty(
+		"--overlay-blur",
+		`${blur}px`,
+	);
+}
+
+// Overlay card opacity functions
+export function getDefaultOverlayCardOpacity(): number {
+	return backgroundWallpaper.overlay?.cardOpacity ?? 99;
+}
+
+export function getStoredOverlayCardOpacity(): number {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.getItem !== "function"
+	) {
+		return getDefaultOverlayCardOpacity();
+	}
+	const stored = localStorage.getItem("overlayCardOpacity");
+	return stored
+		? Number.parseInt(stored, 10)
+		: getDefaultOverlayCardOpacity();
+}
+
+export function setOverlayCardOpacity(opacity: number): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("overlayCardOpacity", String(opacity));
+	document.documentElement.style.setProperty(
+		"--overlay-card-opacity",
+		`${opacity}%`,
+	);
+}
+
+export function applyOverlayCardOpacityToDocument(opacity: number): void {
+	if (typeof document === "undefined") return;
+	document.documentElement.style.setProperty(
+		"--overlay-card-opacity",
+		`${opacity}%`,
+	);
+}
+
+// Sakura effect functions
+export function getDefaultSakuraEnabled(): boolean {
+	return false;
+}
+
+export function getStoredSakuraEnabled(): boolean {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.getItem !== "function"
+	) {
+		return getDefaultSakuraEnabled();
+	}
+	const stored = localStorage.getItem("sakuraEnabled");
+	if (stored === null) {
+		return getDefaultSakuraEnabled();
+	}
+	return stored === "true";
+}
+
+export function setSakuraEnabled(enabled: boolean): void {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.setItem !== "function"
+	) {
+		return;
+	}
+	localStorage.setItem("sakuraEnabled", String(enabled));
 }

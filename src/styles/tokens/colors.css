@@ -1,47 +1,48 @@
 /* ===== 设计令牌：颜色 =====
-   所有颜色色度归零，仅保留明度变化（极简中性灰阶）
-   --primary 为中性深灰，仅作点缀。 */
+   使用 --hue 变量控制全局色相，支持主题色动态切换 */
 
 :root {
-  --primary: oklch(0.30 0 0);
+  --hue: 250;
+  
+  --primary: oklch(0.55 0.12 var(--hue));
   --page-bg: oklch(1 0 0);
   --card-bg: transparent;
   --card-bg-transparent: transparent;
 
-  --btn-content: oklch(0.25 0 0);
+  --btn-content: oklch(0.55 0.12 var(--hue));
   --btn-regular-bg: transparent;
-  --btn-regular-bg-hover: oklch(0.94 0 0);
-  --btn-regular-bg-active: oklch(0.90 0 0);
+  --btn-regular-bg-hover: oklch(0.94 0.02 var(--hue));
+  --btn-regular-bg-active: oklch(0.90 0.03 var(--hue));
 
-  --btn-plain-bg-hover: oklch(0.94 0 0);
-  --btn-plain-bg-active: oklch(0.90 0 0);
+  --btn-plain-bg-hover: oklch(0.94 0.02 var(--hue));
+  --btn-plain-bg-active: oklch(0.90 0.03 var(--hue));
 
-  --btn-card-bg-hover: oklch(0.96 0 0);
-  --btn-card-bg-active: oklch(0.92 0 0);
+  --btn-card-bg-hover: oklch(0.96 0.015 var(--hue));
+  --btn-card-bg-active: oklch(0.92 0.025 var(--hue));
 
   --enter-btn-bg: transparent;
-  --enter-btn-bg-hover: oklch(0.94 0 0);
-  --enter-btn-bg-active: oklch(0.90 0 0);
+  --enter-btn-bg-hover: oklch(0.94 0.02 var(--hue));
+  --enter-btn-bg-active: oklch(0.90 0.03 var(--hue));
 
-  --deep-text: oklch(0.10 0 0);
-  --title-active: oklch(0.30 0 0);
+  --deep-text: oklch(0.25 0.02 var(--hue));
+  --title-active: oklch(0.55 0.12 var(--hue));
 
-  --line-divider: oklch(0.85 0 0);
-  --line-color: oklch(0.85 0 0);
-  --meta-divider: oklch(0.75 0 0);
-  --content-meta: oklch(0.45 0 0);
+  --line-divider: oklch(0.85 0.02 var(--hue));
+  --line-color: oklch(0.85 0.02 var(--hue));
+  --meta-divider: oklch(0.75 0.03 var(--hue));
+  --content-meta: oklch(0.45 0.05 var(--hue));
 
-  --inline-code-bg: oklch(0.95 0 0);
-  --inline-code-color: oklch(0.20 0 0);
-  --selection-bg: oklch(0.85 0 0);
-  --codeblock-bg: oklch(0.97 0 0);
-  --codeblock-topbar-bg: oklch(0.93 0 0);
+  --inline-code-bg: oklch(0.95 0.01 var(--hue));
+  --inline-code-color: oklch(0.20 0.05 var(--hue));
+  --selection-bg: oklch(0.85 0.08 var(--hue));
+  --codeblock-bg: oklch(0.97 0.005 var(--hue));
+  --codeblock-topbar-bg: oklch(0.93 0.015 var(--hue));
 
-  --license-block-bg: oklch(0.97 0 0);
+  --license-block-bg: oklch(0.97 0.005 var(--hue));
 
-  --link-underline: oklch(0.85 0 0);
-  --link-hover: oklch(0.50 0 0);
-  --link-active: oklch(0.30 0 0);
+  --link-underline: oklch(0.85 0.06 var(--hue));
+  --link-hover: oklch(0.50 0.12 var(--hue));
+  --link-active: oklch(0.55 0.12 var(--hue));
 
   --float-panel-bg: oklch(1 0 0);
 
@@ -72,7 +73,20 @@
   --toc-width: 14rem;
   --toc-item-active: oklch(0.20 0 0);
 
-  --color-selection-bar: linear-gradient(to right, oklch(0.20 0 0), oklch(0.50 0 0), oklch(0.80 0 0));
+  --color-selection-bar: linear-gradient(to right, 
+    oklch(0.80 0.10 0), 
+    oklch(0.80 0.10 30), 
+    oklch(0.80 0.10 60), 
+    oklch(0.80 0.10 90), 
+    oklch(0.80 0.10 120), 
+    oklch(0.80 0.10 150), 
+    oklch(0.80 0.10 180), 
+    oklch(0.80 0.10 210), 
+    oklch(0.80 0.10 240), 
+    oklch(0.80 0.10 270), 
+    oklch(0.80 0.10 300), 
+    oklch(0.80 0.10 330), 
+    oklch(0.80 0.10 360));
 
   --guestbook-panel: transparent;
   --guestbook-surface: transparent;
@@ -103,45 +117,45 @@
   --guestbook-mobile-dock-clearance: 6.25rem;
 }
 
-/* 暗色主题：纯黑底 + 白前景，所有色块去饱和 */
+/* 暗色主题：深色底 + 亮前景，使用 --hue 控制色相 */
 :root.dark {
-  --primary: oklch(0.98 0 0);
-  --page-bg: oklch(0.08 0 0);
+  --primary: oklch(0.75 0.14 var(--hue));
+  --page-bg: oklch(0.16 0.014 var(--hue));
   --card-bg: transparent;
   --card-bg-transparent: transparent;
 
-  --deep-text: oklch(0.90 0 0);
-  --title-active: oklch(0.80 0 0);
+  --deep-text: oklch(0.85 0.02 var(--hue));
+  --title-active: oklch(0.75 0.14 var(--hue));
 
-  --btn-content: oklch(0.85 0 0);
+  --btn-content: oklch(0.75 0.14 var(--hue));
   --btn-regular-bg: transparent;
-  --btn-regular-bg-hover: oklch(0.18 0 0);
-  --btn-regular-bg-active: oklch(0.22 0 0);
+  --btn-regular-bg-hover: oklch(0.22 0.03 var(--hue));
+  --btn-regular-bg-active: oklch(0.26 0.04 var(--hue));
 
-  --btn-plain-bg-hover: oklch(0.18 0 0);
-  --btn-plain-bg-active: oklch(0.22 0 0);
+  --btn-plain-bg-hover: oklch(0.22 0.03 var(--hue));
+  --btn-plain-bg-active: oklch(0.26 0.04 var(--hue));
 
-  --btn-card-bg-hover: oklch(0.16 0 0);
-  --btn-card-bg-active: oklch(0.20 0 0);
+  --btn-card-bg-hover: oklch(0.20 0.025 var(--hue));
+  --btn-card-bg-active: oklch(0.24 0.035 var(--hue));
 
-  --line-divider: oklch(0.25 0 0);
-  --line-color: oklch(0.25 0 0);
-  --meta-divider: oklch(0.35 0 0);
-  --content-meta: oklch(0.65 0 0);
+  --line-divider: oklch(0.28 0.03 var(--hue));
+  --line-color: oklch(0.28 0.03 var(--hue));
+  --meta-divider: oklch(0.38 0.04 var(--hue));
+  --content-meta: oklch(0.65 0.06 var(--hue));
 
-  --inline-code-bg: oklch(0.18 0 0);
-  --inline-code-color: oklch(0.85 0 0);
-  --selection-bg: oklch(0.30 0 0);
-  --codeblock-bg: oklch(0.12 0 0);
-  --codeblock-topbar-bg: oklch(0.18 0 0);
+  --inline-code-bg: oklch(0.22 0.02 var(--hue));
+  --inline-code-color: oklch(0.85 0.04 var(--hue));
+  --selection-bg: oklch(0.35 0.10 var(--hue));
+  --codeblock-bg: oklch(0.14 0.01 var(--hue));
+  --codeblock-topbar-bg: oklch(0.22 0.02 var(--hue));
 
-  --license-block-bg: oklch(0.12 0 0);
+  --license-block-bg: oklch(0.14 0.01 var(--hue));
 
-  --link-underline: oklch(0.30 0 0);
-  --link-hover: oklch(0.65 0 0);
-  --link-active: oklch(0.80 0 0);
+  --link-underline: oklch(0.35 0.08 var(--hue));
+  --link-hover: oklch(0.70 0.14 var(--hue));
+  --link-active: oklch(0.75 0.14 var(--hue));
 
-  --float-panel-bg: oklch(0.10 0 0);
+  --float-panel-bg: oklch(0.14 0.014 var(--hue));
 
   --scrollbar-bg: var(--scrollbar-bg-dark);
   --scrollbar-bg-hover: var(--scrollbar-bg-hover-dark);

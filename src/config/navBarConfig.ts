@@ -77,7 +77,7 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				icon: "material-symbols:menu-book-outline",
 			},
 			{
-				name: "朋友圈",
+				name: "朋友的动态",
 				url: "/pengyou/",
 				icon: "material-symbols:group",
 			},
@@ -134,9 +134,9 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		url: "/about/",
 		icon: "material-symbols:info",
 		children: [
-			// 外部链接
-			LinkPreset.Fhome,
-			LinkPreset.Fnote,
+			// // 外部链接
+			// LinkPreset.Fhome,
+			// LinkPreset.Fnote,
 
 			// 关于页面
 			LinkPreset.About,
