@@ -25,7 +25,7 @@ html[data-banner-title-enabled="false"] #wallpaper-wrapper.wallpaper-overlay .ba
 }
 
 /* Fullscreen 模式下非 sticky 导航栏：隐藏 top-row 占位，避免顶部空白 */
-html[data-wallpaper-mode="fullscreen"] body:not(.sticky-navbar) #top-row {
+html[data-wallpaper-mode="fullscreen"] body:not(.sticky-navbar):not(.lg\:is-home) #top-row {
     height: 0 !important;
     min-height: 0 !important;
     padding-top: 0 !important;
@@ -42,7 +42,7 @@ html[data-wallpaper-mode="fullscreen"] .w-full.z-30.pointer-events-none {
 }
 
 /* Fullscreen 模式下为导航栏添加顶部间距，避免导航栏紧贴顶部 */
-html[data-wallpaper-mode="fullscreen"] #navbar-wrapper {
+html[data-wallpaper-mode="fullscreen"] body:not(.lg\:is-home) #navbar-wrapper {
     padding-top: 0.625rem;
 }
 
