@@ -157,20 +157,6 @@ function applyDomState({ document: documentRef, loader }, state) {
 	}, DEFAULT_HIDE_DELAY);
 }
 
-function isInternalPageVisit(targetUrl) {
-	if (!targetUrl) return true;
-	try {
-		const url = new URL(targetUrl, window.location.href);
-		return (
-			url.origin === window.location.origin &&
-			(url.pathname !== window.location.pathname ||
-				url.search !== window.location.search)
-		);
-	} catch {
-		return true;
-	}
-}
-
 function bindSwup({ controller, document: documentRef, window: windowRef }) {
 	let isBound = false;
 
@@ -178,16 +164,11 @@ function bindSwup({ controller, document: documentRef, window: windowRef }) {
 		if (isBound || !windowRef.swup?.hooks) return;
 		isBound = true;
 
-		windowRef.swup.hooks.on("link:click", (_visit, { el } = {}) => {
-			const href = el?.getAttribute?.("href");
-			if (isInternalPageVisit(href)) controller.show("swup-link-click");
-		});
-		windowRef.swup.hooks.on("visit:start", () =>
-			controller.show("swup-visit-start"),
-		);
-		windowRef.swup.hooks.on("content:replace", () =>
-			controller.show("swup-content-replace"),
-		);
+		// Swup SPA 导航期间不显示 PageLoader：
+		// Swup 自身已有 350ms 淡入淡出过渡（.transition-swup-fade / .transition-main），
+		// 再叠加白色全屏 PageLoader 会造成"闪一下像刷新"的视觉问题。
+		// PageLoader 仅用于首次硬加载（见 initPageLoader 中的 controller.show("initial")）。
+		// 保留 hideWhenReady 作为安全兜底，确保即使其他地方误 show 了 loader 也能正确隐藏。
 		windowRef.swup.hooks.on("page:view", () => {
 			void controller.hideWhenReady("swup-page-view");
 		});
