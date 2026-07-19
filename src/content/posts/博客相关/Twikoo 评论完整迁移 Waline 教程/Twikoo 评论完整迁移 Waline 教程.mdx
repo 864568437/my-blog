@@ -1,7 +1,7 @@
 ---
-title: Twikoo 评论一键迁移 Waline
+title: Twikoo 评论一键迁移 Waline（双向互转）
 published: 2026-07-18
-description: 适用于 Firefly Astro 博客，Twikoo 评论导出转换、Waline 导入全流程，修复路径尾斜杠匹配失败、导入成功前台空白等问题
+description: 适用于 Firefly Astro 博客，Twikoo ↔ Waline 评论数据双向转换、导入全流程，修复路径尾斜杠匹配失败、时间格式 500 错误、回复层级丢失等问题
 image: "api"
 tags: [Astro, Firefly, Waline, Twikoo, 博客迁移, 评论系统]
 category: 博客相关
@@ -15,100 +15,124 @@ import CollapsibleCodeBlock from '@/components/features/CollapsibleCodeBlock.ast
 import { TWIKOO_TO_WALINE_HTML_CODE } from './twikoo-to-waline-code.ts'
 
 ## 一、迁移前置说明
-本文档适配基于 Firefly 主题的 Astro 静态博客，完整覆盖 **Twikoo → Waline** 评论迁移全流程，解决两大高频痛点：
-1. Waline 后台导入提示成功，但前台页面完全不显示评论；
-2. 转换后字段缺失、结构不标准，导入后数据库无数据。
+本文档适配基于 Firefly 主题的 Astro 静态博客，完整覆盖 **Twikoo ↔ Waline** 评论数据双向转换全流程，解决四大高频痛点：
+1. 转换后的时间戳格式非法，导入时 Waline 后台报 `500: invalid input syntax for type timestamp`；
+2. Waline 后台导入提示成功，但前台页面完全不显示评论（路径尾斜杠不匹配）；
+3. 转换后父子回复全部平铺，多层嵌套回复层级直接丢失；
+4. Twikoo 与 Waline 互转时缺少双向支持，无法反向恢复。
 
 ### 前置准备清单
 1. 已部署完成 Waline 服务（示例地址：`https://waline.fqzlr.com`）；
 2. Firefly 博客页面已挂载 Waline 前端评论组件；
-3. 可正常登录 Twikoo 后台导出原始评论 JSON；
-4. 浏览器推荐 Chrome / Edge，避免下载、解析兼容问题。
+3. 可正常登录 Twikoo 管理后台导出原始评论 JSON；
+4. 浏览器推荐 Chrome / Edge。
 
-## 二、第一步：导出 Twikoo 原始评论数据
-1. 进入你的 Twikoo 管理后台页面；
-2. 找到「数据导出」功能，导出全部评论文件；
-3. 导出结果为**纯 JSON 数组**，复制全部内容或保存本地 `.json` 文件备用。
+## 二、第一步：导出原始评论数据
 
-## 三、第二步：Twikoo → Waline 专用转换工具（自动修复路径尾斜杠）
+### Twikoo 导出
+1. 进入 Twikoo 管理后台；
+2. 找到「数据导出」，导出全部评论为 **纯 JSON 数组**，保存为 `.json` 文件。
+
+### Waline 导出
+1. 进入 Waline 管理后台 `https://waline.fqzlr.com/ui`；
+2. 左侧菜单「导入导出」→ 导出全部数据，保存为 `.json` 文件。
+
+> 重要：Twikoo 导出每条评论需包含 `_id`、`pid`、`rid` 字段；Waline 导出需包含 `data.Comment`、`data.Users`、`data.Counter` 三表。
+
+## 三、第二步：双向转换工具（自动修复路径尾斜杠 + 保留嵌套回复）
+
 ### 工具核心能力
 > [!IMPORTANT]
-> 普通转换工具会丢失 `createdAt`、`user_id` 等必填字段，且路径无尾斜杠导致前台匹配失败，本工具针对性修复：
-> 1. 1:1 对齐 Waline 数据表完整字段，补齐所有缺失数据库字段；
-> 2. 自动给所有页面路径 `url` 末尾追加 `/`，和 Firefly 前台新建评论格式统一；
-> 3. 支持本地 JSON 文件上传、批量替换博客页面路由前缀；
-> 4. 修复浏览器点击下载无响应、中文/富文本乱码问题；
-> 5. 输出 Waline 官方标准导入外层结构（包含 `Comment/Counter/Users` 三表）。
+> 本工具针对实际迁移踩坑场景做了以下修复和增强：
+> 1. **修复时间格式 500 错误**：`toISOString()` 已自带 3 位毫秒（如 `2026-04-25T11:23:19.928Z`），不再拼接多余的 `.000`，避免产生非法格式 `2026-04-25T11:23:19.928.000Z`；
+> 2. **自动补路径尾斜杠**：所有 `url` 末尾自动追加 `/`，与 Firefly 前台路径格式（`/friends/`）完全一致；
+> 3. **完整还原嵌套回复**：Twikoo `_id` ↔ Waline `objectId` 建立完整映射表，`pid`/`rid` 精准关联父子评论；
+> 4. **1:1 对齐 Waline 数据表**：补齐 `Comment`/`Counter`/`Users` 三表及所有必填字段；
+> 5. **支持双向互转**：Twikoo → Waline 和 Waline → Twikoo 均可一键转换；
+> 6. **本地离线运算**：所有数据在浏览器端处理，不上传任何服务器。
 
-### 完整工具代码
-
-
->
-> ✨ 所有数据转换均在浏览器本地完成，**不会上传到任何服务器**，安全可靠。
-
-下方为内嵌的可交互转换工具，可直接在文档中粘贴 Twikoo 导出的 JSON 数据进行转换：
+### 内嵌交互式转换工具
 
 <TwikooToWalineTool />
 
-新建文本文件，复制下方全部代码，保存为 `twikoo-to-waline.html`，双击用浏览器打开即可使用：
+新建文本文件，复制下方全部代码，保存为 `twikoo-to-waline.html`，双击用浏览器打开即可离线使用：
 
-<CollapsibleCodeBlock title="📝 点击查看完整工具源代码（可复制保存为 HTML 文件离线使用）" language="html" filename="twikoo-to-waline.html">
+<CollapsibleCodeBlock title="📝 点击查看完整工具源代码（可复制保存为 HTML 文件离线使用，支持双向互转）" language="html" filename="twikoo-to-waline.html">
 {TWIKOO_TO_WALINE_HTML_CODE}
 </CollapsibleCodeBlock>
 
 ### 转换工具操作步骤
-1. 在上方内嵌工具中操作，无需单独打开文件；
-2. 导入原始 Twikoo 数据，二选一：
-   - 方式1：直接粘贴 Twikoo 完整 JSON 数组到上方输入框；
-   - 方式2：点击「上传本地JSON」，选中导出的 Twikoo 文件；
-3. （可选）博客路由变更批量替换：
-   - 旧路径前缀：填写 Twikoo 旧路由，例：`/posts/old/`
-   - 新路径前缀：填写当前 Firefly 博客路由，例：`/posts/new/`
-   - 点击「一键替换全部url」批量修改所有评论页面地址；
+
+#### Twikoo → Waline 方向
+1. 在上方内嵌工具中，顶部切换按钮选择「Twikoo → Waline」；
+2. 导入数据，二选一：
+   - 粘贴 Twikoo 完整 JSON 数组到输入框；
+   - 点击「上传本地 JSON」，选中导出的 Twikoo 备份文件；
+3. （可选）路径前缀批量替换：填写旧/新路径前缀后点击「一键替换全部 url」，替换后自动补尾斜杠；
 4. 点击「开始转换」；
-5. 下方预览框生成标准 Waline 导入 JSON，任意一条评论可查看 `"url": "/xxx/"` 已自动追加尾斜杠；
-6. 点击「下载 waline-import.json」保存转换文件。
+5. 预览校验：
+   - 每条评论 `"url": "/xxx/"` 末尾已自动补 `/`；
+   - 子评论 `pid` 为数字 ID，代表父子关联正常；
+6. 点击「下载结果 JSON」保存 `waline-import.json`。
+
+#### Waline → Twikoo 方向（反向恢复）
+1. 顶部切换按钮选择「Waline → Twikoo」；
+2. 粘贴 Waline 导出的完整 JSON 对象；
+3. 点击「开始转换」→ 下载 `twikoo-export.json`；
+4. 注意：Waline 原始数据不含 `uid`、`mailMd5`、`ipRegion`、`href` 等 Twikoo 特有字段，转换后这些字段为空或默认值。
 
 ## 四、第三步：Waline 后台导入转换后的评论文件
 1. 访问 Waline 管理后台：`https://waline.fqzlr.com/ui`；
 2. 左侧菜单栏打开「导入导出」页面；
 3. > [!WARNING]
-    导入会覆盖现有评论，**务必先导出当前评论备份**，防止数据丢失；
+    导入操作会覆盖现有评论，**务必先导出当前 Waline 评论备份**，防止数据丢失；
 4. 上传刚下载的 `waline-import.json`，点击执行导入；
-5. 导入完成后，`Ctrl + F5` 强制刷新后台页面，即可在评论列表看到全部迁移历史评论。
+5. 导入完成后，`Ctrl + F5` 强制刷新后台页面，即可在评论列表看到全部迁移历史评论，嵌套回复正常分层展示。
 
 ## 五、第四步：Firefly 博客前台验证评论展示
-### 匹配原理
-转换工具已自动为所有评论 `url` 末尾添加 `/`，和 Firefly 前台手动提交评论的路径格式完全一致，Waline 采用精确字符串匹配，无需修改前端代码。
-1. 打开博客对应页面，示例：`fqzlr.com/friends/`；
+### 路径匹配原理
+转换工具已自动为所有评论 `url` 末尾添加 `/`，Waline 使用精确字符串匹配页面路径，和 Firefly 前台手动提交评论的路径格式完全一致。
+1. 打开博客任意文章页面，示例：`fqzlr.com/friends/`；
 2. `Ctrl + F5` 强制清除浏览器缓存刷新页面；
-3. 页面正常加载全部迁移完成的历史评论。
+3. 页面加载全部迁移历史评论，子评论正常缩进嵌套展示。
 
-### 前台无评论排查方案
+### 前台无评论 / 层级错乱排查方案
 1. F12 打开浏览器开发者工具，切换到 Network 面板；
 2. 筛选 Waline API 请求，查看请求参数 `path` 是否为带尾斜杠格式（`/friends/`）；
-3. 核对 Waline 数据库评论 `url` 字段是否和页面路径完全一致；
+3. 进入 Waline 后台查看单条评论详情：
+   - 若 `url` 缺少末尾 `/`：重新转换，确认路径已自动补斜杠；
+   - 若子评论 `pid` 为 null：原始 Twikoo 数据缺失 `_id`/`pid`/`rid`，清理脏数据后重新导出转换；
 4. 确认导入流程无报错、未清空原有评论数据。
 
 ## 六、高频踩坑问题汇总
-### 坑1：导入成功，后台可见评论，Firefly 前台页面空白
-- 根因：路径末尾斜杠不匹配（`/friends` vs `/friends/`）；
-- 解决方案：使用本文转换工具重新导出带尾斜杠 JSON，清空旧评论后重新导入。
 
-### 坑2：导入提示成功，但 Waline 后台无任何评论
+### 坑1：导入时报 500 错误 `invalid input syntax for type timestamp`
+- 具体报错：`500: invalid input syntax for type timestamp: "2026-04-25T11:23:19.928.000Z"`
+- 根因：旧版转换工具的 `tsToISO` 使用了 `toISOString().replace('Z', '.000Z')`，当毫秒本身已有 3 位时（如 `.928Z`），替换后变成 `.928.000Z`，PostgreSQL 无法解析双重小数点格式；
+- 解决方案：使用本文新版转换工具（v2），`new Date(ms).toISOString()` 直接输出标准 ISO 8601 格式，无需额外拼接。
+
+### 坑2：导入成功，后台可见评论，Firefly 前台页面空白
+- 根因：路径末尾斜杠不匹配（`/friends` vs `/friends/`）；
+- 解决方案：使用本文新版转换工具，转换时自动为所有 `url` 补尾斜杠，清空旧评论后重新导入。
+
+### 坑3：导入提示成功，但 Waline 后台无任何评论
 - 原因1：转换 JSON 缺失 `createdAt`/`user_id`/`like` 数据库必填字段；
 - 原因2：外层 JSON 结构缺少 `Counter`、`Users` 空数组；
-- 解决方案：使用本文完整转换工具，已补齐全部标准字段与外层结构。
+- 解决方案：使用本文完整版转换工具，已补齐全部标准字段与外层结构。
 
-### 坑3：转换工具下载按钮点击无响应
+### 坑4：所有回复全部平铺，没有嵌套层级
+- 根因：转换工具未做 Twikoo `_id` 与 Waline `objectId` ID 映射，父子评论 pid 关联断裂；
+- 解决方案：使用本文修复层级回复的新版转换器，完整还原多级回复关系。
+
+### 坑5：转换工具下载按钮点击无响应
 - 解决方案：更换 Chrome / Edge 浏览器，关闭浏览器弹窗拦截功能。
 
-### 坑4：评论图片、换行、Emoji 丢失乱码
-- 解决方案：工具内置 UTF-8 编码处理，完整保留原始 HTML 富文本内容，无需额外处理。
+### 坑6：评论图片、换行、Emoji 丢失乱码
+- 解决方案：工具内置 UTF-8 编码处理，Twikoo→Waline 方向会去除 HTML 标签保留纯文本。
 
 ## 七、兜底备用方案（后台导入解析失败时）
-若 Waline 后台导入接口持续丢失数据，可直接写入数据库绕过解析器：
+若 Waline 后台导入接口持续丢失数据、层级错乱，可直接写入数据库绕过解析器：
 1. 打开转换后的 `waline-import.json`，复制 `data.Comment` 数组内全部评论对象；
 2. 进入数据库管理面板（MySQL / SQLite / LeanCloud）；
 3. 找到 `wl_Comment` 数据表，批量插入复制的评论数组；
-4. 直接写入数据库不会丢失任何评论数据。
+4. 直接写入数据库不会丢失任何评论数据、完整保留回复层级。
