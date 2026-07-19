@@ -456,6 +456,50 @@ export const friendsConfig: FriendLink[] = [
 		  "weight": 10,
 		  "enabled": true
 		},
+		{
+		  "title": "JerryLife",
+		  "imgurl": "https://free.picui.cn/free/2026/07/16/6a58eb63ecbd1.png",
+		  "desc": "Enjoy life",
+		  "siteurl": "https://jerry-nis.top",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "Yukihime",
+		  "imgurl": "https://yukihime.dev/favicon/favicon.ico",
+		  "desc": "你的瞳色 是我生命苦寻的永生花",
+		  "siteurl": "https://yukihime.dev/",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "旧梦与花",
+		  "imgurl": "https://zhh2001.github.io/avatar.jpg",
+		  "desc": "欲买桂花同载酒，终不似，少年游",
+		  "siteurl": "https://zhh2001.github.io",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "Zero - 浮生",
+		  "imgurl": "https://vtdd.vip/_astro/avatar.ryzKiMN3_19g6Gw.webp",
+		  "desc": "浮生一刹万般皆舍.",
+		  "siteurl": "https://vtdd.vip",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
 	];
 
 // 获取启用的友链并进行排序
