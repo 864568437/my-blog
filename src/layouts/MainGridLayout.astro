@@ -658,7 +658,7 @@ const mobileQuality = Math.round(configQuality * 0.9);
 	transparentClass,
 ]} style={`top: ${isHomePageCheck ? '0' : finalMainPanelTop}`}>
     <!-- The pointer-events-none here prevent blocking the click event of the TOC -->
-    <div class="relative max-w-(--page-width) mx-auto pointer-events-auto">
+    <div id="main-wrapper" class="relative max-w-(--page-width) mx-auto pointer-events-auto">
         <div id="main-grid"
           class={`transition duration-700 w-full left-0 right-0 grid ${hideSidebar ? 'grid-cols-1 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1' : gridCols} grid-rows-[auto_1fr_auto] lg:grid-rows-[auto] mx-auto px-2 md:px-4 ${!sidebarConfig.mobileShowSidebar ? 'mobile-no-sidebar' : ''} ${isPostPage ? 'gap-0 is-post-layout' : 'gap-4'}`}
           data-sidebar-position={sidebarLayoutConfig.position}

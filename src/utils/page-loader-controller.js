@@ -215,24 +215,6 @@ export function initPageLoader({
 	});
 	windowRef.__fireflyPageLoader = controller;
 
-	controller.show("initial");
-
-	const hideInitialLoader = () => {
-		windowRef.requestAnimationFrame(() => {
-			void controller.hideWhenReady("window-load");
-		});
-	};
-
-	if (documentRef.readyState === "complete") hideInitialLoader();
-	else windowRef.addEventListener("load", hideInitialLoader, { once: true });
-
-	// 硬超时：2秒后无论如何隐藏加载动画
-	setTimeout(() => {
-		if (controller.isVisible()) {
-			controller.hideNow();
-		}
-	}, 2000);
-
 	documentRef.addEventListener("astro:page-load", () => {
 		documentRef.dispatchEvent(new CustomEvent(LOADER_READY_EVENT));
 		void controller.hideWhenReady("astro-page-load");

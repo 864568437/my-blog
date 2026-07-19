@@ -890,6 +890,10 @@
 }
 
 /* 首页容器全宽 — padding 由 JS 控制，此处仅处理 max-width 兜底 */
+.lg\:is-home #main-wrapper {
+	max-width: none !important;
+}
+
 .lg\:is-home #main-grid {
 	padding-left: 0 !important;
 	padding-right: 0 !important;

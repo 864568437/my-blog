@@ -268,6 +268,7 @@ const siteLang = lang.replace("_", "-");
       const WALLPAPER_BANNER = "banner";
       const WALLPAPER_OVERLAY = "overlay";
       const WALLPAPER_NONE = "none";
+      const WALLPAPER_FULLSCREEN = "fullscreen";
       const wallpaperMode = isWallpaperSwitchable
         ? localStorage.getItem("wallpaperMode") || defaultWallpaperMode
         : defaultWallpaperMode;
@@ -296,12 +297,15 @@ const siteLang = lang.replace("_", "-");
           ) {
             document.body.classList.remove("enable-banner");
             document.body.classList.add("no-banner-layout");
+          } else if (wallpaperMode === WALLPAPER_FULLSCREEN) {
+            document.body.classList.add("enable-banner");
+            document.body.classList.remove("no-banner-layout");
           } else {
             document.body.classList.add("enable-banner");
             document.body.classList.remove("no-banner-layout");
           }
 
-          // 全屏壁纸模式
+          // 全屏壁纸透明模式
           if (wallpaperMode === WALLPAPER_OVERLAY) {
             document.body.classList.add("wallpaper-transparent");
           } else {
@@ -323,21 +327,39 @@ const siteLang = lang.replace("_", "-");
           // 全屏壁纸透明模式：切换为 overlay 显示
           if (wallpaperWrapper) {
             wallpaperWrapper.classList.add("wallpaper-overlay");
+            wallpaperWrapper.classList.remove("wallpaper-fullscreen");
             wallpaperWrapper.style.display = "block";
             wallpaperWrapper.classList.remove("hidden", "opacity-0", "mobile-hide-banner");
             wallpaperWrapper.classList.add("opacity-100");
             wallpaperWrapper.style.top = "";
           }
+        } else if (wallpaperMode === WALLPAPER_FULLSCREEN) {
+          // 全屏壁纸模式：壁纸铺满全屏
+          if (wallpaperWrapper) {
+            wallpaperWrapper.classList.remove("wallpaper-overlay");
+            wallpaperWrapper.classList.add("wallpaper-fullscreen");
+            if (isHomePage) {
+              // 首页：隐藏 wallpaper-wrapper（首页用 HomeHero）
+              wallpaperWrapper.style.setProperty("display", "none", "important");
+            } else {
+              // 非首页：显示壁纸，铺满全屏
+              wallpaperWrapper.style.setProperty("display", "block", "important");
+              wallpaperWrapper.style.top = "";
+              wallpaperWrapper.classList.remove("hidden", "opacity-0", "mobile-hide-banner");
+              wallpaperWrapper.classList.add("opacity-100");
+            }
+          }
         } else if (wallpaperMode === WALLPAPER_NONE) {
           // 纯色背景：隐藏壁纸
           if (wallpaperWrapper) {
+            wallpaperWrapper.classList.remove("wallpaper-overlay", "wallpaper-fullscreen");
             wallpaperWrapper.style.display = "none";
             wallpaperWrapper.classList.add("hidden", "opacity-0");
           }
         } else {
           // banner模式：以 banner 方式显示
           if (wallpaperWrapper) {
-            wallpaperWrapper.classList.remove("wallpaper-overlay");
+            wallpaperWrapper.classList.remove("wallpaper-overlay", "wallpaper-fullscreen");
             const isMobile = window.innerWidth < 1024;
             // 移动端非首页时隐藏banner（初始状态直接隐藏，不需要动画）
             // 桌面端始终显示banner
