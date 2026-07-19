@@ -71,6 +71,11 @@
 {/if}
 
 <style>
+	.guestbook-modal-overlay {
+		backdrop-filter: blur(8px) !important;
+		-webkit-backdrop-filter: blur(8px) !important;
+	}
+
 	.guestbook-header-icon {
 		display: flex;
 		align-items: center;
