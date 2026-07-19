@@ -490,10 +490,21 @@ export const friendsConfig: FriendLink[] = [
 		  "enabled": true
 		},
 		{
-		  "title": "Zero - 浮生",
+		  "title": "Zero-浮生",
 		  "imgurl": "https://vtdd.vip/_astro/avatar.ryzKiMN3_19g6Gw.webp",
 		  "desc": "浮生一刹万般皆舍.",
 		  "siteurl": "https://vtdd.vip",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "萧小晓",
+		  "imgurl": "https://www.lxlovo.top/png.png",
+		  "desc": "一个爱写文的菜鸡。",
+		  "siteurl": "https://blog.lxlovo.top",
 		  "tags": [
 		    "Blog"
 		  ],
