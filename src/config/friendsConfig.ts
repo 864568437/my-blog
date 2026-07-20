@@ -9,12 +9,12 @@ export const friendsPageConfig: FriendsPageConfig = {
 	showCustomContent: true,
 	showComment: true,
 	randomizeSort: false,
-	applyLink: "https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml",	
+	applyLink: "https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml",
 	siteInfo: {
 		name: "fqzlr",
 		desc: "坐而言不如起而行.",
 		url: "https://fqzlr.com/",
-		avatar: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
+		avatar: "https://fqzlr.com/avatar.png",
 		email: "",
 	},
 	notes: [
@@ -38,7 +38,7 @@ export const friendsConfig: FriendLink[] = [
 		  "weight": 10,
 		  "enabled": true
 		},
-				{
+		{
 		  "title": "MmzMing的知识库",
 		  "imgurl": "https://i.stardots.io/784774835/StarDots-2026052116374135506.jpg",
 		  "desc": "哈基米，南北绿豆",
@@ -64,7 +64,7 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "Olinl Blog",
 		  "imgurl": "https://q2.qlogo.cn/headimg_dl?dst_uin=9892214&spec=0",
 		  "desc": "分享、实践、学习",
-		  "siteurl": "https://blog.olinl.com",
+		  "siteurl": "https://blog.olinl.com/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -427,7 +427,7 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "深渊园丁",
 		  "imgurl": "https://www.minedensity.top/favicon.svg",
 		  "desc": "这个网站是我送给互联网的一本手绘笔记。如果你在这里找到了什么让你停留的东西，那我们就已经是朋友了",
-		  "siteurl": "https://www.minedensity.top",
+		  "siteurl": "https://www.minedensity.top/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -438,7 +438,7 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "落樱大王の小窝",
 		  "imgurl": "https://aclsky.sakurafishermua.top/i/2026/05/26/6a15b692c4cb9.jpg",
 		  "desc": "生如利刃，熔炉竟是我自己。",
-		  "siteurl": "https://acblog.sakurafishermua.top",
+		  "siteurl": "https://acblog.sakurafishermua.top/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -447,9 +447,9 @@ export const friendsConfig: FriendLink[] = [
 		},
 		{
 		  "title": "xane",
-		  "imgurl": " https://cloudflare-imgbed-d88.pages.dev/file/1784102742642_头像.jpg",
+		  "imgurl": "https://cloudflare-imgbed-d88.pages.dev/file/1784102742642_%E5%A4%B4%E5%83%8F.jpg",
 		  "desc": "Keep going.",
-		  "siteurl": " https://xane.eu.cc",
+		  "siteurl": "https://xane.eu.cc/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -460,7 +460,7 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "JerryLife",
 		  "imgurl": "https://free.picui.cn/free/2026/07/16/6a58eb63ecbd1.png",
 		  "desc": "Enjoy life",
-		  "siteurl": "https://jerry-nis.top",
+		  "siteurl": "https://jerry-nis.top/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -482,7 +482,7 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "旧梦与花",
 		  "imgurl": "https://zhh2001.github.io/avatar.jpg",
 		  "desc": "欲买桂花同载酒，终不似，少年游",
-		  "siteurl": "https://zhh2001.github.io",
+		  "siteurl": "https://zhh2001.github.io/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -493,7 +493,7 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "Zero-浮生",
 		  "imgurl": "https://vtdd.vip/_astro/avatar.ryzKiMN3_19g6Gw.webp",
 		  "desc": "浮生一刹万般皆舍.",
-		  "siteurl": "https://vtdd.vip",
+		  "siteurl": "https://vtdd.vip/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -504,7 +504,18 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "萧小晓",
 		  "imgurl": "https://www.lxlovo.top/png.png",
 		  "desc": "一个爱写文的菜鸡。",
-		  "siteurl": "https://blog.lxlovo.top",
+		  "siteurl": "https://blog.lxlovo.top/",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "Aimerting",
+		  "imgurl": "https://blog.xuioo.com/avatar.jpg",
+		  "desc": "「纯粹祈愿皆成真」",
+		  "siteurl": "https://blog.xuioo.com/",
 		  "tags": [
 		    "Blog"
 		  ],
