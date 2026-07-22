@@ -526,7 +526,18 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "笔尖代码",
 		  "imgurl": "https://123456l.com/assets/images/logo.png",
 		  "desc": "笔尖代码 - 一个汇聚了前端、后端、数据库、运维、系统知识等内容的个人技术文档库",
-		  "siteurl": "https://123456l.com",
+		  "siteurl": "https://123456l.com/",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true
+		},
+		{
+		  "title": "Pasule",
+		  "imgurl": "https://pasule.com/favicon/favicon-pasule.ico",
+		  "desc": "如果等着遗忘，你又为什么歌唱\n",
+		  "siteurl": " https://pasule.com/",
 		  "tags": [
 		    "Blog"
 		  ],
