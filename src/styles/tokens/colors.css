@@ -115,6 +115,14 @@
   --guestbook-sidebar-width: 18rem;
   --guestbook-viewport-offset: 4.75rem;
   --guestbook-mobile-dock-clearance: 6.25rem;
+
+  /* 说说页面专用：参考站点设计令牌 */
+  --moments-surface: color-mix(in oklch, var(--card-bg, oklch(1 0 0)) 92%, var(--page-bg, oklch(1 0 0)));
+  --moments-border: color-mix(in oklch, var(--line-divider, oklch(0.85 0 0)) 92%, transparent);
+  --moments-soft: color-mix(in oklch, var(--btn-plain-bg-hover, oklch(0.94 0 0)) 92%, var(--card-bg, oklch(1 0 0)));
+  --radius-large: 1rem;
+  --card-border: var(--line-divider);
+  --card-text-secondary: var(--content-meta);
 }
 
 /* 暗色主题：深色底 + 亮前景，使用 --hue 控制色相 */
@@ -197,4 +205,11 @@
   --guestbook-line: var(--line-divider);
   --guestbook-danger: var(--admonitions-color-caution);
   --guestbook-success: var(--admonitions-color-tip);
+
+  /* 说说页面专用：暗色模式 */
+  --moments-surface: oklch(0.20 0.01 var(--hue) / 0.88);
+  --moments-border: color-mix(in oklch, var(--line-divider) 92%, transparent);
+  --moments-soft: oklch(0.22 0.01 var(--hue));
+  --card-border: var(--line-divider);
+  --card-text-secondary: var(--content-meta);
 }

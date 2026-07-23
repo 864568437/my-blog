@@ -792,6 +792,21 @@ const mobileQuality = Math.round(configQuality * 0.9);
     border: none !important;
   }
 
+  /* 文章页整体宽度对齐参考站：64rem 内容 + 17.5rem × 2 侧边栏 + 1.5rem × 2 间距 = 1632px */
+  .is-post-layout {
+    --content-max-width: 64rem;
+    --sidebar-width: 17.5rem;
+    --sidebar-gap: 1.5rem;
+    max-width: calc(
+      var(--content-max-width) + var(--sidebar-width) * 2 + var(--sidebar-gap) * 2
+    );
+    margin-left: auto;
+    margin-right: auto;
+    /* 去掉 main-grid 的左右内边距，让 3 列恰好 280+1024+280+gap×2 = 1632 */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
   /* 移动端恢复间距 */
   @media (max-width: 767px) {
     .is-post-layout {

@@ -72,7 +72,7 @@ export function generateGridClasses(config: ResponsiveSidebarConfig): {
 		config.hasLeftComponents &&
 		config.hasRightComponents
 	) {
-		// 双侧边栏
+		// 双侧边栏：参考站 blog.xuioo.com 风格：左右同宽 17.5rem (280px)
 		if (config.tabletSidebar === "right") {
 			// 平板端显示右侧栏: 769-1279px [内容+右侧栏], 1280px+ [左+中+右]
 			gridCols =
@@ -99,11 +99,11 @@ export function generateGridClasses(config: ResponsiveSidebarConfig): {
 export function generateSidebarClasses(
 	config: ResponsiveSidebarConfig,
 ): string {
+	// 参考站 blog.xuioo.com 风格：列宽由 grid 控制（17.5rem），不设固定 max-width
 	const classes = [
 		"mb-4",
 		"hidden",
 		"md:col-span-1",
-		"md:max-w-70",
 		"md:row-start-1",
 		"md:row-end-2",
 		"md:col-start-1",
@@ -127,6 +127,7 @@ export function generateSidebarClasses(
 export function generateRightSidebarClasses(
 	config: ResponsiveSidebarConfig,
 ): string {
+	// 参考站 blog.xuioo.com 风格：列宽由 grid 控制（17.5rem），不设固定 max-width
 	const classes = ["mb-4", "hidden", "onload-animation"];
 
 	if (config.isBothSidebars && config.tabletSidebar === "right") {
@@ -136,7 +137,6 @@ export function generateRightSidebarClasses(
 			"md:row-start-1",
 			"md:row-end-2",
 			"md:col-span-1",
-			"md:max-w-70",
 			"md:col-start-2", // 平板端在第2列
 			"xl:col-start-3", // 桌面端在第3列
 		);
@@ -147,7 +147,6 @@ export function generateRightSidebarClasses(
 			"xl:row-start-1",
 			"xl:row-end-2",
 			"xl:col-span-1",
-			"xl:max-w-70",
 			"xl:col-start-3",
 		);
 	} else if (config.position === "right") {
@@ -157,7 +156,6 @@ export function generateRightSidebarClasses(
 			"md:row-start-1",
 			"md:row-end-2",
 			"md:col-span-1",
-			"md:max-w-70",
 			"md:col-start-2",
 		);
 	} else {
@@ -167,7 +165,6 @@ export function generateRightSidebarClasses(
 			"xl:row-start-1",
 			"xl:row-end-2",
 			"xl:col-span-1",
-			"xl:max-w-70",
 			"xl:col-start-3",
 		);
 	}

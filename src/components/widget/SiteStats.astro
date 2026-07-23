@@ -102,9 +102,9 @@ const stats = [
 		value: posts.length,
 	},
 	{
-		icon: "material-symbols:local-cafe-outline",
-		label: i18n(I18nKey.moments),
-		value: moments.length,
+		icon: "material-symbols:label-outline",
+		label: i18n(I18nKey.siteStatsTagCount),
+		value: tags.length,
 	},
 	{
 		icon: "material-symbols:edit-note-outline",
@@ -117,9 +117,9 @@ const stats = [
 		value: categories.length,
 	},
 	{
-		icon: "material-symbols:label-outline",
-		label: i18n(I18nKey.siteStatsTagCount),
-		value: tags.length,
+		icon: "material-symbols:local-cafe-outline",
+		label: i18n(I18nKey.moments),
+		value: moments.length,
 	},
 	{
 		icon: "material-symbols:text-ad-outline-rounded",
@@ -147,26 +147,22 @@ const stats = [
 ---
 
 <WidgetLayout name={i18n(I18nKey.siteStats)} id="site-stats" class={className} style={style}>
-  <div class="flex flex-col gap-2">
+  <div class="site-stats">
     {stats.map((stat) => (
-      <div class="flex items-center justify-between px-3 py-1.5">
-        <div class="flex items-center gap-2.5">
-          <div class="text-xl {stat.iconColor === 'red' ? 'text-red-500 dark:text-red-400' : 'text-(--primary)'}">
-            <Icon name={stat.icon} />
-          </div>
-          <span class="text-neutral-700 dark:text-neutral-300 font-medium text-sm">
-            {stat.label}
-          </span>
+      <div class="site-stats__row">
+        <div class="site-stats__icon">
+          <Icon name={stat.icon} />
         </div>
-        <div class="flex items-center">
-          <span 
-            class="text-base font-bold text-neutral-900 dark:text-neutral-100"
+        <span class="site-stats__label">{stat.label}</span>
+        <div class="site-stats__value-wrap">
+          <span
+            class="site-stats__value"
             data-stat-id={stat.id}
           >
             {stat.formatted ? formatNumber(stat.value) : stat.value}
           </span>
           {stat.suffix && (
-            <span class="text-sm text-neutral-500 dark:text-neutral-400 ml-1">
+            <span class="site-stats__suffix">
               {stat.suffix}
             </span>
           )}
@@ -175,6 +171,68 @@ const stats = [
     ))}
   </div>
 </WidgetLayout>
+
+<style>
+  .site-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: 0.25rem 0;
+  }
+  .site-stats__row {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    transition: background 0.2s;
+  }
+  .site-stats__row:hover {
+    background: var(--moments-soft);
+  }
+  .site-stats__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--primary);
+    font-size: 1.125rem;
+  }
+  .site-stats__icon :global(svg) {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  .site-stats__label {
+    flex: 1;
+    min-width: 0;
+    color: var(--content-meta);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .site-stats__value-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 0.125rem;
+    flex-shrink: 0;
+  }
+  .site-stats__value {
+    color: var(--deep-text);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .site-stats__suffix {
+    color: var(--content-meta);
+    font-size: 0.75rem;
+    line-height: 1;
+  }
+</style>
 
 <script is:inline define:vars={{ siteStartDate, lastPostDate, todayText }}>
   function updateDynamicStats() {

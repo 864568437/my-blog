@@ -1,0 +1,207 @@
+/* ==========================================================================
+   侧边栏 widget 卡片化样式
+   参考：blog.xuioo.com 风格（独立卡片 + 圆角 + 柔和阴影）
+   设计规范：.trae/design.md
+   适用：仅作用于 .onload-animation.widget-card（在侧边栏内的 widget 容器）
+   ========================================================================== */
+
+/* ---------- 参考站设计令牌 ---------- */
+:root {
+  /* 布局变量：参考站 blog.xuioo.com 风格 */
+  --sidebar-width: 17.5rem;       /* 280px - 左右侧边栏宽度 */
+  --sidebar-gap: 1.5rem;          /* 24px - 列间距 */
+  --content-max-width: 64rem;     /* 1024px - 主内容最大宽度 */
+
+  /* 圆角 */
+  --sidebar-card-radius: 0.75rem; /* 12px - 参考站 article-catalog 圆角 */
+
+  /* 颜色变量（与参考站一致） */
+  --sidebar-card-bg: var(--card-bg, oklch(100% 0 0));
+  --sidebar-card-border: var(--line-divider, oklch(85% 0 0));
+  --sidebar-card-border-hover: var(--primary, oklch(30% 0 0));
+
+  /* 阴影：参考站单层柔和阴影 0 4px 12px #0000000a */
+  --sidebar-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  --sidebar-card-shadow-hover: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+:root.dark {
+  --sidebar-card-bg: oklch(8% 0 0);
+  --sidebar-card-border: oklch(25% 0 0);
+  --sidebar-card-border-hover: oklch(85% 0 0);
+  --sidebar-card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --sidebar-card-shadow-hover: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- 卡片基础样式 ---------- */
+.widget-card {
+  background: var(--sidebar-card-bg);
+  border: 1px solid var(--sidebar-card-border);
+  border-radius: var(--sidebar-card-radius);
+  box-shadow: var(--sidebar-card-shadow);
+  padding: 0; /* padding 由内部统一控制，避免双层 */
+  overflow: hidden; /* 让内部 widget 圆角/阴影不溢出 */
+  transition:
+    box-shadow .3s cubic-bezier(0.32, 0.72, 0, 1),
+    border-color .3s ease,
+    transform .35s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.widget-card:hover {
+  border-color: var(--sidebar-card-border-hover);
+  box-shadow: var(--sidebar-card-shadow-hover);
+  transform: translateY(-1px);
+}
+
+/* ---------- 内部 WidgetLayout 适配（重置默认 padding，由 widget-card 统一提供） ---------- */
+.widget-card widget-layout.section {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* 标题：在卡片内顶部 */
+.widget-card .widget-title {
+  margin-left: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0.9rem 1.1rem 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary, #0f172a);
+  border-bottom: 1px solid var(--sidebar-card-border);
+  background: transparent;
+  letter-spacing: 0.01em;
+}
+:root.dark .widget-card .widget-title {
+  color: var(--text-primary, #e8eaed);
+  border-bottom-color: var(--sidebar-card-border);
+}
+
+/* 去掉 WidgetLayout 默认绿色竖线（在卡片内不必要） */
+.widget-card .widget-title::before {
+  display: none;
+}
+
+/* 标题图标 */
+.widget-card .widget-title .widget-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* collapse-wrapper 重置 padding，由 widget-title + 底部 padding 提供 */
+.widget-card .collapse-wrapper {
+  padding-left: 1.1rem;
+  padding-right: 1.1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 1rem;
+}
+
+/* 展开按钮 padding 修正 */
+.widget-card .expand-btn {
+  padding-left: 0.7rem;
+  padding-right: 0.7rem;
+  padding-bottom: 0.5rem;
+}
+
+/* ---------- 文章页整体宽度对齐参考站 ----------
+   参考站 max-w：64rem (1024px) + 17.5rem (280px) × 2 + 1.5rem (24px) × 2 = 1632px。
+   通过覆盖 --page-width 让 main-wrapper 容器也缩到一致。 */
+:has(> #main-grid.is-post-layout) {
+	--page-width: 1632px;
+}
+
+/* 兜底：如果浏览器不支持 :has()，则直接对 main-grid 自身做宽度约束 */
+@media (min-width: 1280px) {
+	#main-grid.is-post-layout {
+		max-width: 1632px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+/* 防止双层：widget-card 内部嵌套的 article-catalog 容器自身不再带卡片外观
+   （统一由外层 widget-card 提供），适用于所有页面。
+   参考站 blog.xuioo.com 的 全部文章 是放在左侧栏的普通 widget，
+   它的内部 article-catalog-container 不应再带独立卡片外观。 */
+.widget-card .article-catalog-wrapper,
+.widget-card .article-catalog-container {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ---------- Profile 特殊处理 ---------- */
+/* Profile.astro 已有 .profile-card + .card-base p-4，需要去掉双层 padding */
+.widget-card > .profile-card.card-base.p-4 {
+  padding: 0.5rem 1.1rem 1.1rem;
+}
+.widget-card > .profile-card.card-base.p-4 .profile-card__inner {
+  padding: 0;
+}
+
+/* ---------- EditPostButton 标题与按钮适配 ---------- */
+/* EditPostButton 自带 .edit-title 模仿 widget-title；.edit-section 顶层由
+   自身 .edit-title / .edit-list 提供 padding，不应用通用 padding。 */
+.widget-card > .edit-section {
+  padding: 0;
+}
+
+/* ---------- EditPostButton / 其它裸组件适配 ---------- */
+/* 这些组件可能没有 widget-layout 包裹，直接是内容 */
+/* 由 widget-card 自身提供 padding 通过 :scope > :not(widget-layout) 选择器 */
+.widget-card > :not(widget-layout):not(.profile-card):not(.edit-section):not(script):not(style) {
+  padding: 1rem 1.1rem;
+}
+
+/* ---------- 入场动画（在 onload-animation 之上叠加） ---------- */
+@keyframes widget-card-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.widget-card {
+  animation: widget-card-rise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* 错位延迟：nth-child 简易方案 */
+.widget-card:nth-child(1) { animation-delay: 0ms; }
+.widget-card:nth-child(2) { animation-delay: 60ms; }
+.widget-card:nth-child(3) { animation-delay: 120ms; }
+.widget-card:nth-child(4) { animation-delay: 180ms; }
+.widget-card:nth-child(5) { animation-delay: 240ms; }
+.widget-card:nth-child(6) { animation-delay: 300ms; }
+.widget-card:nth-child(7) { animation-delay: 360ms; }
+.widget-card:nth-child(n+8) { animation-delay: 420ms; }
+
+/* ---------- 无障碍：减少动效 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .widget-card {
+    animation: none;
+    transition: none;
+  }
+  .widget-card:hover {
+    transform: none;
+  }
+}
+
+/* ---------- 移动端适配 ---------- */
+@media (max-width: 720px) {
+  .widget-card {
+    border-radius: 14px;
+  }
+  .widget-card .widget-title,
+  .widget-card .article-catalog-header {
+    padding: 0.75rem 0.85rem 0.4rem;
+    font-size: 0.8rem;
+  }
+  .widget-card .collapse-wrapper,
+  .widget-card .article-catalog-body {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+    padding-bottom: 0.85rem;
+  }
+}

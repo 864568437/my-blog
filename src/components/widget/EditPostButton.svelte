@@ -367,85 +367,110 @@ function closeHelpModal() {
 
 <EditToast />
 
-<div class="write-section">
-	<div class="section-title">
-		<span class="title-bar"></span>
-		<span class="title-text">写作</span>
+<div class="edit-section">
+	<div class="edit-title">
+		<span class="title-text">编辑</span>
 	</div>
 
-	{#if showEditButton()}
-		{#if !editMode || currentPage.type === "postDetail"}
-			<button class="write-btn write-btn-outline" onclick={handleEditClick}>
-				<iconify-icon icon="material-symbols:edit-rounded"></iconify-icon>
-				<span class="btn-text">
-					{currentPage.type === "postDetail" ? "编辑当前文章" : "编辑当前" + currentPageName()}
-				</span>
-			</button>
-		{:else}
-			<div class="edit-toolbar-row">
-				<button class="tb-btn tb-btn-cancel" onclick={handleCancel} title="取消编辑">
-					<iconify-icon icon="material-symbols:close-rounded"></iconify-icon>
-					<span class="tb-text">取消</span>
-				</button>
-				<button class="tb-btn tb-btn-draft" onclick={handleSaveDraft} disabled={!hasChanges} title="保存草稿">
-					<iconify-icon icon="material-symbols:save-outline-rounded"></iconify-icon>
-					<span class="tb-text">草稿</span>
-					{#if pageDraftCount > 0}
-						<span class="tb-badge draft-badge">{pageDraftCount}</span>
-					{/if}
-				</button>
-				{#if authed}
-					<button class="tb-btn tb-btn-key tb-btn-key-ok" onclick={triggerKeyImport} title="已导入私钥，点击重新导入">
-						<iconify-icon icon="material-symbols:vpn-key-rounded"></iconify-icon>
-						<span class="tb-text">已认证</span>
-					</button>
-				{:else}
-					<button class="tb-btn tb-btn-key tb-btn-key-err" onclick={triggerKeyImport} title="点击导入 GitHub App 私钥">
-						<iconify-icon icon="material-symbols:key-rounded"></iconify-icon>
-						<span class="tb-text">密钥</span>
-					</button>
-				{/if}
-				<button class="tb-btn tb-btn-add" onclick={handleAdd} title="添加新项">
+	<!-- 列表行：每个动作一行，与 SiteStats 风格一致 -->
+	<div class="edit-list">
+		{#if showWriteButton()}
+			<a href="/write/" class="edit-row" data-no-swup>
+				<span class="edit-row__icon">
 					<iconify-icon icon="material-symbols:add-rounded"></iconify-icon>
-					<span class="tb-text">添加</span>
-				</button>
-				<button class="tb-btn tb-btn-submit" onclick={handleSubmit} disabled={saving || (!hasChanges && pageDraftCount === 0)} title="提交">
+				</span>
+				<span class="edit-row__label">写新文章</span>
+				<span class="edit-row__suffix">New</span>
+			</a>
+		{:else if currentPage.type === "inline" && editMode}
+			<button
+				class="edit-row edit-row--primary"
+				onclick={handleSubmit}
+				disabled={saving || (!hasChanges && pageDraftCount === 0)}
+				title="提交到 GitHub"
+			>
+				<span class="edit-row__icon">
 					{#if saving}
 						<iconify-icon icon="material-symbols:progress-activity-rounded" class="animate-spin"></iconify-icon>
 					{:else}
 						<iconify-icon icon="material-symbols:send-rounded"></iconify-icon>
 					{/if}
-					<span class="tb-text">提交</span>
-				</button>
-			</div>
-			<div class="edit-toolbar-row">
-				<button class="tb-btn tb-btn-batch" onclick={handleBatchSubmit} title="批量提交">
-					<iconify-icon icon="material-symbols:cloud-upload-rounded"></iconify-icon>
-					<span class="tb-text">批量提交</span>
-					{#if totalDraftCount > 0}
-						<span class="tb-badge batch-badge">{totalDraftCount}</span>
-					{/if}
-				</button>
-				<button class="tb-btn tb-btn-clear" onclick={handleClearDrafts} disabled={totalDraftCount === 0} title="清除全部草稿">
-					<iconify-icon icon="material-symbols:delete-outline-rounded"></iconify-icon>
-					<span class="tb-text">清除</span>
-					{#if totalDraftCount > 0}
-						<span class="tb-badge clear-badge">{totalDraftCount}</span>
-					{/if}
-				</button>
-				<button class="tb-btn tb-btn-help" onclick={openHelpModal} title="使用帮助">
-					<iconify-icon icon="material-symbols:help-outline-rounded"></iconify-icon>
-					<span class="tb-text">帮助</span>
-				</button>
-			</div>
+				</span>
+				<span class="edit-row__label">提交修改</span>
+				{#if pageDraftCount > 0}
+					<span class="edit-row__suffix">{pageDraftCount}</span>
+				{/if}
+			</button>
 		{/if}
-	{/if}
 
-	{#if showWriteButton()}
-		<a href="/write/" class="write-btn write-btn-filled" data-no-swup>
-			<iconify-icon icon="material-symbols:add-rounded"></iconify-icon>
-			<span class="btn-text">写新文章</span>
-		</a>
+		{#if showEditButton() && (!editMode || currentPage.type === "postDetail")}
+			<button class="edit-row" onclick={handleEditClick}>
+				<span class="edit-row__icon">
+					<iconify-icon icon="material-symbols:edit-rounded"></iconify-icon>
+				</span>
+				<span class="edit-row__label">
+					{currentPage.type === "postDetail" ? "编辑当前文章" : "编辑" + currentPageName()}
+				</span>
+				<span class="edit-row__suffix">
+					<iconify-icon icon="material-symbols:chevron-right"></iconify-icon>
+				</span>
+			</button>
+		{:else if showEditButton() && currentPage.type === "inline" && editMode}
+			<button class="edit-row" onclick={handleCancel} title="取消编辑">
+				<span class="edit-row__icon">
+					<iconify-icon icon="material-symbols:close-rounded"></iconify-icon>
+				</span>
+				<span class="edit-row__label">取消编辑</span>
+				<span class="edit-row__suffix">
+					<iconify-icon icon="material-symbols:chevron-right"></iconify-icon>
+				</span>
+			</button>
+		{/if}
+	</div>
+
+	{#if currentPage.type === "inline" && editMode}
+		<div class="edit-toolbar-row">
+			<button class="tb-btn tb-btn-draft" onclick={handleSaveDraft} disabled={!hasChanges} title="保存草稿">
+				<iconify-icon icon="material-symbols:save-outline-rounded"></iconify-icon>
+				<span class="tb-text">草稿</span>
+				{#if pageDraftCount > 0}
+					<span class="tb-badge draft-badge">{pageDraftCount}</span>
+				{/if}
+			</button>
+			{#if authed}
+				<button class="tb-btn tb-btn-key tb-btn-key-ok" onclick={triggerKeyImport} title="已导入私钥，点击重新导入">
+					<iconify-icon icon="material-symbols:vpn-key-rounded"></iconify-icon>
+					<span class="tb-text">已认证</span>
+				</button>
+			{:else}
+				<button class="tb-btn tb-btn-key tb-btn-key-err" onclick={triggerKeyImport} title="点击导入 GitHub App 私钥">
+					<iconify-icon icon="material-symbols:key-rounded"></iconify-icon>
+					<span class="tb-text">密钥</span>
+				</button>
+			{/if}
+			<button class="tb-btn tb-btn-add" onclick={handleAdd} title="添加新项">
+				<iconify-icon icon="material-symbols:add-rounded"></iconify-icon>
+				<span class="tb-text">添加</span>
+			</button>
+			<button class="tb-btn tb-btn-batch" onclick={handleBatchSubmit} title="批量提交">
+				<iconify-icon icon="material-symbols:cloud-upload-rounded"></iconify-icon>
+				<span class="tb-text">批量</span>
+				{#if totalDraftCount > 0}
+					<span class="tb-badge batch-badge">{totalDraftCount}</span>
+				{/if}
+			</button>
+			<button class="tb-btn tb-btn-clear" onclick={handleClearDrafts} disabled={totalDraftCount === 0} title="清除全部草稿">
+				<iconify-icon icon="material-symbols:delete-outline-rounded"></iconify-icon>
+				<span class="tb-text">清除</span>
+				{#if totalDraftCount > 0}
+					<span class="tb-badge clear-badge">{totalDraftCount}</span>
+				{/if}
+			</button>
+			<button class="tb-btn tb-btn-help" onclick={openHelpModal} title="使用帮助">
+				<iconify-icon icon="material-symbols:help-outline-rounded"></iconify-icon>
+				<span class="tb-text">帮助</span>
+			</button>
+		</div>
 	{/if}
 
 	<input
@@ -563,101 +588,141 @@ function closeHelpModal() {
 {/if}
 
 <style>
-	.write-section {
+	/* ---------- 容器 ---------- */
+	.edit-section {
 		width: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
 	}
 
-	.section-title {
+	/* 标题：与 .widget-card .widget-title 完全一致（padding/font/border） */
+	.edit-title {
 		display: flex;
 		align-items: center;
-		gap: 8px;
-		font-size: 18px;
+		justify-content: space-between;
+		gap: 0.4rem;
+		margin: 0;
+		padding: 0.9rem 1.1rem 0.5rem;
+		font-size: 0.85rem;
 		font-weight: 700;
-		color: var(--text-color, #1f2937);
-		margin-top: 4px;
+		color: var(--text-primary, #0f172a);
+		background: transparent;
+		letter-spacing: 0.01em;
+		border-bottom: 1px solid var(--sidebar-card-border, rgba(15, 23, 42, 0.10));
+	}
+	:global(.dark) .edit-title {
+		color: var(--text-primary, #e8eaed);
+		border-bottom-color: var(--sidebar-card-border, rgba(255, 255, 255, 0.10));
+	}
+	/* 与 widget-title 一致：去掉默认绿色竖线（在卡片内不必要） */
+	.edit-title::before { display: none; }
+	.title-text { line-height: 1; }
+
+	/* ---------- 列表行（与 SiteStats __row 一致；行内边距与 .collapse-wrapper 对齐） ---------- */
+	.edit-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		padding: 0.4rem 1.1rem 0.6rem;
 	}
 
-	.title-bar {
-		width: 4px;
-		height: 20px;
-		background: var(--text-color, #1f2937);
-		border-radius: 2px;
-	}
-
-	.title-text {
-		line-height: 1;
-	}
-
-	.write-btn {
+	.edit-row {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		gap: 6px;
-		padding: 10px 16px;
-		border-radius: 6px;
-		font-size: 14px;
-		font-weight: 500;
+		gap: 0.625rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.5rem;
+		background: transparent;
+		border: none;
+		color: inherit;
+		font: inherit;
 		cursor: pointer;
-		transition: all 0.2s;
-		white-space: nowrap;
-		line-height: 1;
 		text-decoration: none;
 		width: 100%;
 		box-sizing: border-box;
-		border: none;
+		transition: background 0.2s;
+		text-align: left;
 	}
 
-	.write-btn iconify-icon {
+	.edit-row:hover:not(:disabled) {
+		background: var(--moments-soft, rgba(0, 0, 0, 0.04));
+	}
+	:global(.dark) .edit-row:hover:not(:disabled) {
+		background: var(--moments-soft, rgba(255, 255, 255, 0.06));
+	}
+
+	.edit-row:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	.edit-row__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 1.5rem;
+		height: 1.5rem;
+		color: var(--primary);
+		font-size: 1.125rem;
+		line-height: 0;
+	}
+	.edit-row__icon iconify-icon { line-height: 0; }
+	.edit-row__icon :global(svg) {
+		width: 1.125rem;
+		height: 1.125rem;
+	}
+
+	.edit-row__label {
+		flex: 1;
+		min-width: 0;
+		color: var(--content-meta, rgba(15, 23, 42, 0.75));
+		font-size: 0.8125rem;
+		font-weight: 500;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	:global(.dark) .edit-row__label {
+		color: var(--content-meta, rgba(255, 255, 255, 0.75));
+	}
+
+	.edit-row__suffix {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		vertical-align: middle;
-		line-height: 0;
-		font-size: 18px;
+		flex-shrink: 0;
+		min-width: 1.4rem;
+		padding: 0 0.35rem;
+		height: 1.25rem;
+		background: var(--btn-regular-bg, rgba(0, 0, 0, 0.06));
+		color: var(--deep-text, rgba(15, 23, 42, 0.6));
+		font-size: 0.7rem;
+		font-weight: 600;
+		border-radius: 0.625rem;
+	}
+	:global(.dark) .edit-row__suffix {
+		background: var(--btn-regular-bg, rgba(255, 255, 255, 0.08));
+		color: var(--deep-text, rgba(255, 255, 255, 0.7));
+	}
+	.edit-row__suffix iconify-icon {
+		font-size: 1rem;
+		opacity: 0.6;
 	}
 
-	.write-btn-outline {
-		border: 1.5px solid var(--text-color, #1f2937);
-		background: transparent;
-		color: var(--text-color, #1f2937);
-	}
+	/* 编辑模式下的提交行：用主题色突出 */
+	.edit-row--primary .edit-row__icon { color: var(--primary); }
+	.edit-row--primary .edit-row__label { color: var(--text-primary, #0f172a); font-weight: 600; }
+	:global(.dark) .edit-row--primary .edit-row__label { color: var(--text-primary, #e8eaed); }
 
-	.write-btn-outline:hover {
-		background: var(--text-color, #1f2937);
-		color: var(--bg-color, white);
-	}
-
-	:global(.dark) .write-btn-outline {
-		border-color: rgba(255, 255, 255, 0.9);
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	:global(.dark) .write-btn-outline:hover {
-		background: rgba(255, 255, 255, 0.9);
-		color: rgba(0, 0, 0, 0.9);
-	}
-
-	.write-btn-filled {
-		background: var(--text-color, #1f2937);
-		color: var(--bg-color, white);
-	}
-
-	.write-btn-filled:hover {
-		opacity: 0.85;
-	}
-
-	:global(.dark) .write-btn-filled {
-		background: rgba(255, 255, 255, 0.95);
-		color: rgba(0, 0, 0, 0.9);
-	}
-
+	/* ---------- 编辑模式工具栏（草稿/密钥/添加/批量/清除/帮助） ---------- */
 	.edit-toolbar-row {
 		display: flex;
 		gap: 6px;
 		flex-wrap: wrap;
+		margin-top: 0.5rem;
+		padding-top: 0.5rem;
+		border-top: 1px dashed var(--sidebar-card-border, rgba(15, 23, 42, 0.10));
 	}
 
 	.tb-btn {

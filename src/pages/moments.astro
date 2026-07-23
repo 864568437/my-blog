@@ -31,56 +31,58 @@ const albums = [] as any[];
 ---
 
 <MainGridLayout title="动态" description="记录生活中的点点滴滴">
-  <!-- 微信朋友圈风格封面 -->
-  <MomentsCover coverImage={coverImage} coverAvatar={coverAvatar} coverName={coverName} coverBio={coverBio} />
+  <div class="moments-page">
+    <!-- 微信朋友圈风格封面（用户保留原样） -->
+    <MomentsCover coverImage={coverImage} coverAvatar={coverAvatar} coverName={coverName} coverBio={coverBio} />
 
-  <!-- 置顶说说（始终渲染容器，JS 可动态追加外部置顶） -->
-  <div class="wx-pinned" id="pinned-block" style={pinnedMoments.length === 0 ? 'display:none' : ''}>
-    <a href="/moments/pinned/" class="wx-pinned-link">
-      <div class="wx-pinned-tag">
-        <span>置顶</span>
-      </div>
-      <div class="wx-pinned-items" id="pinned-items">
-        {pinnedData.map((item) => (
-          <div class="wx-pinned-preview">
-            {item.images.length > 0 ? (
-              <div class={`wx-pimgs wx-pimgs-${Math.min(item.images.length, 9)}`}>
-                {item.images.slice(0, 9).map((img) => (
-                  <img src={img} alt="" class="wx-pinned-img" loading="lazy" />
-                ))}
-              </div>
-            ) : (
-              <p class="wx-ptxt">{item.body.slice(0, 60)}{item.body.length > 60 ? '...' : ''}</p>
-            )}
-          </div>
+    <!-- 置顶说说（始终渲染容器，JS 可动态追加外部置顶） -->
+    <div class="wx-pinned" id="pinned-block" style={pinnedMoments.length === 0 ? 'display:none' : ''}>
+      <a href="/moments/pinned/" class="wx-pinned-link">
+        <div class="wx-pinned-tag">
+          <span>置顶</span>
+        </div>
+        <div class="wx-pinned-items" id="pinned-items">
+          {pinnedData.map((item) => (
+            <div class="wx-pinned-preview">
+              {item.images.length > 0 ? (
+                <div class={`wx-pimgs wx-pimgs-${Math.min(item.images.length, 9)}`}>
+                  {item.images.slice(0, 9).map((img) => (
+                    <img src={img} alt="" class="wx-pinned-img" loading="lazy" />
+                  ))}
+                </div>
+              ) : (
+                <p class="wx-ptxt">{item.body.slice(0, 60)}{item.body.length > 60 ? '...' : ''}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </a>
+      <!-- 隐藏的完整卡片供编辑组件收集数据 -->
+      <div class="wx-pinned-hidden">
+        {pinnedMoments.map((moment) => (
+          <MomentCard moment={moment} />
         ))}
       </div>
-    </a>
-    <!-- 隐藏的完整卡片供编辑组件收集数据 -->
-    <div class="wx-pinned-hidden">
-      {pinnedMoments.map((moment) => (
-        <MomentCard moment={moment} />
-      ))}
     </div>
-  </div>
 
-  <!-- 说说列表（本地 + 外部合并，按时间排序） -->
-  <div class="wx-feed" id="moments-feed">
-    {sortedMoments.length > 0 ? (
-      sortedMoments.map((moment) => (
-        <div class="wx-feed-item" data-published={new Date(moment.published).toISOString()}>
-          <MomentCard moment={moment} />
-        </div>
-      ))
-    ) : (
-      <div class="wx-empty" id="moments-empty">
-        <div class="wx-empty-icon">
-          <Icon name="material-symbols:sentiment-neutral-outline" />
-        </div>
-        <h3>还没有发布任何说说</h3>
-        <p>快去记录你的生活点滴吧</p>
+    <!-- 说说列表（本地 + 外部合并，按时间排序） -->
+    <div class="moments-body">
+      <div class="moments-timeline" id="moments-feed">
+        {sortedMoments.length > 0 ? (
+          sortedMoments.map((moment) => (
+            <MomentCard moment={moment} />
+          ))
+        ) : (
+          <div class="wx-empty" id="moments-empty">
+            <div class="wx-empty-icon">
+              <Icon name="material-symbols:sentiment-neutral-outline" />
+            </div>
+            <h3>还没有发布任何说说</h3>
+            <p>快去记录你的生活点滴吧</p>
+          </div>
+        )}
       </div>
-    )}
+    </div>
   </div>
 
   <MomentsEditor client:load />
@@ -116,40 +118,17 @@ const albums = [] as any[];
 
 
 <style>
-  /* 置顶块样式在底部 <style is:global> 中，
+  /* 置顶块样式在 features/moments.css 中定义，
      因为 JS 动态创建的外部置顶元素没有 Astro scoped 属性 */
 
   /* ============================================
    * 说说列表
    * ============================================ */
-  .wx-feed {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 1rem 0 2rem;
-  }
-
-  .wx-feed-item {
-    position: relative;
-  }
-
-  .wx-feed-item + .wx-feed-item::before {
-    content: '';
-    position: absolute;
-    top: -0.75rem;
-    left: 1rem;
-    right: 1rem;
-    height: 1px;
-    background: var(--border);
-    opacity: 0.7;
-  }
-
-  /* 空状态 */
   .wx-empty {
     text-align: center;
     padding: 3rem 1rem;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
+    background: var(--moments-surface);
+    border: 1px solid var(--moments-border);
     border-radius: 12px;
   }
 
@@ -160,7 +139,7 @@ const albums = [] as any[];
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--btn-regular-bg);
+    background: var(--moments-soft);
     border-radius: 50%;
     color: var(--content-meta);
     font-size: 2rem;
@@ -169,7 +148,7 @@ const albums = [] as any[];
   .wx-empty h3 {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-color);
+    color: var(--deep-text);
     margin-bottom: 0.375rem;
   }
 
@@ -194,19 +173,4 @@ const albums = [] as any[];
   .wx-visitor-icon {
     font-size: 1rem;
   }
-
-  /* 响应式 */
-  @media (max-width: 480px) {
-    .wx-feed {
-      gap: 1.25rem;
-      padding: 0.75rem 0 1.5rem;
-    }
-
-    .wx-feed-item + .wx-feed-item::before {
-      top: -0.625rem;
-      left: 0.75rem;
-      right: 0.75rem;
-    }
-  }
 </style>
-

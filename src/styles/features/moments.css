@@ -2,9 +2,13 @@
  * 说说页面全局样式
  * 从 moments.astro 的 <style is:global> 提取
  * 放在持久 CSS 文件中防止 Swup 导航时样式丢失
+ *
+ * 风格参考：blog.xuioo.com/moments/
  * ============================================ */
 
-/* 置顶块样式 */
+/* ============================================
+ * 1. 置顶块样式（保留微信朋友圈风格，勿动）
+ * ============================================ */
 .wx-pinned {
   display: flex;
   align-items: stretch;
@@ -128,188 +132,780 @@
   display: none;
 }
 
-/* JS 动态插入的说说卡片样式 */
-#moments-feed .moment-card {
+/* ============================================
+ * 2. 说说卡片：参考 blog.xuioo.com 风格
+ *    timeline 布局（左侧头像+右侧内容）
+ *    同时作用于 #moments-feed 与 #pinned-feed 容器
+ * ============================================ */
+
+/* ---------- 2.1 卡片主体 ---------- */
+.moment-item,
+#moments-feed .moment-card,
+#pinned-feed .moment-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+  padding: 1.25rem;
+  background: var(--moments-surface);
+  border: 1px solid var(--moments-border);
+  border-radius: clamp(1rem, 1.4vw, 1.2rem);
   position: relative;
-  background: var(--card-bg);
-  border-radius: var(--radius-large);
-  padding: 1.25rem 1.25rem 1.25rem 2.25rem;
-  border: 2px solid #000;
+  transition:
+    transform 0.35s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.35s cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 0.25s,
+    border-style 0.25s;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 10px 30px -28px rgba(15, 23, 42, 0.26);
+  animation: moment-fade-in-up 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--moment-index, 0) * 70ms);
+}
+
+/* nth-child fallback for没有 --moment-index 的环境 */
+#moments-feed > .moment-item:nth-child(1) { --moment-index: 0; }
+#moments-feed > .moment-item:nth-child(2) { --moment-index: 1; }
+#moments-feed > .moment-item:nth-child(3) { --moment-index: 2; }
+#moments-feed > .moment-item:nth-child(4) { --moment-index: 3; }
+#moments-feed > .moment-item:nth-child(5) { --moment-index: 4; }
+#moments-feed > .moment-item:nth-child(6) { --moment-index: 5; }
+#moments-feed > .moment-item:nth-child(7) { --moment-index: 6; }
+#moments-feed > .moment-item:nth-child(8) { --moment-index: 7; }
+#moments-feed > .moment-item:nth-child(9) { --moment-index: 8; }
+#moments-feed > .moment-item:nth-child(n+10) { --moment-index: 9; }
+
+/* 移动端禁用延迟，避免长列表等待 */
+@media (max-width: 640px) {
+  .moment-item,
+  #moments-feed .moment-card,
+  #pinned-feed .moment-card {
+    animation-delay: 0ms;
+  }
+}
+
+/* 尊重用户的「减少动效」偏好 */
+@media (prefers-reduced-motion: reduce) {
+  .moment-item,
+  #moments-feed .moment-card,
+  #pinned-feed .moment-card {
+    animation: none;
+  }
+  .moment-item:hover,
+  #moments-feed .moment-card:hover,
+  #pinned-feed .moment-card:hover {
+    transform: none;
+  }
+}
+:root.dark .moment-item,
+:root.dark #moments-feed .moment-card,
+:root.dark #pinned-feed .moment-card {
+  background: oklch(0.18 0 0 / 0.88);
+}
+
+.moment-item:hover,
+#moments-feed .moment-card:hover,
+#pinned-feed .moment-card:hover {
+  border-color: color-mix(in oklch, var(--deep-text) 18%, var(--moments-border));
+  border-style: dashed;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 14px 34px -30px rgba(15, 23, 42, 0.24);
+}
+:root.dark .moment-item:hover,
+:root.dark #moments-feed .moment-card:hover,
+:root.dark #pinned-feed .moment-card:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 14px 34px -30px rgba(0, 0, 0, 0.55);
+}
+
+.moment-item.is-pinned,
+#moments-feed .moment-card.is-pinned,
+#pinned-feed .moment-card.is-pinned {
+  border-color: color-mix(in oklch, var(--deep-text) 12%, var(--moments-border));
+  background: color-mix(in oklch, var(--moments-surface) 92%, var(--btn-plain-bg-hover));
+}
+:root.dark .moment-item.is-pinned,
+:root.dark #moments-feed .moment-card.is-pinned,
+:root.dark #pinned-feed .moment-card.is-pinned {
+  background: oklch(0.185 0 0);
+}
+
+@keyframes moment-fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- 2.2 左侧头像 ---------- */
+.moment-avatar,
+#moments-feed .card-avatar,
+#pinned-feed .card-avatar {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  background: var(--line-divider);
+  border: 1.5px solid color-mix(in oklch, var(--page-bg) 75%, var(--line-divider));
   overflow: hidden;
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 8px 18px -16px rgba(15, 23, 42, 0.34);
 }
-:root.dark #moments-feed .moment-card { border-color: #3f3f46; }
-#moments-feed .moment-card:hover {
-  border-color: var(--primary);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-  transform: translateY(-2px);
+.moment-avatar__img,
+#moments-feed .avatar-img,
+#pinned-feed .avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
-:root.dark #moments-feed .moment-card:hover {
-  border-color: #fff;
-  box-shadow: 0 4px 24px rgba(255,255,255,0.08);
+:root.dark .moment-avatar,
+:root.dark #moments-feed .card-avatar,
+:root.dark #pinned-feed .card-avatar {
+  border-color: rgb(11, 11, 11);
 }
 
-#moments-feed .card-accent-bar {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-  background: var(--primary); opacity: 0.35; border-radius: 0 2px 2px 0;
+/* ---------- 2.3 右侧内容 ---------- */
+.moment-content,
+#moments-feed .card-content,
+#pinned-feed .card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
-#moments-feed .card-header { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 0.75rem; }
-#moments-feed .card-avatar { flex-shrink: 0; }
-#moments-feed .avatar-img {
-  width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover;
-  border: 2px solid var(--primary); box-sizing: border-box;
+/* ---------- 2.4 名字行（含置顶标签） ---------- */
+.moment-name-row,
+#moments-feed .user-row,
+#pinned-feed .user-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
-#moments-feed .card-user-info { flex: 1; min-width: 0; }
-#moments-feed .user-row { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.125rem; }
-#moments-feed .pinned-badge {
-  display: inline-flex; align-items: center; gap: 0.25rem;
-  padding: 0.125rem 0.5rem; background: var(--btn-regular-bg);
-  color: var(--btn-content); border-radius: var(--radius);
-  font-size: 0.75rem; font-weight: 600;
+.moment-name,
+#moments-feed .user-name,
+#pinned-feed .user-name {
+  color: var(--deep-text);
+  letter-spacing: 0.01em;
+  font-size: 0.9375rem;
+  font-weight: 700;
 }
-#moments-feed .pinned-icon { width: 14px; height: 14px; }
-#moments-feed .user-name { font-size: 0.9375rem; font-weight: 600; color: var(--primary); }
-#moments-feed .meta-row { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: var(--content-meta); }
-#moments-feed .meta-dot { opacity: 0.5; }
-#moments-feed .location {
-  display: inline-flex; align-items: center; gap: 0.125rem;
-  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.moment-pinned-tag,
+#moments-feed .pinned-badge,
+#pinned-feed .pinned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  background: var(--moments-soft);
+  color: var(--content-meta);
+  border: 1px solid var(--moments-border);
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
 }
-#moments-feed .location-icon { font-size: 0.875rem; flex-shrink: 0; width: 14px; height: 14px; }
+.moment-pinned-tag__icon,
+#moments-feed .pinned-icon,
+#pinned-feed .pinned-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
 
-#moments-feed .card-content { margin-bottom: 0.75rem; }
-#moments-feed .moment-markdown { word-break: break-word; }
-#moments-feed .moment-markdown p { margin-bottom: 0.375rem; }
-#moments-feed .moment-markdown p:last-child { margin-bottom: 0; }
-#moments-feed .moment-markdown img { border-radius: var(--radius); margin: 0.5rem 0; max-width: 100%; }
-#moments-feed .moment-markdown a { color: var(--primary); text-decoration: underline; }
-
-#moments-feed .card-images { display: grid; gap: 0.375rem; margin-bottom: 0.75rem; }
-#moments-feed .image-cols-1 { grid-template-columns: 100px; }
-#moments-feed .image-cols-2 { grid-template-columns: repeat(2, 100px); }
-#moments-feed .image-cols-3 { grid-template-columns: repeat(3, 90px); }
-#moments-feed .image-item {
-  position: relative; border-radius: var(--radius); overflow: hidden;
-  cursor: pointer; background: var(--btn-regular-bg); aspect-ratio: 1;
+/* ---------- 2.5 时间/地点 ---------- */
+.moment-meta,
+#moments-feed .meta-row,
+#pinned-feed .meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--content-meta);
 }
-#moments-feed .image-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-#moments-feed .image-item:hover .image-img { transform: scale(1.03); }
+.moment-meta__time,
+#moments-feed .meta-row time,
+#pinned-feed .meta-row time {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-variant-numeric: tabular-nums;
+}
+.moment-meta__icon {
+  opacity: 0.7;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  flex-shrink: 0;
+}
+.moment-meta__location,
+#moments-feed .location,
+#pinned-feed .location {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1875rem;
+  font-weight: 500;
+  max-width: 8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.moment-meta__location::before,
+#moments-feed .meta-dot,
+#pinned-feed .meta-dot {
+  content: "·";
+  opacity: 0.5;
+  font-weight: 400;
+  margin-right: 0.1875rem;
+}
+
+/* ---------- 2.6 正文 ---------- */
+.moment-text {
+  color: var(--deep-text);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.moment-text p { margin: 0 0 0.5rem; }
+.moment-text p:last-child { margin-bottom: 0; }
+.moment-text a {
+  color: inherit;
+  border-bottom: 1px solid color-mix(in oklch, var(--deep-text) 18%, transparent);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.moment-text a:hover { opacity: 0.75; }
+.moment-text strong { color: var(--deep-text); font-weight: 700; }
+.moment-text em { color: var(--content-meta); font-style: italic; }
+.moment-text blockquote {
+  border-left: 2px solid color-mix(in oklch, var(--deep-text) 16%, var(--line-divider));
+  background: var(--moments-soft);
+  color: var(--content-meta);
+  border-radius: 0.875rem;
+  margin: 0.5rem 0;
+  padding: 0.75rem 0.95rem;
+  font-size: 0.875rem;
+}
+.moment-text code {
+  background: var(--moments-soft);
+  color: var(--deep-text);
+  border-radius: 0.45rem;
+  padding: 0.125rem 0.375rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+}
+:root.dark .moment-text code { background: rgb(34, 34, 34); }
+.moment-text ul, .moment-text ol { margin: 0.5rem 0; padding-left: 1.25rem; }
+.moment-text li { margin: 0.25rem 0; }
+.moment-text h1, .moment-text h2, .moment-text h3, .moment-text h4 {
+  color: var(--deep-text);
+  margin: 0.75rem 0 0.375rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.moment-text h1 { font-size: 1.125rem; }
+.moment-text h2 { font-size: 1rem; }
+.moment-text h3 { font-size: 0.9375rem; }
+.moment-text h4 { font-size: 0.875rem; }
+.moment-text img { max-width: 100%; border-radius: var(--radius-large); margin: 0.5rem 0; }
+
+/* 兼容旧版 moment-markdown 容器（历史样式） */
+#moments-feed .moment-markdown,
+#pinned-feed .moment-markdown {
+  word-break: break-word;
+}
+#moments-feed .moment-markdown p,
+#pinned-feed .moment-markdown p { margin-bottom: 0.375rem; }
+#moments-feed .moment-markdown p:last-child,
+#pinned-feed .moment-markdown p:last-child { margin-bottom: 0; }
+#moments-feed .moment-markdown img,
+#pinned-feed .moment-markdown img { border-radius: var(--radius); margin: 0.5rem 0; max-width: 100%; }
+#moments-feed .moment-markdown a,
+#pinned-feed .moment-markdown a { color: var(--primary); text-decoration: underline; }
+
+/* ---------- 2.7 图片网格 ---------- */
+.moment-images,
+#moments-feed .card-images,
+#pinned-feed .card-images {
+  display: grid;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+  padding: 0.125rem;
+  background: var(--moments-soft);
+  border: 1px solid var(--moments-border);
+  border-radius: 0.95rem;
+  overflow: hidden;
+}
+.moment-images[data-count="1"],
+#moments-feed .image-cols-1,
+#pinned-feed .image-cols-1 {
+  grid-template-columns: 1fr;
+  max-width: 22rem;
+}
+.moment-images[data-count="2"],
+#moments-feed .image-cols-2,
+#pinned-feed .image-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 28rem;
+}
+.moment-images[data-count="3"] { grid-template-columns: repeat(3, 1fr); max-width: 32rem; }
+.moment-images[data-count="4"] { grid-template-columns: repeat(2, 1fr); max-width: 22rem; }
+.moment-images[data-count="5"],
+.moment-images[data-count="6"] { grid-template-columns: repeat(3, 1fr); max-width: 28rem; }
+.moment-images[data-count="7"],
+.moment-images[data-count="8"],
+.moment-images[data-count="9"] { grid-template-columns: repeat(3, 1fr); max-width: 32rem; }
+
+.moment-image,
+#moments-feed .image-item,
+#pinned-feed .image-item {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  background: var(--line-divider);
+  border: none;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  cursor: pointer;
+}
+.moment-images[data-count="1"] .moment-image { aspect-ratio: auto; }
+.moment-images[data-count="1"] .moment-image__img,
+.moment-images[data-count="1"] .moment-image img { object-fit: unset; width: 100%; height: auto; }
+
+.moment-image__img,
+#moments-feed .image-img,
+#pinned-feed .image-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition:
+    transform 0.4s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.4s;
+  display: block;
+}
+.moment-image__img.is-loaded { opacity: 1; }
+.moment-image:hover .moment-image__img,
+#moments-feed .image-item:hover .image-img,
+#pinned-feed .image-item:hover .image-img { transform: scale(1.03); }
+.moment-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  transition: background 0.2s;
+  pointer-events: none;
+}
+.moment-image:hover::after { background: rgba(0, 0, 0, 0.08); }
+.moment-image__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--content-meta);
+  opacity: 0.4;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 0;
+}
+:root.dark .moment-image__placeholder { color: gray; }
 #moments-feed .hidden-image { display: none !important; }
 #moments-feed .has-more .image-img { filter: brightness(0.6); }
 #moments-feed .more-overlay {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-#moments-feed .more-text { font-size: 1.5rem; font-weight: 700; color: white; text-shadow: 0 2px 6px rgba(0,0,0,0.3); }
-
-#moments-feed .card-tags {
-  display: flex; flex-wrap: wrap; gap: 0.375rem;
-  padding-top: 0.625rem; border-top: 1px solid var(--border);
-}
-#moments-feed .tag-item {
-  padding: 0.25rem 0.625rem; background: transparent;
-  border: 1px solid var(--primary); border-radius: 9999px;
-  font-size: 0.75rem; color: var(--primary);
-  transition: all 0.2s ease;
-}
-#moments-feed .tag-item:hover {
-  background: color-mix(in srgb, var(--primary) 10%, transparent);
+#moments-feed .more-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* 移动端 */
-@media (max-width: 480px) {
-  #moments-feed .moment-card {
-    padding: 0.875rem 0.875rem 0.875rem 1.75rem;
-  }
-  #moments-feed .avatar-img { width: 2.25rem; height: 2.25rem; }
-  #moments-feed .user-name { font-size: 0.875rem; }
-  #moments-feed .meta-row { font-size: 0.6875rem; }
-  #moments-feed .location { max-width: 80px; }
-  #moments-feed .card-images { gap: 0.25rem; }
-  #moments-feed .more-text { font-size: 1.25rem; }
-}
-
-/* 置顶说说页面 - 卡片样式 */
-#pinned-feed .moment-card {
-  position: relative;
-  background: var(--card-bg);
-  border-radius: var(--radius-large);
-  padding: 1.25rem 1.25rem 1.25rem 2.25rem;
-  border: 2px solid #000;
-  overflow: hidden;
-  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
-}
-:root.dark #pinned-feed .moment-card { border-color: #3f3f46; }
-#pinned-feed .moment-card:hover {
-  border-color: var(--primary);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
-  transform: translateY(-2px);
-}
-:root.dark #pinned-feed .moment-card:hover {
-  border-color: #fff;
-  box-shadow: 0 4px 24px rgba(255,255,255,0.08);
-}
-#pinned-feed .card-accent-bar {
-  position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
-  background: var(--primary); opacity: 0.35; border-radius: 0 2px 2px 0;
-}
-#pinned-feed .card-header { display: flex; align-items: center; gap: 0.625rem; margin-bottom: 0.75rem; }
-#pinned-feed .card-avatar { flex-shrink: 0; }
-#pinned-feed .avatar-img {
-  width: 2.5rem; height: 2.5rem; border-radius: 50%; object-fit: cover;
-  border: 2px solid var(--primary); box-sizing: border-box;
-}
-#pinned-feed .card-user-info { flex: 1; min-width: 0; }
-#pinned-feed .user-row { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.125rem; }
-#pinned-feed .pinned-badge {
-  display: inline-flex; align-items: center; gap: 0.25rem;
-  padding: 0.125rem 0.5rem; background: var(--btn-regular-bg);
-  color: var(--btn-content); border-radius: var(--radius);
-  font-size: 0.75rem; font-weight: 600;
-}
-#pinned-feed .pinned-icon { width: 14px; height: 14px; }
-#pinned-feed .user-name { font-size: 0.9375rem; font-weight: 600; color: var(--primary); }
-#pinned-feed .meta-row { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: var(--content-meta); }
-#pinned-feed .meta-dot { opacity: 0.5; }
-#pinned-feed .location {
-  display: inline-flex; align-items: center; gap: 0.125rem;
-  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-#pinned-feed .location-icon { font-size: 0.875rem; flex-shrink: 0; width: 14px; height: 14px; }
-#pinned-feed .card-content { margin-bottom: 0.75rem; }
-#pinned-feed .moment-markdown { word-break: break-word; }
-#pinned-feed .moment-markdown p { margin-bottom: 0.375rem; }
-#pinned-feed .moment-markdown p:last-child { margin-bottom: 0; }
-#pinned-feed .moment-markdown img { border-radius: var(--radius); margin: 0.5rem 0; max-width: 100%; }
-#pinned-feed .moment-markdown a { color: var(--primary); text-decoration: underline; }
-#pinned-feed .card-images { display: grid; gap: 0.375rem; margin-bottom: 0.75rem; }
-#pinned-feed .image-cols-1 { grid-template-columns: 100px; }
-#pinned-feed .image-cols-2 { grid-template-columns: repeat(2, 100px); }
-#pinned-feed .image-cols-3 { grid-template-columns: repeat(3, 90px); }
-#pinned-feed .image-item {
-  position: relative; border-radius: var(--radius); overflow: hidden;
-  cursor: pointer; background: var(--btn-regular-bg); aspect-ratio: 1;
-}
-#pinned-feed .image-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-#pinned-feed .image-item:hover .image-img { transform: scale(1.03); }
+/* ---------- 2.8 标签 ---------- */
+.moment-tags,
+#moments-feed .card-tags,
 #pinned-feed .card-tags {
-  display: flex; flex-wrap: wrap; gap: 0.375rem;
-  padding-top: 0.625rem; border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
 }
+.moment-tag,
+#moments-feed .tag-item,
 #pinned-feed .tag-item {
-  padding: 0.25rem 0.625rem; background: transparent;
-  border: 1px solid var(--primary); border-radius: 9999px;
-  font-size: 0.75rem; color: var(--primary);
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1875rem 0.625rem;
+  background: var(--moments-soft);
+  color: var(--content-meta);
+  border: 1px solid var(--moments-border);
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
 }
+:root.dark .moment-tag { color: rgb(158, 158, 158); background: rgb(34, 34, 34); }
+.moment-tag::before,
+#moments-feed .tag-item::before {
+  content: "#";
+  opacity: 0.6;
+  margin-right: 0.0625rem;
+}
+.moment-tag:hover,
+#moments-feed .tag-item:hover,
 #pinned-feed .tag-item:hover {
-  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  background: color-mix(in oklch, var(--moments-soft) 86%, var(--page-bg));
+  color: var(--deep-text);
 }
+
+/* ---------- 2.9 操作栏 ---------- */
+.moment-actions,
+#moments-feed .card-actions,
+#pinned-feed .card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding-top: 0.625rem;
+  border-top: 1px dashed var(--line-divider);
+}
+.moment-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.75rem;
+  background: var(--moments-soft);
+  color: var(--content-meta);
+  border: 1px solid var(--moments-border);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition: 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.moment-action-btn:hover {
+  color: var(--deep-text);
+  border-color: color-mix(in oklch, var(--deep-text) 18%, var(--moments-border));
+  background: color-mix(in oklch, var(--moments-soft) 86%, var(--page-bg));
+  border-style: dashed;
+}
+.moment-action-btn:active { transform: scale(0.95); }
+.moment-action-btn :global(svg),
+.moment-action-btn svg {
+  width: 0.9375rem;
+  height: 0.9375rem;
+}
+
+/* ============================================
+ * 3. 页面骨架：moments-page / moments-banner /
+ *    moments-header / moments-body / moments-timeline
+ * ============================================ */
+.moments-page {
+  --moments-surface: color-mix(in oklch, var(--card-bg) 92%, var(--page-bg));
+  --moments-border: color-mix(in oklch, var(--line-divider) 92%, transparent);
+  --moments-soft: color-mix(in oklch, var(--btn-plain-bg-hover) 92%, var(--card-bg));
+  padding: 0.5rem 0 1rem;
+}
+
+.moments-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line-divider);
+}
+
+.moments-subscribe-btn,
+.moments-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.4rem 0.875rem;
+  color: var(--deep-text);
+  background: var(--moments-surface);
+  border: 1px solid var(--moments-border);
+  border-radius: clamp(0.95rem, 1.4vw, 1.1rem);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.2s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.moments-subscribe-btn:hover,
+.moments-back-link:hover {
+  border-color: color-mix(in oklch, var(--deep-text) 18%, var(--moments-border));
+  border-style: dashed;
+  box-shadow: 0 14px 32px -28px rgba(15, 23, 42, 0.22);
+}
+:root.dark .moments-subscribe-btn:hover,
+:root.dark .moments-back-link:hover {
+  box-shadow: 0 14px 32px -28px rgba(0, 0, 0, 0.55);
+}
+.moments-subscribe-btn:active,
+.moments-back-link:active { transform: scale(0.97); }
+.moments-subscribe-btn svg,
+.moments-back-link svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+
+.moments-banner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 14rem;
+  margin-bottom: 1.25rem;
+  border-radius: clamp(1rem, 1.6vw, 1.25rem);
+  border: 1px solid var(--moments-border);
+  background: color-mix(in oklch, var(--card-bg) 92%, var(--page-bg));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 18px 40px -34px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+}
+:root.dark .moments-banner { background: oklch(0.1728 0 0); }
+.moments-banner__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  display: block;
+}
+
+.moments-header {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1.25rem;
+}
+.moments-header__user {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 0.875rem;
+  margin-left: auto;
+  padding-bottom: 1rem;
+  min-width: 0;
+}
+.moments-header__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.18rem;
+  min-width: 0;
+  color: #fff;
+  text-align: right;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+.moments-header__name {
+  font-size: 1.25rem;
+  font-weight: 760;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+.moments-header__stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  opacity: 0.92;
+}
+.moments-header__stats svg { width: 0.875rem; height: 0.875rem; }
+.moments-header__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 5rem;
+  height: 5rem;
+  border-radius: 1.15rem;
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: var(--card-bg);
+  overflow: hidden;
+  box-shadow: 0 16px 32px -24px rgba(0, 0, 0, 0.46);
+  transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.moments-header__avatar-wrap:hover { transform: translateY(-1px); }
+.moments-header__avatar-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+:root.dark .moments-header__avatar-wrap { border-color: rgb(22, 22, 22); }
+.moments-header__avatar-wrap--user {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 1rem;
+}
+
+.moments-body {
+  position: relative;
+  z-index: 2;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.moments-timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.moments-timeline::before {
+  content: "";
+  position: absolute;
+  top: 2.5rem;
+  bottom: 0.5rem;
+  left: 1.625rem;
+  width: 1px;
+  opacity: 0.9;
+  background: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--line-divider) 92%, transparent) 0 8px,
+    transparent 8px 14px
+  );
+}
+
+/* 顶部置顶预览（参考 xuioo 的 moments-pinned-area） */
+.moments-pinned-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  background: var(--moments-surface);
+  border: 1px solid var(--moments-border);
+  border-radius: clamp(1rem, 1.4vw, 1.2rem);
+  color: var(--deep-text);
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    border-color 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+.moments-pinned-area:hover {
+  border-color: color-mix(in oklch, var(--deep-text) 18%, var(--moments-border));
+  border-style: dashed;
+  box-shadow: 0 14px 32px -28px rgba(15, 23, 42, 0.22);
+}
+:root.dark .moments-pinned-area:hover {
+  box-shadow: 0 14px 32px -28px rgba(0, 0, 0, 0.55);
+}
+.moments-pinned-area:active { transform: scale(0.99); }
+.moments-pinned-area__avatar {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in oklch, var(--page-bg) 75%, var(--line-divider));
+  box-shadow: 0 8px 18px -16px rgba(15, 23, 42, 0.34);
+}
+:root.dark .moments-pinned-area__avatar { border-color: rgb(11, 11, 11); }
+.moments-pinned-area__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.moments-pinned-area__label {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 0.3125rem 0.625rem;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--content-meta);
+  background: var(--moments-soft);
+  border: 1px solid var(--moments-border);
+  border-radius: 999px;
+}
+.moments-pinned-area__title {
+  font-size: 1.125rem;
+  font-weight: 750;
+  color: var(--deep-text);
+}
+.moments-pinned-area__count {
+  font-size: 0.75rem;
+  color: var(--content-meta);
+}
+.moments-pinned-area__arrow {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--content-meta);
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), color 0.3s;
+}
+.moments-pinned-area:hover .moments-pinned-area__arrow {
+  color: var(--deep-text);
+  transform: translate(4px);
+}
+
+/* ============================================
+ * 4. 移动端响应
+ * ============================================ */
+@media (max-width: 640px) {
+  .moments-banner { height: 10.5rem; margin-bottom: 1rem; }
+  .moments-header { gap: 0.625rem; padding: 0 0.875rem; }
+  .moments-header__avatar-wrap,
+  .moments-header__avatar-wrap--user {
+    width: 3.75rem;
+    height: 3.75rem;
+    border-radius: 0.75rem;
+  }
+  .moments-header__name { font-size: 1rem; }
+  .moments-timeline { gap: 0.875rem; }
+  .moments-timeline::before { left: 1.25rem; }
+}
+
 @media (max-width: 480px) {
-  #pinned-feed .moment-card { padding: 0.875rem 0.875rem 0.875rem 1.75rem; }
-  #pinned-feed .avatar-img { width: 2.25rem; height: 2.25rem; }
+  .moment-item,
+  #moments-feed .moment-card,
+  #pinned-feed .moment-card {
+    padding: 0.875rem;
+    gap: 0.5rem;
+  }
+  .moment-avatar,
+  #moments-feed .card-avatar,
+  #pinned-feed .card-avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+  .moment-name,
+  #moments-feed .user-name,
   #pinned-feed .user-name { font-size: 0.875rem; }
+  .moment-meta,
+  #moments-feed .meta-row,
   #pinned-feed .meta-row { font-size: 0.6875rem; }
-  #pinned-feed .location { max-width: 80px; }
+  .moment-meta__location,
+  #moments-feed .location,
+  #pinned-feed .location { max-width: 5rem; }
+  .moment-images,
+  #moments-feed .card-images,
   #pinned-feed .card-images { gap: 0.25rem; }
+  #moments-feed .more-text { font-size: 1.25rem; }
 }

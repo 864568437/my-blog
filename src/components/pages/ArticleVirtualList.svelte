@@ -319,10 +319,9 @@ $effect(() => {
 										{#if post.tags.length > 0}
 											<span class="ag-meta-gap" aria-hidden="true"></span>
 											{#each post.tags.slice(0, 2) as tag, i (tag.name)}
-												{#if i > 0}
-													<span class="ag-meta-divider" aria-hidden="true">/</span>
-												{/if}
-												<span class="ag-tag">{tag.name}</span>
+												<a class="ag-tag-pill" href="/tags/{tag.name}/">
+													#{tag.name}
+												</a>
 											{/each}
 											{#if post.tags.length > 2}
 												<span class="ag-tag-more" aria-hidden="true">+{post.tags.length - 2}</span>
@@ -346,27 +345,9 @@ $effect(() => {
 					<article
 						class="article-list-row-card"
 						class:is-pinned={isPinned}
+						class:no-cover={!post.imageUrl}
 						data-post-id={post.id}
 					>
-						{#if post.imageUrl}
-							<div
-								class="article-list-row-card__bg-wrapper"
-							>
-								<img
-									class="article-list-row-card__bg-image"
-									src={post.imageUrl}
-									alt={`文章配图：${post.title}`}
-									loading="lazy"
-									decoding="async"
-									data-api-index="0"
-									referrerpolicy={post.imageReferrerPolicy || undefined}
-									onload={(event) => handleImageLoad(event, post.id)}
-									onerror={(event) => handleDetailImageError(event, post.imageApiUrls)}
-								/>
-								<div class="article-list-row-card__gradient-overlay"></div>
-							</div>
-						{/if}
-
 						<a
 							href={post.url}
 							class="article-list-row-card__content"
@@ -375,7 +356,7 @@ $effect(() => {
 							<div class="article-list-row-card__layer-1">
 								{#if isPinned}
 									<span class="article-list-row-card__pinned-badge" aria-label="置顶文章">
-										<Icon icon="material-symbols:pinboard" size="sm" />
+										<Icon icon="material-symbols:push-pin-rounded" size="xs" />
 										<span>{i18n(I18nKey.pinned)}</span>
 									</span>
 								{/if}
@@ -390,32 +371,63 @@ $effect(() => {
 							</div>
 
 							<div class="article-list-row-card__layer-2">
-								<span class="al-category" style={getCategoryColor(post.category)}>
-									#{post.category}
-								</span>
-								<span class="article-list-row-card__meta-item">
+								{#if post.category}
+									<span class="al-meta-item al-category" style={getCategoryColor(post.category)}>
+										<Icon icon="material-symbols:folder-rounded" size="sm" />
+										<span class="al-meta-text">{post.category}</span>
+									</span>
+								{/if}
+								<span class="al-meta-item">
 									<Icon icon="material-symbols:calendar-month-rounded" size="sm" />
 									<time datetime={post.publishedIso}>{post.publishedText}</time>
 								</span>
-								{#if post.tags.length > 0}
-									{#each post.tags.slice(0, 3) as tag, i (tag.name)}
-										{#if i > 0}
-											<span class="al-meta-divider" aria-hidden="true">/</span>
-										{/if}
-										<span class="al-tag">{tag.name}</span>
-									{/each}
-									{#if post.tags.length > 3}
-										<span class="al-tag-more" aria-hidden="true">+{post.tags.length - 3}</span>
-									{/if}
-								{/if}
 							</div>
 
-							<div class="article-list-row-card__layer-3">
-								<p class="article-list-row-card__description">
-									{post.description}
-								</p>
-							</div>
+							{#if post.description}
+								<div class="article-list-row-card__layer-3">
+									<p class="article-list-row-card__description">
+										{post.description}
+									</p>
+								</div>
+							{/if}
+
+							{#if post.tags.length > 0}
+								<div class="article-list-row-card__layer-4">
+									{#each post.tags.slice(0, 4) as tag (tag.name)}
+										<a href={tag.url} class="al-tag-pill">#{tag.name}</a>
+									{/each}
+									{#if post.tags.length > 4}
+										<span class="al-tag-more">+{post.tags.length - 4}</span>
+									{/if}
+								</div>
+							{/if}
 						</a>
+
+						{#if post.imageUrl}
+							<a
+								href={post.url}
+								class="article-list-row-card__cover"
+								tabindex="-1"
+								aria-hidden="true"
+							>
+								<div
+									class="article-list-row-card__cover-image"
+									class:skeleton-shimmer={showLoadingSkeleton}
+								>
+									<img
+										class="article-list-row-card__img"
+										src={post.imageUrl}
+										alt={`文章配图：${post.title}`}
+										loading="lazy"
+										decoding="async"
+										data-api-index="0"
+										referrerpolicy={post.imageReferrerPolicy || undefined}
+										onload={(event) => handleImageLoad(event, post.id)}
+										onerror={(event) => handleDetailImageError(event, post.imageApiUrls)}
+									/>
+								</div>
+							</a>
+						{/if}
 					</article>
 				{/each}
 			</div>
