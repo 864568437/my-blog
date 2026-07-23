@@ -5,17 +5,26 @@
    ============================================ */
 
 .post-card-wrapper {
-	border: 2px solid #000 !important;
-	border-radius: var(--radius-large) !important;
+	border: 1px solid var(--sidebar-card-border, oklch(85% 0 0)) !important;
+	border-radius: var(--sidebar-card-radius, 0.75rem) !important;
+	background: var(--sidebar-card-bg, oklch(100% 0 0)) !important;
+	box-shadow: var(--sidebar-card-shadow, 0 4px 12px rgba(0, 0, 0, 0.04)) !important;
 	overflow: hidden !important;
-	transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+	transition:
+		border-color 0.3s ease,
+		box-shadow 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+		transform 0.35s cubic-bezier(0.32, 0.72, 0, 1),
+		background-color 0.3s ease !important;
 }
 .post-card-wrapper:hover {
-	transform: translateY(-2px) !important;
+	border-color: var(--sidebar-card-border-hover, var(--primary, #000)) !important;
+	box-shadow: var(--sidebar-card-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.08)) !important;
+	transform: translateY(-1px) !important;
 }
 
 :root.dark .post-card-wrapper {
-	border-color: #fff !important;
+	border-color: var(--sidebar-card-border, oklch(25% 0 0)) !important;
+	background: var(--sidebar-card-bg, oklch(8% 0 0)) !important;
 }
 
 /* === Hover Arrow === */

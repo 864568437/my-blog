@@ -128,19 +128,21 @@ const subType = item.subject_type;
 <style>
 	.bm-card {
 		display: block;
-		border-radius: var(--radius-large);
+		border-radius: var(--sidebar-card-radius, 0.75rem);
 		overflow: hidden;
 		text-decoration: none;
 		color: inherit;
-		transition: transform 0.22s cubic-bezier(.23,1,.32,1),
-		            box-shadow 0.22s cubic-bezier(.23,1,.32,1);
+		box-shadow: var(--sidebar-card-shadow, 0 4px 12px rgba(0, 0, 0, 0.04));
+		transition:
+			transform 0.22s cubic-bezier(.23,1,.32,1),
+			box-shadow 0.22s cubic-bezier(.23,1,.32,1);
 	}
 	.bm-card:hover {
-		transform: translateY(-3px);
-		box-shadow: 0 8px 25px -6px rgba(0,0,0,.12), 0 0 0 1px var(--primary);
+		transform: translateY(-1px);
+		box-shadow: var(--sidebar-card-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.08));
 	}
 	:global(html.dark) .bm-card:hover {
-		box-shadow: 0 8px 25px -6px rgba(0,0,0,.35), 0 0 0 1px var(--primary);
+		box-shadow: var(--sidebar-card-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.5));
 	}
 
 	/* ===== 封面层 ===== */

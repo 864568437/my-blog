@@ -68,7 +68,7 @@ const scoreText = score > 0 ? `${score}`.replace(/\.0$/, "") : "";
 	}
 
 	.book-card:hover {
-		transform: translateY(-4px);
+		transform: translateY(-1px);
 	}
 	:root.dark .book-card:hover .book-title {
 		color: var(--primary);
@@ -78,19 +78,15 @@ const scoreText = score > 0 ? `${score}`.replace(/\.0$/, "") : "";
 	.book-cover-wrap {
 		position: relative;
 		aspect-ratio: 3/4;
-		border-radius: 6px;
+		border-radius: var(--sidebar-card-radius, 0.75rem);
 		overflow: hidden;
-		box-shadow:
-			0 2px 8px rgba(0,0,0,0.10),
-			0 1px 2px rgba(0,0,0,0.06);
+		box-shadow: var(--sidebar-card-shadow, 0 4px 12px rgba(0, 0, 0, 0.04));
 		transition: box-shadow 0.2s ease;
 		background: var(--btn-regular-bg);
 	}
 
 	.book-card:hover .book-cover-wrap {
-		box-shadow:
-			0 8px 25px rgba(0,0,0,0.15),
-			0 2px 6px rgba(0,0,0,0.08);
+		box-shadow: var(--sidebar-card-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.08));
 	}
 
 	.book-cover-img {
@@ -182,12 +178,12 @@ const scoreText = score > 0 ? `${score}`.replace(/\.0$/, "") : "";
 	}
 
 	:root.dark .book-cover-wrap {
-		border: 1px solid #3f3f46;
-		box-shadow: 0 2px 8px rgba(255,255,255,0.03);
+		border: 1px solid var(--sidebar-card-border, oklch(25% 0 0));
+		box-shadow: var(--sidebar-card-shadow, 0 4px 12px rgba(0, 0, 0, 0.3));
 	}
 	:root.dark .book-card:hover .book-cover-wrap {
-		border-color: #fff;
-		box-shadow: 0 8px 25px rgba(255,255,255,0.1);
+		border-color: var(--sidebar-card-border-hover, var(--primary));
+		box-shadow: var(--sidebar-card-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.5));
 	}
 
 	@media (max-width: 480px) {
