@@ -123,15 +123,25 @@
 /* 防止双层：widget-card 内部嵌套的 article-catalog 容器自身不再带卡片外观
    （统一由外层 widget-card 提供），适用于所有页面。
    参考站 blog.xuioo.com 的 全部文章 是放在左侧栏的普通 widget，
-   它的内部 article-catalog-container 不应再带独立卡片外观。 */
+   它的内部 article-catalog-container 不应再带独立卡片外观。
+   使用 !important 确保在 wallpaper-transparent 全屏透明模式下也能正确重置
+   （该模式会通过 var(--card-bg) 给内层容器重新着色导致双层）。 */
 .widget-card .article-catalog-wrapper,
 .widget-card .article-catalog-container {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  box-shadow: none;
-  padding: 0;
-  margin: 0;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* article-catalog-header 在 widget-card 内部时去掉自身 border-bottom，
+   避免与 widget-card 自身的 border 形成双层边框视觉 */
+.widget-card .article-catalog-header {
+  border-bottom: none !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
 }
 
 /* ---------- Profile 特殊处理 ---------- */
