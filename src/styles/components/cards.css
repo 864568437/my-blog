@@ -181,14 +181,4 @@
       background-color 0.2s ease,
       backdrop-filter 0.2s ease;
   }
-
-  /* 文章目录容器（侧栏 TOC） */
-  .wallpaper-transparent .article-catalog-container {
-    background: var(--card-mix-overlay) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition:
-      background 0.2s ease,
-      backdrop-filter 0.2s ease;
-  }
 }

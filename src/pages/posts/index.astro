@@ -2,8 +2,8 @@
 import { render } from "astro:content";
 import * as path from "node:path";
 import type { ImageMetadata } from "astro";
+import LayoutSwitch from "@/components/controls/LayoutSwitch.svelte";
 import PageHeader from "@/components/common/PageHeader.astro";
-import AnimatedTabs from "@/components/controls/AnimatedTabs.svelte";
 import ArticleVirtualList from "@/components/pages/ArticleVirtualList.svelte";
 import { siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
@@ -117,25 +117,21 @@ const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
 <MainGridLayout title={title} description={description}>
 	<section class="article-list-page">
 		<header class="article-list-page__header">
-				<div class="article-list-page__header-left">
-					<PageHeader
-						title={title}
-						eyebrow="Article Index"
-						variant="stacked"
-						breadcrumbs={[{ name: title, icon: "material-symbols:article-outline-rounded" }]}
-					>
-						<div class="article-list-page__controls">
-							<div class:list={["article-list-page__tabs", { "is-hidden": !allowLayoutSwitch }]}>
-								<AnimatedTabs client:load activeTab={defaultLayout === "grid" ? "grid" : "list"} />
-							</div>
-							<div class="article-list-page__total" aria-label={`共 ${articleListPosts.length} 篇文章`}>
-								<span class="article-list-page__total-number">{articleListPosts.length}</span>
-								<span class="article-list-page__total-label">篇文章</span>
-							</div>
-						</div>
-					</PageHeader>
+			<PageHeader
+				title={title}
+				eyebrow="Article Index"
+				variant="stacked"
+				breadcrumbs={[{ name: title, icon: "material-symbols:article-outline-rounded" }]}
+			>
+				<div class="article-list-page__total" aria-label={`共 ${articleListPosts.length} 篇文章`}>
+					<span class="article-list-page__total-number">{articleListPosts.length}</span>
+					<span class="article-list-page__total-label">篇文章</span>
 				</div>
-			</header>
+				{allowLayoutSwitch && (
+					<LayoutSwitch client:load activeLayout={defaultLayout === "grid" ? "grid" : "list"} />
+				)}
+			</PageHeader>
+		</header>
 
 		<ArticleVirtualList
 			client:load

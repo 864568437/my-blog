@@ -125,6 +125,8 @@ const finalCrumbs: BreadcrumbItem[] = (() => {
 			{eyebrow && <span class="page-title__eyebrow">{eyebrow}</span>}
 			<h1 id={id} class="page-title__text">{title}</h1>
 		</div>
-		<slot />
+		<div class="page-title__actions">
+			<slot />
+		</div>
 	</div>
 </header>
