@@ -130,14 +130,28 @@
   }
 
   /* 浮动坞抽屉（分类 / 公告 / 音乐 / TOC / 全部文章） */
-  .wallpaper-transparent .dock-drawer {
-    background-color: var(--card-mix-overlay) !important;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition:
-      background-color 0.2s ease,
-      backdrop-filter 0.2s ease;
-  }
+.wallpaper-transparent .dock-drawer {
+	background-color: var(--card-mix-overlay) !important;
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	transition:
+		background-color 0.2s ease,
+		backdrop-filter 0.2s ease;
+}
+
+/* 文章页：支持与分享 / 许可证 / 评论卡片
+ * 这些卡片原本使用固定 --license-block-bg 或独立背景
+ * 在全屏壁纸模式下需要统一接入 --card-mix-overlay 以响应透明度调节
+ */
+.wallpaper-transparent .license-container,
+.wallpaper-transparent .sponsor-share-block {
+	background-color: var(--card-mix-overlay) !important;
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	transition:
+		background-color 0.2s ease,
+		backdrop-filter 0.2s ease;
+}
 
   /* 项目导航卡片（/projects/） */
   .wallpaper-transparent .tools-card {
@@ -180,5 +194,42 @@
     transition:
       background-color 0.2s ease,
       backdrop-filter 0.2s ease;
+  }
+
+  /* 文章页：支持与分享 / 许可证
+   * 这两个区域原本使用固定 --license-block-bg
+   * 在全屏壁纸模式下需要统一接入 --card-mix-overlay 以响应透明度调节
+   */
+  .wallpaper-transparent .license-container,
+  .wallpaper-transparent .sponsor-share-block {
+    background-color: var(--card-mix-overlay) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition:
+      background-color 0.2s ease,
+      backdrop-filter 0.2s ease;
+  }
+
+  /* 文章页：评论区（Waline / Twikoo / Artalk）
+   * 评论系统 UI 自带多层白色背景会盖住 card-base
+   * 在全屏壁纸模式下需要将评论容器及其子元素背景设为透明，让 card-mix-overlay 透出
+   */
+  .wallpaper-transparent #waline,
+  .wallpaper-transparent #waline > *,
+  .wallpaper-transparent #waline .wl-container,
+  .wallpaper-transparent #waline .wl-editor,
+  .wallpaper-transparent #waline .wl-input,
+  .wallpaper-transparent #waline .wl-card,
+  .wallpaper-transparent #waline .wl-comment,
+  .wallpaper-transparent #waline .wl-panel,
+  .wallpaper-transparent #waline .wl-meta,
+  .wallpaper-transparent #tcomment,
+  .wallpaper-transparent #tcomment > *,
+  .wallpaper-transparent .tk-comments-container,
+  .wallpaper-transparent .tk-comment,
+  .wallpaper-transparent .tk-input {
+    background: transparent !important;
+    background-color: transparent !important;
+    transition: background 0.2s ease, background-color 0.2s ease;
   }
 }
