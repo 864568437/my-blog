@@ -121,6 +121,16 @@ const socialLinks = profileConfig.links.filter(
     background: oklch(0.18 0 0 / 0.88);
   }
 
+  /* 全屏壁纸透明模式由 cards.css 全局规则处理
+   * 这里仅补充 transition 声明保持与其他卡片同步
+   *（background 和 background-color 都在 cards.css 中用 !important 简写压制）
+   */
+  :global(.wallpaper-transparent) .profile-card {
+    transition:
+      background-color 0.2s ease,
+      backdrop-filter 0.2s ease;
+  }
+
   .profile-card__inner {
     display: flex;
     flex-direction: column;

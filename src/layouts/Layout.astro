@@ -228,6 +228,12 @@ const siteLang = lang.replace("_", "-");
       const hue = localStorage.getItem("hue") || configHue;
       document.documentElement.style.setProperty("--hue", hue);
 
+      // Load text glow strength (夜晚模式文字发光亮度 0-1)
+      const storedGlow = localStorage.getItem("textGlowStrength");
+      const textGlowStrength = storedGlow !== null ? Number.parseFloat(storedGlow) : 0.5;
+      const safeGlow = Number.isFinite(textGlowStrength) ? Math.max(0, Math.min(1, textGlowStrength)) : 0.5;
+      document.documentElement.style.setProperty("--text-glow-strength", String(safeGlow));
+
       // calculate the --banner-height-extend, which needs to be a multiple of 4 to avoid blurry text
       // 使用更准确的窗口高度计算
       function calculateBannerHeightExtend() {
@@ -635,7 +641,7 @@ function disableAnimation() {
   }
   setClickOutsideToClose("display-setting", [
     "display-setting",
-    "display-settings-switch",
+    "dock-hue-btn",
   ]);
   // 导航菜单由 NavMenuPanel.astro 自己处理点击外部关闭
   setClickOutsideToClose("search-panel", [

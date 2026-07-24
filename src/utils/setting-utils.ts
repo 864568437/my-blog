@@ -1128,6 +1128,43 @@ export function applyOverlayCardOpacityToDocument(opacity: number): void {
 	applyOverlayVarToRootAndWrapper("--overlay-card-opacity", `${opacity}%`);
 }
 
+// Text glow strength (夜晚模式文字发光亮度 0-1)
+export function getDefaultTextGlowStrength(): number {
+	return 0.5;
+}
+
+export function getStoredTextGlowStrength(): number {
+	if (
+		typeof localStorage === "undefined" ||
+		typeof localStorage.getItem !== "function"
+	) {
+		return getDefaultTextGlowStrength();
+	}
+	const stored = localStorage.getItem("textGlowStrength");
+	if (stored === null) return getDefaultTextGlowStrength();
+	const parsed = Number.parseFloat(stored);
+	return Number.isFinite(parsed) ? Math.max(0, Math.min(1, parsed)) : getDefaultTextGlowStrength();
+}
+
+export function setTextGlowStrength(strength: number): void {
+	if (typeof document === "undefined") return;
+	const clamped = Math.max(0, Math.min(1, strength));
+	document.documentElement.style.setProperty(
+		"--text-glow-strength",
+		String(clamped),
+	);
+	if (
+		typeof localStorage !== "undefined" &&
+		typeof localStorage.setItem === "function"
+	) {
+		localStorage.setItem("textGlowStrength", String(clamped));
+	}
+}
+
+export function applyStoredTextGlowStrength(): void {
+	setTextGlowStrength(getStoredTextGlowStrength());
+}
+
 // 在切换到 overlay 模式或初始化时,把已存储的 overlay 值同步到
 // documentElement 与 #wallpaper-wrapper,避免内联样式遮挡滑块效果
 export function applyStoredOverlayValues(): void {

@@ -15,6 +15,7 @@ import {
 	getDefaultOverlayCardOpacity,
 	getDefaultOverlayOpacity,
 	getDefaultSakuraEnabled,
+	getDefaultTextGlowStrength,
 	getDefaultWallpaperCarouselEnabled,
 	getDefaultWavesEnabled,
 	getHue,
@@ -24,6 +25,7 @@ import {
 	getStoredOverlayCardOpacity,
 	getStoredOverlayOpacity,
 	getStoredSakuraEnabled,
+	getStoredTextGlowStrength,
 	getStoredWallpaperCarouselEnabled,
 	getStoredWallpaperMode,
 	getStoredWavesEnabled,
@@ -34,6 +36,7 @@ import {
 	setOverlayCardOpacity,
 	setOverlayOpacity,
 	setSakuraEnabled,
+	setTextGlowStrength,
 	setWallpaperCarouselEnabled,
 	setWallpaperMode,
 	setWavesEnabled,
@@ -52,6 +55,8 @@ const defaultLayout = siteConfig.postListLayout.defaultMode;
 let mounted = $state(false);
 let isSmallScreen = $state(false);
 let isSwitching = $state(false);
+let textGlowStrength = $state(getStoredTextGlowStrength());
+const defaultTextGlowStrength = getDefaultTextGlowStrength();
 let wavesEnabled = $state(true);
 const defaultWavesEnabled = getDefaultWavesEnabled();
 let gradientEnabled = $state(true);
@@ -378,6 +383,23 @@ $effect(() => {
             <input aria-label={i18n(I18nKey.themeColor)} type="range" min="0" max="360" bind:value={hue}
                    class="slider" id="colorSlider" step="5" style="width: 100%">
         </div>
+
+        <!-- 夜晚文字发光亮度（仅在夜晚模式生效） -->
+        <div class="mt-2 flex items-center gap-2">
+            <div class="flex items-center gap-1.5 text-xs font-medium text-(--btn-content) opacity-80 min-w-16">
+                <Icon icon="material-symbols:wb-twilight-outline" class="text-[0.95rem]"></Icon>
+                <span>文字发光</span>
+            </div>
+            <div class="flex-1 h-5 px-1 bg-[oklch(0.85_0.05_var(--hue))] dark:bg-[oklch(0.30_0.06_var(--hue))] rounded-sm select-none">
+                <input aria-label="文字发光亮度" type="range" min="0" max="100" step="1"
+                       value={Math.round(textGlowStrength * 100)}
+                       oninput={(e) => { textGlowStrength = Number((e.currentTarget as HTMLInputElement).value) / 100; setTextGlowStrength(textGlowStrength); }}
+                       class="slider w-full" />
+            </div>
+            <div class="w-9 h-6 bg-(--btn-regular-bg) rounded-md flex justify-center font-bold text-[0.7rem] items-center text-(--btn-content)">
+                {Math.round(textGlowStrength * 100)}
+            </div>
+        </div>
     </div>
     {/if}
 
@@ -498,7 +520,7 @@ $effect(() => {
                     <input
                         aria-label={i18n(I18nKey.overlayCardOpacity)}
                         type="range"
-                        min="20"
+                        min="0"
                         max="100"
                         step="1"
                         value={Math.round(overlayCardOpacity)}

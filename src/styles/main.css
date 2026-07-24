@@ -113,6 +113,34 @@
 	.section-label::before { content: "[ "; }
 	.section-label::after  { content: " ]"; }
 
+	/* 夜晚模式文字发光：仅在 .dark 根类下生效
+	 * 发光强度由 --text-glow-strength (0-1) 控制
+	 * 强度 0 时 text-shadow 为透明，不渲染
+	 */
+	:root.dark body,
+	:root.dark .text-glow-target,
+	:root.dark p,
+	:root.dark h1,
+	:root.dark h2,
+	:root.dark h3,
+	:root.dark h4,
+	:root.dark h5,
+	:root.dark h6,
+	:root.dark span:not(.no-glow),
+	:root.dark a,
+	:root.dark li,
+	:root.dark td,
+	:root.dark th,
+	:root.dark label,
+	:root.dark .cb__link,
+	:root.dark .cb__current,
+	:root.dark .cb__sep,
+	:root.dark .page-title__text,
+	:root.dark .page-title__eyebrow {
+		text-shadow: var(--text-glow);
+		transition: text-shadow 0.25s ease;
+	}
+
 	.btn-line {
 		@apply inline-flex items-center justify-center px-4 py-1.5 rounded-full
 		       border border-(--line-divider) text-(--deep-text)

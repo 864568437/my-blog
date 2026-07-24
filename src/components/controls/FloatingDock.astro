@@ -78,6 +78,12 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 		<span class="dock-btn-label">留言</span>
 	</button>
 
+	<!-- 主题色 (常驻在留言下面) -->
+	<button class="dock-btn" id="dock-hue-btn" aria-label="主题色" type="button" data-tooltip="主题色">
+		<span class="dock-btn-icon"><Icon name="material-symbols:palette-outline" class="text-3xl" /></span>
+		<span class="dock-btn-label">主题色</span>
+	</button>
+
 	<!-- 跳到评论 (条件显示) -->
 	<button class="dock-btn dock-btn-comment hide" id="dock-comment-btn" aria-label="Comments" type="button" data-tooltip="跳到评论">
 		<span class="dock-btn-icon"><Icon name="material-symbols:chat-bubble-outline" class="text-3xl" /></span>
@@ -105,12 +111,6 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 			<button class="dock-btn" id="dock-search-btn" aria-label={i18n(I18nKey.search)} type="button" data-tooltip={i18n(I18nKey.search)}>
 				<span class="dock-btn-icon"><Icon name="material-symbols:search" class="text-3xl" /></span>
 				<span class="dock-btn-label">搜索</span>
-			</button>
-
-			<!-- 主题色 -->
-			<button class="dock-btn" id="dock-hue-btn" aria-label="主题色" type="button" data-tooltip="主题色">
-				<span class="dock-btn-icon"><Icon name="material-symbols:palette-outline" class="text-3xl" /></span>
-				<span class="dock-btn-label">主题色</span>
 			</button>
 
 			<!-- 分类 -->
@@ -315,7 +315,7 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 			setExpanded(false);
 		});
 
-		// 主题色面板切换
+		// 主题色面板切换（常驻按钮，点击展开/收起面板）
 		document.getElementById("dock-hue-btn")?.addEventListener("click", (e) => {
 			e.stopPropagation();
 			const panel = document.getElementById("display-setting");

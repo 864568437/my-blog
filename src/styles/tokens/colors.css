@@ -3,7 +3,7 @@
 
 :root {
   --hue: 250;
-  
+
   --primary: oklch(0.55 0.12 var(--hue));
   --page-bg: oklch(1 0 0);
   --card-bg: transparent;
@@ -26,6 +26,16 @@
 
   --deep-text: oklch(0.25 0.02 var(--hue));
   --title-active: oklch(0.55 0.12 var(--hue));
+
+  /* 全局文字色阶：缺失会导致面包屑/正文/侧边栏出现默认黑色 fallback */
+  --text-primary: var(--deep-text);
+  --text-secondary: var(--content-meta);
+  --text-muted: var(--content-meta);
+
+  /* 文字发光（夜晚模式）：默认 0，白天不发光；夜晚通过 --text-glow-strength 控制 */
+  --text-glow-color: oklch(0.75 0.14 var(--hue));
+  --text-glow-strength: 0;
+  --text-glow: 0 0 0 transparent;
 
   --line-divider: oklch(0.85 0.02 var(--hue));
   --line-color: oklch(0.85 0.02 var(--hue));
@@ -132,8 +142,20 @@
   --card-bg: transparent;
   --card-bg-transparent: transparent;
 
-  --deep-text: oklch(0.85 0.02 var(--hue));
+  /* 夜晚模式：纯白文字（最高亮度为 0.98，让饱和度滑条能调至接近全白） */
+  --deep-text: oklch(0.92 0.005 var(--hue));
   --title-active: oklch(0.75 0.14 var(--hue));
+
+  /* 文字色阶：夜晚使用 deep-text 作为 primary，避免黑色 fallback */
+  --text-primary: var(--deep-text);
+  --text-secondary: var(--content-meta);
+  --text-muted: var(--content-meta);
+
+  /* 夜晚模式文字发光：基于主题色相的柔和光晕 */
+  --text-glow-color: oklch(0.75 0.14 var(--hue));
+  --text-glow-strength: 0.5;
+  --text-glow:
+    0 0 calc(var(--text-glow-strength, 0) * 4px) color-mix(in srgb, var(--text-glow-color) calc(var(--text-glow-strength, 0) * 60%), transparent);
 
   --btn-content: oklch(0.75 0.14 var(--hue));
   --btn-regular-bg: transparent;

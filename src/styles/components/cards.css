@@ -51,20 +51,31 @@
   }
 
   /* ----- 全屏壁纸模式下的卡片背景覆盖 -----
-   * 每条规则只声明需要的效果（背景 / 模糊），不触 border / box-shadow / 内容
-   * 全部加 0.2s 过渡，拖动滑块时不突兀
+   * 统一规则：
+   * 1. 背景全部用 background-color（子属性），便于 transition 精确控制
+   * 2. transition 全部统一为 background-color + backdrop-filter，0.2s ease
+   * 3. 全部加 !important 确保覆盖组件内 scoped style
+   * 4. 全部加 backdrop-filter: blur(12px) 保持视觉一致
    */
 
   /* 主内容卡片（MainGridLayout 内层） */
   .wallpaper-transparent .card-base {
     background-color: var(--card-mix-overlay) !important;
-    transition: background-color 0.2s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition:
+      background-color 0.2s ease,
+      backdrop-filter 0.2s ease;
   }
 
   /* 工具按钮卡片 */
   .wallpaper-transparent .btn-card {
     background-color: var(--card-mix-overlay) !important;
-    transition: background-color 0.2s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition:
+      background-color 0.2s ease,
+      backdrop-filter 0.2s ease;
   }
 
   /* 动态卡片 */
@@ -103,17 +114,21 @@
 
   /* 文章列表卡片 */
   .wallpaper-transparent .article-list-row-card {
-    background: var(--card-mix-overlay) !important;
-    transition: background 0.2s ease;
+    background-color: var(--card-mix-overlay) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition:
+      background-color 0.2s ease,
+      backdrop-filter 0.2s ease;
   }
 
   /* 侧边栏 widget 卡片 */
   .wallpaper-transparent .widget-card {
-    background: var(--card-mix-overlay) !important;
+    background-color: var(--card-mix-overlay) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     transition:
-      background 0.2s ease,
+      background-color 0.2s ease,
       backdrop-filter 0.2s ease;
   }
 
@@ -123,53 +138,49 @@
     background-color: var(--card-mix-overlay) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    /* 边框不动：不写 border / box-shadow 相关属性 */
     transition:
       background-color 0.2s ease,
       backdrop-filter 0.2s ease;
   }
 
   /* 浮动坞抽屉（分类 / 公告 / 音乐 / TOC / 全部文章） */
-.wallpaper-transparent .dock-drawer {
-	background-color: var(--card-mix-overlay) !important;
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
-	transition:
-		background-color 0.2s ease,
-		backdrop-filter 0.2s ease;
-}
-
-/* 文章页：支持与分享 / 许可证 / 评论卡片
- * 这些卡片原本使用固定 --license-block-bg 或独立背景
- * 在全屏壁纸模式下需要统一接入 --card-mix-overlay 以响应透明度调节
- */
-.wallpaper-transparent .license-container,
-.wallpaper-transparent .sponsor-share-block {
-	background-color: var(--card-mix-overlay) !important;
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
-	transition:
-		background-color 0.2s ease,
-		backdrop-filter 0.2s ease;
-}
-
-  /* 项目导航卡片（/projects/） */
-  .wallpaper-transparent .tools-card {
-    background: var(--card-mix-overlay) !important;
+  .wallpaper-transparent .dock-drawer {
+    background-color: var(--card-mix-overlay) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     transition:
-      background 0.2s ease,
+      background-color 0.2s ease,
+      backdrop-filter 0.2s ease;
+  }
+
+  /* 文章页：支持与分享 / 许可证 */
+  .wallpaper-transparent .license-container,
+  .wallpaper-transparent .sponsor-share-block {
+    background-color: var(--card-mix-overlay) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition:
+      background-color 0.2s ease,
+      backdrop-filter 0.2s ease;
+  }
+
+  /* 项目导航卡片（/projects/） */
+  .wallpaper-transparent .tools-card {
+    background-color: var(--card-mix-overlay) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition:
+      background-color 0.2s ease,
       backdrop-filter 0.2s ease;
   }
 
   /* 文章卡片包装（/posts/ 列表） */
   .wallpaper-transparent .post-card-wrapper {
-    background: var(--card-mix-overlay) !important;
+    background-color: var(--card-mix-overlay) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     transition:
-      background 0.2s ease,
+      background-color 0.2s ease,
       backdrop-filter 0.2s ease;
   }
 
@@ -196,18 +207,44 @@
       backdrop-filter 0.2s ease;
   }
 
-  /* 文章页：支持与分享 / 许可证
-   * 这两个区域原本使用固定 --license-block-bg
-   * 在全屏壁纸模式下需要统一接入 --card-mix-overlay 以响应透明度调节
+  /* 友链 / 分类 / 笔记本 / 书籍 / 影视 / 音乐 / bangumi / 朋友 / 欢迎 / 最近 卡片
+   * 统一规则：所有这些卡片用同一条规则覆盖，确保颜色深度和调节速率完全一致
    */
-  .wallpaper-transparent .license-container,
-  .wallpaper-transparent .sponsor-share-block {
+  .wallpaper-transparent .friend-card-link,
+  .wallpaper-transparent .category-folder,
+  .wallpaper-transparent .category-folder::before,
+  .wallpaper-transparent .category-folder__summary,
+  .wallpaper-transparent .category-folder__content,
+  .wallpaper-transparent .category-card,
+  .wallpaper-transparent .notebook-folder-card,
+  .wallpaper-transparent .book-card,
+  .wallpaper-transparent .movie-game-card,
+  .wallpaper-transparent .music-card,
+  .wallpaper-transparent .bangumi-card,
+  .wallpaper-transparent .pengyou-card,
+  .wallpaper-transparent .welcome-card,
+  .wallpaper-transparent .recent-items-card {
     background-color: var(--card-mix-overlay) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     transition:
       background-color 0.2s ease,
       backdrop-filter 0.2s ease;
+  }
+
+  /* profile-card 特殊处理：它在 .widget-card 内部，不能与父元素形成双层
+   * 父元素 .widget-card 已经应用 --card-mix-overlay，
+   * 这里把 profile-card 自身和带背景的子元素全部置为透明，仅由父元素提供颜色
+   * 同时必须用 background 简写 + !important 来压过 Profile.astro scoped 的 background: var(--moments-surface) 简写
+   *（用 background-color 子属性无法完全覆盖 scoped 简写规则，会导致 oklch 颜色泄漏）
+   */
+  .wallpaper-transparent .profile-card,
+  .wallpaper-transparent .profile-card.card-base.p-4,
+  .wallpaper-transparent.dark .profile-card,
+  .wallpaper-transparent .profile-card__avatar,
+  .wallpaper-transparent .profile-card__inner {
+    background: transparent !important;
+    background-color: transparent !important;
   }
 
   /* 文章页：评论区（Waline / Twikoo / Artalk）
