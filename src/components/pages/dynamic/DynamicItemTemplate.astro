@@ -1,0 +1,116 @@
+---
+/**
+ * DynamicItemTemplate.astro —— 单条动态的 DOM 模板
+ * --------------------------------------------------------------
+ * 该文件是 DynamicFeed.svelte 用来批量生成动态卡片的「模板源」。
+ *
+ * 为什么不使用 Svelte each 块？
+ *   Svelte 5 的 $effect 会在每次响应式数据变化时重跑渲染函数。当动态
+ *   数量较大（>50 条）时，每条 #each 项都需要走 keyed diff，性能开销
+ *   明显。本设计将「结构定义」与「数据填充」解耦：
+ *     - 模板（结构）：本文件，一次性渲染为 <template> 元素
+ *     - 数据（内容）：DynamicFeed.svelte 通过 template.content.cloneNode
+ *       复制后，按 [data-dynamic-*] 钩子填充。
+ *   这样做的好处是分页切换时只需 replaceChildren + append，浏览器
+ *   内部已对大量同结构节点做了优化。
+ *
+ * ⚠️ 关键约定：所有需要被 JS 读取/替换的节点都应保持
+ *   - data-dynamic-* 属性名
+ *   - class="moment-*" 样式钩子（详见 src/styles/dynamic.css）
+ *   - icon 引用方式（astro-icon 的 <Icon />）
+ * 修改时请同步检查 DynamicFeed.svelte 中的 querySelector 选择器。
+ */
+import { Icon } from "astro-icon/components";
+import { profileConfig } from "@/config";
+
+// 头像 alt 文本（无障碍）：缺省使用「博主」
+const profileLabel = profileConfig.name || "博主";
+---
+
+<!--
+  data-dynamic-item-template 标识：DynamicFeed 通过该选择器获取模板节点。
+  内层使用 <dynamic-entry> 自定义元素而非 <div>，避免与通用选择器冲突，
+  且便于在样式中通过 [data-dynamic-entry] 做针对性样式覆盖。
+-->
+<template data-dynamic-item-template>
+	<dynamic-entry class="moment-item" data-dynamic-entry>
+		<article>
+			<!--
+			  头像：data-dynamic-avatar 钩子由 DynamicFeed 替换 src/alt。
+			  链接指向 /about/ 是因为头像点击的常见语义是「查看作者主页」，
+			  若需要改为其它行为请同步修改 href 即可（脚本不会修改链接）。
+			-->
+			<a href="/about/" class="moment-avatar dynamic-avatar" aria-label={profileLabel}>
+				<img data-dynamic-avatar src={profileConfig.avatar || ""} alt={profileLabel} class="moment-avatar__img" />
+			</a>
+			<div class="moment-content dynamic-identity">
+				<div class="moment-name-row dynamic-entry-header">
+					<!-- 作者名：data-dynamic-author -->
+					<strong class="moment-name" data-dynamic-author>{profileConfig.name}</strong>
+					<!--
+					  置顶标签：默认带 hidden 属性，DynamicFeed 根据 entry.pinned
+					  调用 removeAttribute('hidden') / setAttribute('hidden', '')
+					-->
+					<span class="moment-pinned-tag" data-dynamic-pinned hidden>
+						<Icon name="material-symbols:push-pin" class="moment-pinned-tag__icon" />
+						<span>置顶</span>
+					</span>
+				</div>
+				<!-- 元信息行：时间 / 地点 / 设备 -->
+				<div class="moment-meta">
+					<!--
+					  永久链接：data-dynamic-permalink 会被 JS 替换 href 并
+					  绑定 click 拦截。内部 <time data-dynamic-time> 接收
+					  ISO 时间字符串 + 本地化展示文本。
+					-->
+					<span class="moment-meta__time">
+						<a class="dynamic-time" data-dynamic-permalink>
+							<Icon name="material-symbols:schedule-outline-rounded" style="width:1em;height:1em;" />
+							<time data-dynamic-time></time>
+						</a>
+					</span>
+					<!-- 地点：默认 display:none，DynamicFeed 在 entry.location 存在时显示并写入文本 -->
+					<span class="moment-meta__location" data-dynamic-location style="display:none;">
+						<Icon name="material-symbols:location-on" style="width:1em;height:1em;" />
+						<span></span>
+					</span>
+					<!-- 设备：默认 display:none，DynamicFeed 在 entry.device 存在时显示并写入文本 -->
+					<span class="moment-meta__device" data-dynamic-device style="display:none;">
+						<Icon name="material-symbols:phone-android" style="width:1em;height:1em;" />
+						<span></span>
+					</span>
+				</div>
+
+				<!--
+				  正文：data-dynamic-content 由 DynamicFeed 写入 entry.html。
+				  注意：写入内容已由 Astro Markdown 渲染管线处理（XSS 转义），
+				  第三方 API 接入时务必自行做 sanitize。
+				-->
+				<div class="moment-text dynamic-content" data-dynamic-content></div>
+
+				<!--
+				  图廊：data-dynamic-gallery 默认 display:none，DynamicFeed
+				  根据 entry.images 长度决定是否显示。实际图片由
+				  registerDynamicGallery() 将 .dynamic-content img 包裹为
+				  <figure class="dynamic-image-figure"> 后落入此区域。
+				-->
+				<div data-dynamic-gallery class="moment-images" data-count="0" style="display:none;"></div>
+
+				<!-- 标签容器：DynamicFeed 写入 <span class="moment-tag">#tag</span> 序列 -->
+				<div class="moment-tags" data-dynamic-tags></div>
+
+				<!--
+				  操作栏：当前为保留位（display:none）。如需启用分享/点赞，
+				  可移除内联 style 并实现对应按钮，DynamicFeed 已为分享按钮
+				  预留 data-dynamic-share 钩子。
+				-->
+				<div class="moment-actions" style="display:none;">
+					<button class="moment-action-btn moment-share-btn" type="button" data-dynamic-share>
+						<Icon name="material-symbols:share" style="width:14px;height:14px;" />
+						<span>分享</span>
+					</button>
+				</div>
+			</div>
+		</article>
+	</dynamic-entry>
+</template>

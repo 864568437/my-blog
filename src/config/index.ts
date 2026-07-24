@@ -36,6 +36,7 @@ export { fontConfig } from "./fontConfig"; // 字体配置
 export { footerConfig } from "./footerConfig"; // 页脚配置
 export { friendsPageConfig, friendsConfig, getEnabledFriends } from "./friendsConfig"; // 友链配置
 export { momentsConfig, momentsCover, momentsPageConfig, getEnabledMoments } from "./momentsConfig"; // 说说配置
+export { dynamicConfig } from "./dynamicConfig"; // 动态页面配置
 export {
 	notebookFolders,
 	notebookNotes,

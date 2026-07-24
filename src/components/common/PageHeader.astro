@@ -1,0 +1,130 @@
+---
+/**
+ * PageHeader.astro —— 通用页面页头
+ * 结构：面包屑导航 (可选多级) + 标题 (icon + eyebrow + h1)
+ *
+ * 视觉规范：与 /dynamic/ 页面保持一致
+ *  - 面包屑：首页 › 一级 › 二级
+ *  - eyebrow：英文小标，例 MOMENTS / Article Index
+ *  - 大字主标题：与 .page-title--stacked 同款
+ *
+ * 使用：
+ *   <PageHeader title="动态" eyebrow="Moments" />
+ *   <PageHeader
+ *     title="归档"
+ *     eyebrow="Archive"
+ *     breadcrumbs={[{ name: "归档" }]}
+ *   />
+ *   <PageHeader
+ *     title="JavaScript"
+ *     eyebrow="Category"
+ *     breadcrumbs={[
+ *       { name: "全部文章", href: "/posts/" },
+ *       { name: "JavaScript" },
+ *     ]}
+ *   />
+ */
+import { Icon } from "astro-icon/components";
+
+export interface BreadcrumbItem {
+	name: string;
+	href?: string; // 不传表示当前页
+	icon?: string;
+}
+
+interface Props {
+	title: string;
+	icon?: string;
+	eyebrow?: string;
+	variant?: "compact" | "stacked";
+	breadcrumbs?: BreadcrumbItem[]; // 不传时使用 [首页, 当前页]
+	showBreadcrumb?: boolean; // 默认 true
+	id?: string; // 透传到 <h1>，用于 aria-labelledby 等场景
+	class?: string;
+}
+
+const {
+	title,
+	icon,
+	eyebrow,
+	variant = "stacked",
+	breadcrumbs,
+	showBreadcrumb = true,
+	id,
+	class: className,
+} = Astro.props;
+
+// 默认面包屑：首页 › 当前页
+const defaultCrumbs: BreadcrumbItem[] = [
+	{ name: "首页", href: "/", icon: "material-symbols:home-rounded" },
+	{ name: title, icon: "material-symbols:file-copy-outline-rounded" },
+];
+
+// 合并用户传入的与默认面包屑
+// 若用户传入第一项是"首页"则去重，否则前置"首页"
+const finalCrumbs: BreadcrumbItem[] = (() => {
+	if (!breadcrumbs || breadcrumbs.length === 0) return defaultCrumbs;
+	const first = breadcrumbs[0];
+	if (first.href === "/" || first.name === "首页") {
+		return breadcrumbs;
+	}
+	return [{ name: "首页", href: "/", icon: "material-symbols:home-rounded" }, ...breadcrumbs];
+})();
+---
+
+<header class:list={["page-header", className]}>
+	{
+		showBreadcrumb && (
+			<nav class="cb" aria-label="Breadcrumb">
+				<ol class="cb__list">
+					{finalCrumbs.map((item, idx) => {
+						const isLast = idx === finalCrumbs.length - 1;
+						return (
+							<li class="cb__item">
+								{!isLast && item.href ? (
+									<a href={item.href} class="cb__link">
+										{item.icon && (
+											<span class="cb__icon" aria-hidden="true">
+												<Icon name={item.icon} />
+											</span>
+										)}
+										<span>{item.name}</span>
+									</a>
+								) : (
+									<span class="cb__current" aria-current={isLast ? "page" : undefined}>
+										{item.icon && (
+											<span class="cb__icon" aria-hidden="true">
+												<Icon name={item.icon} />
+											</span>
+										)}
+										<span>{item.name}</span>
+									</span>
+								)}
+								{!isLast && (
+									<span class="cb__sep" aria-hidden="true">
+										›
+									</span>
+								)}
+							</li>
+						);
+					})}
+				</ol>
+			</nav>
+		)
+	}
+
+	<div class:list={["page-title", `page-title--${variant}`, "moments-title"]}>
+		{
+			variant === "compact" && icon && (
+				<span class="page-title__icon" aria-hidden="true">
+					<Icon name={icon} class="text-[1.65rem]" />
+				</span>
+			)
+		}
+		<div class="page-title__body">
+			{eyebrow && <span class="page-title__eyebrow">{eyebrow}</span>}
+			<h1 id={id} class="page-title__text">{title}</h1>
+		</div>
+		<slot />
+	</div>
+</header>

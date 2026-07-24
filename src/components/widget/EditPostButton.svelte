@@ -41,6 +41,7 @@ const inlineEditPages: PageConfig[] = [
 	{ pageName: "足迹", pageKey: "places", isInlineEdit: true, match: (p) => p.startsWith("/life/places") },
 	{ pageName: "笔记本", pageKey: "notebooks", isInlineEdit: true, match: (p) => p.startsWith("/life/notebooks") },
 	{ pageName: "说说", pageKey: "moments", isInlineEdit: true, match: (p) => p.startsWith("/moments") },
+	{ pageName: "动态", pageKey: "dynamic", isInlineEdit: true, match: (p) => p.startsWith("/dynamic") },
 	{ pageName: "读书", pageKey: "books", isInlineEdit: true, match: (p) => p.startsWith("/books") },
 	{ pageName: "音乐", pageKey: "music", isInlineEdit: true, match: (p) => p.startsWith("/music") },
 	{ pageName: "相册", pageKey: "album", isInlineEdit: true, match: (p) => p.startsWith("/album") },

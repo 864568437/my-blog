@@ -7,6 +7,19 @@ import MainGridLayout from "@layouts/MainGridLayout.astro";
 import MomentsEditor from "@/components/edit/MomentsEditor.svelte";
 import { momentsCover, getEnabledMoments, momentsPageConfig } from "@/config/momentsConfig";
 
+/**
+ * 页面已迁移至 /dynamic/
+ * --------------------------------------------------------------
+ * 旧的「说说」页面已被新的 /dynamic/ 页面取代（迁移自 Firefly 主题）。
+ * 为避免外部链接失效，本页面通过服务端重定向将所有访问者导向
+ * /dynamic/。置顶页 /moments/pinned/ 不受影响，可继续访问。
+ */
+return Astro.redirect("/dynamic/");
+
+// 下方代码为保留的旧实现，因重定向而不再执行；如需恢复
+// 「说说」独立页面，注释掉上面的 return 即可。
+/* eslint-disable */
+
 // 从 momentsConfig.ts 读取说说数据
 const allMoments = getEnabledMoments();
 
@@ -128,8 +141,8 @@ const albums = [] as any[];
     text-align: center;
     padding: 3rem 1rem;
     background: var(--moments-surface);
-    border: 1px solid var(--moments-border);
-    border-radius: 12px;
+    border: var(--moments-border-width) solid var(--moments-border);
+    border-radius: var(--moments-radius-card);
   }
 
   .wx-empty-icon {

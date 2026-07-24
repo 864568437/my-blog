@@ -10,6 +10,7 @@ import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import Layout from "@/layouts/Layout.astro";
 import "@/styles/pages/calendar.css";
+import PageHeader from "@/components/common/PageHeader.astro";
 
 if (!siteConfig.pages.calendar) {
 	return Astro.redirect("/404/");
@@ -64,12 +65,17 @@ const detailProps = { holidays, posts, birthdays, schedules, years, showPosts };
 	<main id="swup-container" class="calendar-page-wrapper">
 		<div class="calendar-page">
 			<div class="calendar-page__shell">
-				<header class="calendar-page__header flex justify-between items-start gap-4 flex-wrap">
-					<div class="flex-1 min-w-0">
-						<h1 class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">{title}</h1>
-					</div>
+				<header class="calendar-page__header">
+				<!-- 页面页头：面包屑 + 标题 -->
+				<PageHeader
+					title={title}
+					eyebrow="Calendar"
+					variant="stacked"
+					breadcrumbs={[{ name: title, icon: "material-symbols:calendar-month-rounded" }]}
+				>
 					<div class="page-header-toolbar-slot flex-shrink-0"></div>
-				</header>
+				</PageHeader>
+			</header>
 
 				<aside class="calendar-page__rail calendar-page__rail--left" aria-label={i18n(I18nKey.calendarUpcoming)}>
 					<EventOverview client:load {...overviewProps} />

@@ -4,6 +4,7 @@ import { pengyouConfig } from "@/config/pengyouConfig";
 import { circleConfig } from "@/config/circleConfig";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import PengyouEditor from "@/components/edit/PengyouEditor.svelte";
+import PageHeader from "@/components/common/PageHeader.astro";
 import "@/styles/features/circle.css";
 
 const title = "朋友圈";
@@ -156,21 +157,23 @@ const itemsJson = JSON.stringify(items.map(i => ({
 ---
 
 <MainGridLayout title={title} description={description}>
-  <div class="circle-container">
-    <!-- 顶部导航栏 -->
-    <div class="circle-header">
-      <div class="circle-header-left">
-        <span class="circle-header-icon">
-          <Icon name="material-symbols:group" class="text-xl text-[var(--primary)]" />
-        </span>
-        <span class="circle-header-title">朋友圈</span>
-      </div>
-      <a href="/friends/" class="circle-header-link">
-        全部友链
-        <Icon name="material-symbols:chevron-right-rounded" class="text-base" />
-      </a>
-    </div>
+  <!-- 页面页头：面包屑 + 标题 + 右侧操作 slot（全部友链） -->
+  <PageHeader
+    title={title}
+    eyebrow="Circle"
+    variant="stacked"
+    breadcrumbs={[{ name: title, icon: "material-symbols:group" }]}
+  >
+    <a
+      href="/friends/"
+      class="pengyou-all-friends-link"
+    >
+      全部友链
+      <Icon name="material-symbols:chevron-right-rounded" class="text-base" />
+    </a>
+  </PageHeader>
 
+  <div class="circle-container">
     <!-- 统计区域 -->
     <div class="circle-stats-bar">
       <div class="stats-left">

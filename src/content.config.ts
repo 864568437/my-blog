@@ -211,6 +211,23 @@ const bangumiCollection = defineCollection({
 	}),
 });
 
+// ============================================================================
+// 动态/说说集合 - 简短动态内容
+// 目录：src/content/dynamic/
+// ============================================================================
+const dynamicCollection = defineCollection({
+	loader: glob({ pattern: "**/*.md", base: "./src/content/dynamic" }),
+	schema: z.object({
+		published: z.date(),
+		pinned: z.boolean().optional().default(false),
+		tags: z.array(z.string()).optional().default([]),
+		location: z.string().optional().default(""),
+		device: z.string().optional().default(""),
+		author: z.string().optional().default(""),
+		avatar: z.string().optional().default(""),
+	}),
+});
+
 /**
  * 导出所有内容集合
  *
@@ -224,4 +241,5 @@ export const collections = {
 	ziyuan: ziyuanCollection,
 	danmu: danmuCollection,
 	bangumi: bangumiCollection,
+	dynamic: dynamicCollection,
 };

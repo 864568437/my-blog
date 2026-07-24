@@ -1,3 +1,96 @@
+/* ==========================================================================
+ * 页面标题与面包屑
+ *  - .page-title*：标题本体（沿用原 page-title.css）
+ *  - .cb*：面包屑（从 dynamic.css 抽离，所有页面通用）
+ *  - .moments-title：标题行的布局容器（标题 + 右侧 slot 操作按钮）
+ * ========================================================================== */
+
+.page-header {
+	margin: 0 0 20px;
+}
+
+/* ----- 面包屑 ----- */
+.cb {
+	padding: 12px;
+	margin: 0 0 16px;
+	border-radius: 16px;
+}
+
+.cb__list {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 4px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	font-size: 14px;
+	font-weight: 400;
+}
+
+.cb__item {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 0;
+	margin: 0;
+}
+
+.cb__link {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 4px;
+	margin: 0 -4px;
+	border-radius: 4px;
+	color: var(--text-secondary);
+	text-decoration: none;
+	transition: color 0.2s;
+}
+
+.cb__link:hover {
+	color: var(--text-primary);
+}
+
+.cb__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.cb__icon svg {
+	width: 1em;
+	height: 1em;
+}
+
+.cb__sep {
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-secondary);
+	margin: 0 4px;
+}
+
+.cb__current {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-primary);
+}
+
+/* ----- 标题行布局（标题 + 右侧操作 slot） ----- */
+.moments-title {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 0 0 16px;
+	margin: 0;
+}
+
+/* ----- 标题本体 ----- */
 .page-title {
 	display: flex;
 	align-items: center;
@@ -25,6 +118,7 @@
 }
 
 .page-title__body {
+	display: block;
 	min-width: 0;
 }
 
@@ -40,6 +134,7 @@
 }
 
 .page-title__text {
+	display: block;
 	margin: 0;
 	color: var(--deep-text);
 	font-size: clamp(1.85rem, 4vw, 2.5rem);
@@ -87,5 +182,23 @@
 	.page-title--stacked .page-title__text {
 		font-size: clamp(1.85rem, 9vw, 2.45rem);
 		line-height: 1;
+	}
+}
+
+@media (max-width: 640px) {
+	.moments-title {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 12px;
+	}
+
+	.page-title__text {
+		font-size: 36px;
+	}
+}
+
+@media (max-width: 480px) {
+	.page-title__text {
+		font-size: 32px;
 	}
 }

@@ -1,7 +1,7 @@
 ---
 import ConfigEditor from "@/components/edit/ConfigEditor.svelte";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
-import PageTitle from "@/components/common/PageTitle.astro";
+import PageHeader from "@/components/common/PageHeader.astro";
 import {
 	siteConfig,
 	sidebarLayoutConfig,
@@ -21,7 +21,12 @@ const description = "可视化编辑站点全局配置";
     <div class="card-base z-10 px-9 py-6 relative w-full">
       <div class="mb-4 flex justify-between items-start gap-4 flex-wrap">
         <div class="flex-1 min-w-0">
-          <PageTitle title={title} eyebrow="Config" variant="stacked" />
+          <PageHeader
+            title={title}
+            eyebrow="Config"
+            variant="stacked"
+            breadcrumbs={[{ name: title, icon: "material-symbols:settings-rounded" }]}
+          />
           <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mt-3">
             在此页面可视化编辑站点全局配置，修改后通过 GitHub API 提交到仓库。
           </p>

@@ -1,0 +1,168 @@
+---
+/**
+ * /dynamic/ 动态页面入口
+ * --------------------------------------------------------------
+ * 本文件是从 Firefly 主题的 /dynamic/ 页面迁移并适配而来的页面入口。
+ * 与原版相比，主要差异：
+ *   1) 数据源切换：原版使用 `src/content/dynamic/*.md` 配合 Astro Content
+ *      Collection + `/api/dynamic.json` 端点；本仓库沿用相同方案。
+ *   2) 视觉风格：复用本仓库 `src/styles/dynamic.css` 中定义的设计 token
+ *      （沿用 moments 风格变量），不再使用 Firefly 自带主题样式。
+ *   3) 交互行为：保留客户端搜索、年份筛选、分页、URL 同步等核心能力。
+ *
+ * 依赖文件：
+ *   - @/components/pages/dynamic/DynamicFeed.svelte
+ *       负责读取 /api/dynamic.json 并渲染动态列表（核心组件）。
+ *   - @/components/pages/dynamic/DynamicItemTemplate.astro
+ *       提供单条动态的 DOM 模板（被 DynamicFeed 通过 cloneNode 复用）。
+ *   - @/components/edit/DynamicEditor.svelte
+ *       通过侧边栏「编辑」按钮触发的可视化编辑器（默认隐藏）。
+ *   - @/config/dynamicConfig
+ *       提供标题/描述/封面/分页/评论等可配置项。
+ *   - @/styles/dynamic.css
+ *       页面样式（卡片、封面、筛选条、分页等）。
+ *
+ * 数据流：
+ *   src/content/dynamic/*.md  ──(Astro Content Collection)──▶
+ *     src/pages/api/dynamic.json.ts  ──(HTTP/JSON)──▶  DynamicFeed.svelte
+ *
+ * 添加/编辑动态的两种方式：
+ *   1) 直接在 `src/content/dynamic/` 下新增或修改 Markdown 文件，
+ *      frontmatter 字段见 src/content.config.ts 中 dynamic schema。
+ *   2) 通过页面内的「编辑」侧边栏进入 DynamicEditor，编辑后通过
+ *      GitHub API（src/utils/draftHelpers）写入 src/content/dynamic.json。
+ *      ⚠️ 注意：第二种方式目前实现为写入 JSON，需要在 API 端点扩展
+ *         读取 JSON 的逻辑才能生效（当前 API 端点仅读取 markdown）。
+ */
+import { Icon } from "astro-icon/components";
+import DynamicFeed from "@/components/pages/dynamic/DynamicFeed.svelte";
+import DynamicItemTemplate from "@/components/pages/dynamic/DynamicItemTemplate.astro";
+import DynamicEditor from "@/components/edit/DynamicEditor.svelte";
+import PageHeader from "@/components/common/PageHeader.astro";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import { dynamicConfig } from "@/config";
+import { url } from "@/utils/url-utils";
+import "@/styles/dynamic.css";
+
+// 页面基础信息（从 dynamicConfig 读取，提供默认值）
+const title = dynamicConfig.title || "动态";
+const description = dynamicConfig.description || "记录生活中的点点滴滴";
+
+// 每页条数：使用 ?? 兼容 0 的情况，至少为 1 避免分页崩溃
+const itemsPerPage = Math.max(1, dynamicConfig.itemsPerPage ?? 10);
+
+// 是否启用内联评论：当 showComment !== false（即默认 true）且 commentConfig.type
+// 配置了非 'none' 的评论系统时启用。供 DynamicFeed 渲染 dynamic-inline-comments 节点
+const showInlineComments = Boolean(
+	dynamicConfig.showComment !== false,
+);
+
+// 动态数据源 URL：
+//   - 若 apiUrl 以 http 开头（外部 Memos 等 API），直接使用；
+//   - 否则作为站内路径处理，使用 url() 拼接 base（适配子路径部署）。
+const dataUrl = dynamicConfig.apiUrl?.startsWith("http")
+	? dynamicConfig.apiUrl
+	: url(dynamicConfig.apiUrl || "/api/dynamic.json");
+
+// 是否启用 Memos 适配（保留扩展能力，参考 Firefly 原版实现）
+const memos = dynamicConfig.memos;
+
+// 封面区域配置（与 moments 风格保持一致：背景图 + 头像 + 名字 + 简介）
+const coverImage = dynamicConfig.coverImage || "";
+const coverAvatar = dynamicConfig.coverAvatar || "";
+const coverName = dynamicConfig.coverName || "";
+const coverBio = dynamicConfig.coverBio || "";
+// showCover 默认 true，可通过 dynamicConfig.showCover = false 关闭
+const showCover = dynamicConfig.showCover !== false;
+---
+
+<MainGridLayout title={title} description={description}>
+	<section class="dynamic-page moments-page" aria-labelledby="dynamic-page-title">
+		{/* 页面页头：面包屑 + 标题 + 右侧操作 slot（订阅按钮） */}
+		<PageHeader
+			id="dynamic-page-title"
+			title={title}
+			eyebrow="MOMENTS"
+			variant="stacked"
+			breadcrumbs={[
+				{ name: "首页", href: "/", icon: "material-symbols:home-rounded" },
+				{ name: title, icon: "material-symbols:edit-note-rounded" },
+			]}
+		>
+			<a href="/rss.xml" class="moments-subscribe-btn" aria-label="订阅动态">
+				<Icon is:inline name="material-symbols:rss-feed-rounded" />
+				<span>订阅</span>
+			</a>
+		</PageHeader>
+
+		{/* 封面横幅：背景图 + 头像 + 用户名/简介 + 动态总数徽标 */}
+		{showCover && (
+			<div class="moments-banner">
+				<img class="moments-banner__bg" src={coverImage} alt="Moments Banner" loading="lazy" decoding="async" />
+				<div class="moments-header">
+					<div class="moments-header__user">
+						<div class="moments-header__name">{coverName}</div>
+						<div class="moments-header__info">{coverBio}</div>
+					</div>
+					<div class="moments-header__avatar-wrap moments-header__avatar-wrap--user">
+						<img src={coverAvatar} alt="User Avatar" loading="lazy" decoding="async" />
+					</div>
+				</div>
+				{/* 动态计数：[data-dynamic-page-count] 由 DynamicFeed 在加载完成后更新 */}
+				<div class="moments-banner__count">
+					<Icon is:inline name="material-symbols:forum-rounded" style="width:14px;height:14px;" />
+					<strong data-dynamic-page-count>0</strong>
+					<span>条动态</span>
+				</div>
+			</div>
+		)}
+
+		{/* 搜索与筛选栏：
+		    - [data-dynamic-search] 与 [data-year-select] 由 DynamicFeed 通过
+		      page.querySelector 获取并监听 input/change 事件。
+		    - 切勿修改这些 data-* 属性名，否则 DynamicFeed 将无法绑定。 */}
+		<header class="dynamic-filter-bar">
+			<label class="dynamic-search">
+				<Icon is:inline name="material-symbols:search-rounded" />
+				<input
+					type="search"
+					data-dynamic-search
+					placeholder="搜索动态..."
+				/>
+			</label>
+			<div class="dynamic-filter-right">
+				<label class="dynamic-year-select">
+					<Icon is:inline name="material-symbols:calendar-month-rounded" />
+					<select data-year-select aria-label="年份筛选">
+						{/* DynamicFeed 会在加载完成后清空并填充真实年份选项 */}
+						<option value="all">全部年份</option>
+					</select>
+					<Icon is:inline name="material-symbols:arrow-drop-down-rounded" />
+				</label>
+			</div>
+		</header>
+
+		{/* 动态编辑器：默认不显示内容，仅在侧边栏触发 edit:sidebarModeChange
+		    事件（pageKey="dynamic"）时进入编辑模式。 */}
+		<DynamicEditor client:load />
+
+		{/* 动态列表主体：传入数据源 URL 与分页/筛选/国际化等参数。 */}
+		<div class="moments-body">
+			<DynamicFeed
+				client:load
+				source={dataUrl}
+				{itemsPerPage}
+				showComments={showInlineComments}
+				emptyText="还没有动态，快去发布第一条吧~"
+				noResultsText="没有找到匹配的动态"
+				loadingText="加载中..."
+				allYearsText="全部年份"
+				{memos}
+			/>
+		</div>
+
+		{/* 单条动态的 DOM 模板：DynamicFeed 通过 [data-dynamic-item-template]
+		    获取并 cloneNode(true) 后填充数据。建议保持模板节点结构稳定。 */}
+		<DynamicItemTemplate />
+	</section>
+</MainGridLayout>

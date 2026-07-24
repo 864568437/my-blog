@@ -9,6 +9,7 @@ import { i18n } from "@/i18n/translation";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import { formatDateI18nWithTime } from "@/utils/date-utils";
 import BangumiEditor from "@/components/edit/BangumiEditor.svelte";
+import PageHeader from "@/components/common/PageHeader.astro";
 
 if (!siteConfig.pages.books) {
 	return Astro.redirect("/404/");
@@ -45,22 +46,17 @@ const wishCount = bookItems.filter((b) => b.status === 1).length;
 <MainGridLayout title={i18n(I18nKey.booksTitle)} description={i18n(I18nKey.booksSubtitle)}>
 	<div class="books-page-wrapper flex w-full overflow-hidden relative min-h-32">
 		<div data-pagefind-body class="card-base z-10 px-6 pt-8 pb-8 relative w-full">
-					<!-- Page header -->
-		<header class="books-header relative w-full mb-6">
-			<div class="flex items-center gap-3 mb-3">
-				<div class="w-12 h-12 rounded-2xl bg-black dark:bg-white flex items-center justify-center">
-					<Icon name="material-symbols:auto-stories" class="text-[1.4rem] text-white dark:text-black" />
-				</div>
-				<div>
-					<h1 data-pagefind-meta="title" data-pagefind-weight="10" class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-						{i18n(I18nKey.booksTitle)}
-					</h1>
-				</div>
-			</div>
-			<p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
+					<!-- 页面页头：面包屑 + 标题（保留原有的图标/描述/更新时间/统计） -->
+		<PageHeader
+			title={i18n(I18nKey.booksTitle)}
+			eyebrow="Books"
+			variant="stacked"
+			breadcrumbs={[{ name: i18n(I18nKey.booksTitle), icon: "material-symbols:auto-stories" }]}
+		>
+			<p class="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-2xl">
 				{i18n(I18nKey.booksSubtitle)}
 			</p>
-			<div class="flex items-center gap-4 mt-2">
+			<div class="flex items-center gap-4 mt-2 flex-wrap">
 				<p class="text-xs text-neutral-400 dark:text-neutral-500">
 					{i18n(I18nKey.bangumiLastUpdated)} {buildTime}
 				</p>
@@ -79,7 +75,7 @@ const wishCount = bookItems.filter((b) => b.status === 1).length;
 					</span>
 				</div>
 			</div>
-		</header>
+		</PageHeader>
 
 			<div data-no-swup>
 				<BangumiEditor

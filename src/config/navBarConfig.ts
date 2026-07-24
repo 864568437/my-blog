@@ -51,15 +51,17 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 	];
 
 	// 动态（带下拉子菜单）
+	// 说明：/moments/ 已被迁移至 /dynamic/，因此「说说」入口已从子菜单中
+	// 移除。/moments/pinned/ 仍保留（供历史书签直接访问）。
 	links.push({
 		name: "动态",
-		url: "/moments/",
+		url: "/dynamic/",
 		icon: "material-symbols:local-cafe",
 		children: [
 			{
-				name: "说说",
-				url: "/moments/",
-				icon: "material-symbols:chat-bubble-outline",
+				name: "动态",
+				url: "/dynamic/",
+				icon: "material-symbols:dynamic-feed-rounded",
 			},
 			{
 				name: "相册",

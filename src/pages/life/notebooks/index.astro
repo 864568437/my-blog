@@ -32,6 +32,21 @@ const sortedNotebooks = [...notebooks].sort((a, b) => {
 ---
 
 <MainGridLayout title="笔记本" description="成长日记、学习复盘、灵感随笔">
+	<!-- 页面页头：面包屑 + 标题 -->
+	<PageHeader
+		title="笔记本"
+		eyebrow="Notebooks"
+		variant="stacked"
+		breadcrumbs={[
+			{ name: "生活", icon: "material-symbols:home-work-rounded" },
+			{ name: "笔记本", icon: "material-symbols:menu-book-rounded" },
+		]}
+	>
+		<p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-2xl">
+			成长日记、学习复盘、灵感随笔
+		</p>
+	</PageHeader>
+
 	<div data-no-swup>
 		<NotebooksEditor client:load />
 	</div>

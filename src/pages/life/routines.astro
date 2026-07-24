@@ -4,6 +4,7 @@ import { Icon } from "astro-icon/components";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import RoutinesEditor from "@/components/edit/RoutinesEditor.svelte";
 import { getEnabledRoutines } from "@/config/routinesConfig";
+import PageHeader from "@/components/common/PageHeader.astro";
 
 const routinesList = getEnabledRoutines();
 
@@ -29,16 +30,18 @@ const totalEntries = entriesWithContent.length;
   <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
     <div class="card-base z-10 px-4 py-6 md:px-9 relative w-full">
 
-      <!-- 头部 -->
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-12 h-12 rounded-2xl bg-black dark:bg-white flex items-center justify-center">
-          <Icon name="material-symbols:checklist" class="text-[1.4rem] text-white dark:text-black" />
-        </div>
-        <div>
-          <h1 data-pagefind-meta="title" data-pagefind-weight="10" class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">日常规划</h1>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">记录和规划生活中的各项事务</p>
-        </div>
-      </div>
+      <!-- 页面页头：面包屑 + 标题 -->
+      <PageHeader
+        title="日常规划"
+        eyebrow="Routines"
+        variant="stacked"
+        breadcrumbs={[
+          { name: "生活", icon: "material-symbols:home-work-rounded" },
+          { name: "日常规划", icon: "material-symbols:checklist" },
+        ]}
+      >
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">记录和规划生活中的各项事务</p>
+      </PageHeader>
 
       <!-- 统计卡片 -->
       <div class="flex flex-wrap gap-3 mb-6">

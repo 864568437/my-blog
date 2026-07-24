@@ -4,7 +4,7 @@ import CategoryRose from "@components/widget/CategoryRose.astro";
 import TagGraph from "@components/widget/TagGraph.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { Icon } from "astro-icon/components";
-import PageTitle from "@/components/common/PageTitle.astro";
+import PageHeader from "@/components/common/PageHeader.astro";
 import { getCategoryTagGroups, getTagGraphData } from "@/utils/content-utils";
 
 const categoryGroups = await getCategoryTagGroups();
@@ -20,10 +20,11 @@ const title = "分类标签";
 <MainGridLayout title={title}>
   <div class="categories-page card-base z-10 px-4 py-6 md:px-9 relative w-full" data-taxonomy-view-root>
     <div class="categories-page__header">
-      <PageTitle
+      <PageHeader
         title={title}
         eyebrow="Taxonomy"
         variant="stacked"
+        breadcrumbs={[{ name: title, icon: "material-symbols:folder-rounded" }]}
       />
 
       <div class="categories-page__view-switch" role="tablist" aria-label="分类标签视图">

@@ -161,17 +161,17 @@
  *    同时作用于 #moments-feed 与 #pinned-feed 容器
  * ============================================ */
 
-/* ---------- 2.1 卡片主体 ---------- */
+/* ---------- 2.1 卡片主体（精确复刻 blog.xuioo.com） ---------- */
 .moment-item,
 #moments-feed .moment-card,
 #pinned-feed .moment-card {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.625rem;
-  padding: 1.25rem;
+  gap: 10px;
+  padding: 20px;
   background: var(--moments-surface);
-  border: 1px solid var(--moments-border);
-  border-radius: clamp(1rem, 1.4vw, 1.2rem);
+  border: var(--moments-border-width) solid var(--moments-border);
+  border-radius: var(--moments-radius-card);
   position: relative;
   transition:
     transform 0.35s cubic-bezier(0.32, 0.72, 0, 1),
@@ -323,12 +323,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.125rem 0.5rem;
+  padding: 3px 10px;
   background: var(--moments-soft);
   color: var(--content-meta);
-  border: 1px solid var(--moments-border);
+  border: var(--moments-border-width) solid var(--moments-border);
   border-radius: 9999px;
-  font-size: 0.6875rem;
+  font-size: 12px;
   font-weight: 600;
 }
 .moment-pinned-tag__icon,
@@ -454,12 +454,12 @@
 #moments-feed .card-images,
 #pinned-feed .card-images {
   display: grid;
-  gap: 0.375rem;
+  gap: 6px;
   margin-top: 0.25rem;
-  padding: 0.125rem;
+  padding: 2px;
   background: var(--moments-soft);
-  border: 1px solid var(--moments-border);
-  border-radius: 0.95rem;
+  border: var(--moments-border-width) solid var(--moments-border);
+  border-radius: var(--moments-radius-image-grid);
   overflow: hidden;
 }
 .moment-images[data-count="1"],
@@ -568,12 +568,12 @@
 #pinned-feed .tag-item {
   display: inline-flex;
   align-items: center;
-  padding: 0.1875rem 0.625rem;
+  padding: 3px 10px;
   background: var(--moments-soft);
   color: var(--content-meta);
-  border: 1px solid var(--moments-border);
+  border: var(--moments-border-width) solid var(--moments-border);
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 500;
   transition: background 0.2s, color 0.2s;
 }
@@ -598,20 +598,20 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 0.25rem;
-  padding-top: 0.625rem;
-  border-top: 1px dashed var(--line-divider);
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: var(--moments-border-width) dashed var(--moments-divider);
 }
 .moment-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.3125rem 0.75rem;
+  gap: 6px;
+  padding: 5px 12px;
   background: var(--moments-soft);
   color: var(--content-meta);
-  border: 1px solid var(--moments-border);
+  border: var(--moments-border-width) solid var(--moments-border);
   border-radius: 999px;
-  font-size: 0.8125rem;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   user-select: none;
@@ -635,9 +635,13 @@
  *    moments-header / moments-body / moments-timeline
  * ============================================ */
 .moments-page {
-  --moments-surface: color-mix(in oklch, var(--card-bg) 92%, var(--page-bg));
-  --moments-border: color-mix(in oklch, var(--line-divider) 92%, transparent);
-  --moments-soft: color-mix(in oklch, var(--btn-plain-bg-hover) 92%, var(--card-bg));
+  --moments-surface: oklch(1 0 0 / 0.1);
+  --moments-border: oklch(0.85 0 0 / 0.92);
+  --moments-soft: oklch(0.94 0 0 / 0.92);
+  --moments-divider: oklch(0.85 0 0);
+  --moments-border-width: 0.8px;
+  --moments-radius-card: 19.2px;
+  --moments-radius-image-grid: 15.2px;
   padding: 0.5rem 0 1rem;
 }
 
