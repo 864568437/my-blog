@@ -575,6 +575,130 @@ const siteLang = lang.replace("_", "-");
   } from "@/constants/constants";
   import { backgroundWallpaper, expressiveCodeConfig, siteConfig } from "@/config";
 
+  // ===== check-flink 友链状态渲染 =====
+  // 部署到 Vercel/Zeabur 后，把下方 URL 替换为 https://.../result.json
+  const CHECK_FLINK_RESULT_URL = "https://check-flink-eight.vercel.app/result.json";
+  const CHECK_FLINK_CACHE_KEY = "checkFlinkResultCache";
+  const CHECK_FLINK_CACHE_TTL = 30 * 60 * 1000; // 30 分钟
+
+  function normalizeUrl(u) {
+    return (u || "").replace(/\/$/, "").trim();
+  }
+
+  function pickFriendStatus(href, data) {
+    if (!data || !Array.isArray(data.link_status)) return null;
+    const target = normalizeUrl(href);
+    for (let i = 0; i < data.link_status.length; i++) {
+      if (normalizeUrl(data.link_status[i].link) === target) {
+        return data.link_status[i];
+      }
+    }
+    return null;
+  }
+
+  function applyFriendStatus(statusEl, info) {
+    statusEl.style.display = "inline-block";
+    const lat = info.latency;
+    if (lat === -1) {
+      statusEl.style.backgroundColor = "#ef4444";
+      statusEl.textContent = "超时";
+    } else if (lat < 1) {
+      statusEl.style.backgroundColor = "#22c55e";
+      statusEl.textContent = lat.toFixed(2) + "s";
+    } else if (lat < 2) {
+      statusEl.style.backgroundColor = "#f59e0b";
+      statusEl.textContent = lat.toFixed(2) + "s";
+    } else {
+      statusEl.style.backgroundColor = "#f97316";
+      statusEl.textContent = lat.toFixed(2) + "s";
+    }
+  }
+
+  // 友链截图背景图：注入 --siteshot-url CSS 变量，由 FriendCard.astro 渲染
+  function applyFriendScreenshot(card, info) {
+    if (!info || !info.siteshot) return;
+    const url = String(info.siteshot).trim();
+    if (!url) return;
+    card.setAttribute("data-siteshot", url);
+    card.style.setProperty("--siteshot-url", `url("${url}")`);
+
+    // 监听截图加载失败：失败时清空属性让 FriendCard 降级到纯色背景
+    const probe = new Image();
+    probe.onerror = () => {
+      card.removeAttribute("data-siteshot");
+      card.style.removeProperty("--siteshot-url");
+    };
+    probe.src = url;
+  }
+
+  function readCheckFlinkCache() {
+    try {
+      const raw = localStorage.getItem(CHECK_FLINK_CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.data || !parsed.ts) return null;
+      if (Date.now() - parsed.ts > CHECK_FLINK_CACHE_TTL) return null;
+      return parsed.data;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeCheckFlinkCache(data) {
+    try {
+      localStorage.setItem(
+        CHECK_FLINK_CACHE_KEY,
+        JSON.stringify({ data: data, ts: Date.now() }),
+      );
+    } catch (e) {
+      /* localStorage 满，忽略 */
+    }
+  }
+
+  async function renderLinkStatus() {
+    const cards = document.querySelectorAll(".friend-card-link");
+    if (cards.length === 0) return;
+
+    // 1. 先用缓存快速渲染
+    const cached = readCheckFlinkCache();
+    if (cached) {
+      cards.forEach((card) => {
+        const href = card.getAttribute("href") || "";
+        const statusEl = card.querySelector(".friend-status");
+        if (!statusEl) return;
+        const info = pickFriendStatus(href, cached);
+        if (info) {
+          applyFriendStatus(statusEl, info);
+          applyFriendScreenshot(card, info);
+        }
+      });
+    }
+
+    // 2. 后台拉取最新数据
+    try {
+      const res = await fetch(CHECK_FLINK_RESULT_URL, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      writeCheckFlinkCache(data);
+      cards.forEach((card) => {
+        const href = card.getAttribute("href") || "";
+        const statusEl = card.querySelector(".friend-status");
+        if (!statusEl) return;
+        const info = pickFriendStatus(href, data);
+        if (info) {
+          applyFriendStatus(statusEl, info);
+          applyFriendScreenshot(card, info);
+        } else {
+          statusEl.style.display = "none";
+          statusEl.textContent = "";
+        }
+      });
+    } catch (err) {
+      console.warn("[check-flink] 状态拉取失败，使用缓存：", err);
+    }
+  }
+  // ===== check-flink end =====
+
   /* Preload fonts */
   // (async function() {
   // 	try {
@@ -1033,6 +1157,9 @@ function disableAnimation() {
       updateMainGridCols();
       updateSidebarComponentsVisibility();
 
+      // 渲染友链状态（check-flink）
+      renderLinkStatus();
+
       // hide the temp high element when the transition is done
       const heightExtend = document.getElementById("page-height-extend");
       if (heightExtend) {
@@ -1331,6 +1458,7 @@ function disableAnimation() {
       initIconLoader();
       initPageLoader();
       applyHomeLayoutOnLoad();
+      renderLinkStatus();
     });
   } else {
     updateMainGridCols();
@@ -1340,6 +1468,7 @@ function disableAnimation() {
     initIconLoader();
     initPageLoader();
     applyHomeLayoutOnLoad();
+    renderLinkStatus();
   }
 
   // 动态修改网页标题（标签页标题互动）
