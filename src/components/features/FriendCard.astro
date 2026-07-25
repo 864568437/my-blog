@@ -21,14 +21,6 @@ const host = (() => {
 
 // 头像加载失败时的降级文字（取 title 前 2 个字符）
 const avatarFallback = title.slice(0, 2);
-
-const typeColors: Record<string, { bg: string; text: string }> = {
-	Blog: { bg: "rgba(59, 130, 246, 0.92)", text: "#ffffff" },
-	Docs: { bg: "rgba(245, 158, 11, 0.92)", text: "#ffffff" },
-};
-
-const primaryTag = tags[0] || "Blog";
-const typeColor = typeColors[primaryTag] || typeColors.Blog;
 ---
 
 <a
@@ -42,19 +34,13 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
   data-siteshot={siteshot}
   style={siteshot ? `--siteshot-url: url("${siteshot}");` : ""}
 >
-  <!-- 顶部：友链主页截图 + 类型角标 + 状态徽章 -->
+  <!-- 顶部：友链主页截图 + 状态徽章（去除 Blog 角标） -->
   <div class="friend-card-screenshot">
-    <span
-      class="friend-card-type-badge"
-      style={`background-color: ${typeColor.bg}; color: ${typeColor.text};`}
-    >
-      {primaryTag}
-    </span>
     <!-- 友链可达性状态徽章（由 Layout.astro 的 renderLinkStatus() 渲染颜色和文字） -->
     <span class="friend-status" data-status=""></span>
   </div>
 
-  <!-- 底部：圆形头像 + 姓名 + 域名 + 描述 -->
+  <!-- 中部：圆形头像 + 姓名 + 描述（压缩版） -->
   <div class="friend-card-info">
     <div class="friend-card-avatar-wrap" data-fallback={avatarFallback}>
       <img
@@ -68,7 +54,6 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
     </div>
     <div class="friend-card-text">
       <h3 class="friend-card-title">{title}</h3>
-      <p class="friend-card-domain">{host}</p>
       <p class="friend-card-desc">{desc}</p>
     </div>
   </div>
@@ -78,46 +63,18 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
   .friend-card-link {
     display: flex;
     flex-direction: column;
-    position: relative;
-    background: var(--card-bg, #fff);
-    border: 1px solid var(--card-border, oklch(85% 0 0 / 0.92));
-    border-radius: var(--radius-card, 16px);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      0 1px 2px rgba(0, 0, 0, 0.04),
-      0 8px 24px -12px rgba(15, 23, 42, 0.12);
     text-decoration: none;
     color: inherit;
-    overflow: hidden;
+    /* 容器本身无边框/背景，由 3 段拼出卡片框 */
     transition:
-      border-color 300ms ease,
-      box-shadow 350ms cubic-bezier(0.32, 0.72, 0, 1),
       transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  :root.dark .friend-card-link {
-    background: var(--card-bg, #1c1d20);
-    border-color: var(--card-border, rgba(255, 255, 255, 0.10));
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 1px 2px rgba(0, 0, 0, 0.3),
-      0 8px 24px -12px rgba(0, 0, 0, 0.5);
-  }
-
   .friend-card-link:hover {
-    border-color: var(--card-border-hover, rgba(15, 23, 42, 0.16));
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.7),
-      0 2px 4px rgba(0, 0, 0, 0.06),
-      0 16px 32px -16px rgba(15, 23, 42, 0.18);
     transform: translateY(-2px);
   }
 
-  :root.dark .friend-card-link:hover {
-    border-color: var(--card-border-hover, rgba(255, 255, 255, 0.20));
-  }
-
-  /* 顶部：友链主页截图区（16:10） */
+  /* ===== 顶部：友链主页截图区（16:10） ===== */
   .friend-card-screenshot {
     position: relative;
     width: 100%;
@@ -128,13 +85,18 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
     background-position: center top;
     background-repeat: no-repeat;
     overflow: hidden;
+    border: 1px solid var(--card-border, oklch(85% 0 0 / 0.92));
+    border-bottom: none;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    transition: border-color 300ms ease;
   }
 
   :root.dark .friend-card-screenshot {
     background-color: oklch(0.20 0 0);
+    border-color: var(--card-border, rgba(255, 255, 255, 0.10));
   }
 
-  /* 截图加载失败时降级：渐变占位（由 JS 切换 .is-fallback） */
   .friend-card-screenshot.is-fallback {
     background-image:
       radial-gradient(circle at 20% 30%, rgba(91, 141, 239, 0.20), transparent 60%),
@@ -158,28 +120,12 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
     pointer-events: none;
   }
 
-  /* 左上角类型角标 */
-  .friend-card-type-badge {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    padding: 0.2rem 0.5rem;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    border-radius: 6px;
-    z-index: 3;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    letter-spacing: 0.01em;
-    line-height: 1.3;
-  }
-
   /* 右上角状态徽章：白点 + 延迟数字（4 色由 data-status 切换） */
   .friend-status {
     position: absolute;
     top: 0.5rem;
     right: 0.5rem;
-    display: none; /* 默认隐藏，由 JS 根据 result.json 数据显示 */
+    display: none;
     align-items: center;
     gap: 0.35rem;
     padding: 0.25rem 0.5rem 0.25rem 0.45rem;
@@ -202,7 +148,6 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
   .friend-status[data-status="warn"]    { background-color: rgba(249, 115, 22, 0.92); }
   .friend-status[data-status="timeout"] { background-color: rgba(239, 68, 68, 0.92); }
 
-  /* 状态徽章白点（脉冲动画） */
   .friend-status::before {
     content: "";
     width: 6px;
@@ -224,23 +169,37 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
     .friend-status::before { animation: none; }
   }
 
-  /* 底部信息区 */
+  /* ===== 中部：信息区（压缩版，卡片底部） ===== */
   .friend-card-info {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.625rem;                          /* 头像与文字间距压缩 */
     align-items: flex-start;
-    padding: 0.875rem;
-    position: relative;
+    padding: 0.625rem 0.75rem 0.625rem 0.75rem;   /* 内边距压缩 */
+    background: var(--card-bg, #fff);
+    border-left: 1px solid var(--card-border, oklch(85% 0 0 / 0.92));
+    border-right: 1px solid var(--card-border, oklch(85% 0 0 / 0.92));
+    border-bottom: 1px solid var(--card-border, oklch(85% 0 0 / 0.92));
+    border-bottom-left-radius: 16px;         /* 卡片底部圆角 */
+    border-bottom-right-radius: 16px;
+    min-height: 3.75rem;                    /* 强制最小高度，让所有卡片等高 */
+    transition: border-color 300ms ease;
   }
 
-  /* 圆形头像（压边效果） */
+  :root.dark .friend-card-info {
+    background: var(--card-bg, #1c1d20);
+    border-left-color: var(--card-border, rgba(255, 255, 255, 0.10));
+    border-right-color: var(--card-border, rgba(255, 255, 255, 0.10));
+    border-bottom-color: var(--card-border, rgba(255, 255, 255, 0.10));
+  }
+
+  /* 圆形头像（缩小） */
   .friend-card-avatar-wrap {
     position: relative;
     flex-shrink: 0;
-    width: 3rem;
-    height: 3rem;
-    margin-top: -1.75rem;        /* 头像上半部压在截图与信息区交界 */
-    margin-left: 0.125rem;
+    width: 2.5rem;                          /* 头像缩小 3rem → 2.5rem */
+    height: 2.5rem;
+    margin-top: -1.25rem;                   /* 上移幅度对应调整 */
+    margin-left: 0.0625rem;
     z-index: 2;
   }
 
@@ -260,10 +219,8 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
     border-color: var(--card-bg, #1c1d20);
   }
 
-  /* 头像加载失败：显示 fallback 文字（前 2 字符） */
-  .friend-card-avatar.is-error {
-    display: none;
-  }
+  .friend-card-avatar.is-error { display: none; }
+
   .friend-card-avatar-wrap.is-error::after {
     content: attr(data-fallback);
     position: absolute;
@@ -271,7 +228,7 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     font-weight: 600;
     color: oklch(0.45 0 0);
     background: oklch(0.88 0 0);
@@ -291,12 +248,12 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.125rem;
   }
 
   .friend-card-title {
     margin: 0;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;                    /* 缩小 0.9375rem → 0.875rem */
     font-weight: 600;
     color: oklch(0.15 0 0);
     line-height: 1.3;
@@ -305,46 +262,42 @@ const typeColor = typeColors[primaryTag] || typeColors.Blog;
     white-space: nowrap;
   }
 
-  :root.dark .friend-card-title {
-    color: oklch(0.95 0 0);
-  }
-
-  .friend-card-domain {
-    margin: 0;
-    font-size: 0.75rem;
-    font-weight: 400;
-    color: oklch(0.5 0 0);
-    line-height: 1.3;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  :root.dark .friend-card-domain {
-    color: oklch(0.6 0 0);
-  }
+  :root.dark .friend-card-title { color: oklch(0.95 0 0); }
 
   .friend-card-desc {
-    margin: 0.25rem 0 0 0;
-    font-size: 0.8125rem;
+    margin: 0.125rem 0 0 0;
+    font-size: 0.75rem;                     /* 缩小 0.8125rem → 0.75rem */
     font-weight: 400;
     color: oklch(0.4 0 0);
-    line-height: 1.5;
+    line-height: 1.45;
     font-style: italic;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    /* 关键修复：强制 2 行最小高度，1 行描述也占 2 行空间，所有卡片等高 */
+    min-height: calc(0.75rem * 1.45 * 2);
   }
 
-  :root.dark .friend-card-desc {
-    color: oklch(0.7 0 0);
+  :root.dark .friend-card-desc { color: oklch(0.7 0 0); }
+
+  /* hover 时 2 段同步加深边框 */
+  .friend-card-link:hover .friend-card-screenshot,
+  .friend-card-link:hover .friend-card-info {
+    border-color: var(--card-border-hover, rgba(15, 23, 42, 0.16));
+  }
+  :root.dark .friend-card-link:hover .friend-card-screenshot,
+  :root.dark .friend-card-link:hover .friend-card-info {
+    border-color: var(--card-border-hover, rgba(255, 255, 255, 0.20));
   }
 
   /* 移动端适配 */
   @media (max-width: 640px) {
-    .friend-card-screenshot {
-      aspect-ratio: 16 / 9;
-    }
+    .friend-card-screenshot { aspect-ratio: 16 / 9; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .friend-card-link { transition-duration: 0.01ms; }
   }
 </style>
