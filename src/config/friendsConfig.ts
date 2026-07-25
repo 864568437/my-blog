@@ -477,7 +477,7 @@ export const friendsConfig: FriendLink[] = [
 		],
 		"weight": 10,
 		"enabled": true
-		}
+		},
 		{
 		  "title": "旧梦与花",
 		  "imgurl": "https://zhh2001.github.io/avatar.jpg",
@@ -544,7 +544,6 @@ export const friendsConfig: FriendLink[] = [
 		  "weight": 10,
 		  "enabled": true
 		},
-
 		{
 		"title": "天狗的博客",
 		"imgurl": "http://tengu.l2.ink/wp-content/uploads/2026/07/cropped-Camera_XHS_17834972703201040g00831dq5qmlm0m6g5od3.jpg",
