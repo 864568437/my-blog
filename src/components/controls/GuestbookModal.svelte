@@ -1,10 +1,47 @@
 <script lang="ts">
 	import { onMount, tick } from "svelte";
 	import Icon from "@/components/common/Icon.svelte";
-	import GuestbookChat from "@/components/features/GuestbookChat.svelte";
+	import GuestbookChat, {
+		type GuestbookSyncSnapshot,
+	} from "@/components/features/GuestbookChat.svelte";
+
+	// 同步状态快照（来自 GuestbookChat），用于合并到顶部标题栏
+	let syncSnapshot = $state<GuestbookSyncSnapshot>({
+		totalCount: 0,
+		initialLoading: true,
+		lastSyncedAt: null,
+		isOffline: false,
+		syncing: false,
+		syncError: "",
+	});
 
 	let isOpen = $state(false);
 	let chatMounted = $state(false);
+
+	/**
+	 * 格式化顶部标题栏中的同步时间。
+	 * 与原 GuestbookChat 内部标题栏保持一致。
+	 */
+	function formatSyncedAt(value: number | null): string {
+		if (!value) return "等待同步";
+		const date = new Date(value);
+		const pad = (n: number) => n.toString().padStart(2, "0");
+		return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+	}
+
+	function formatSyncStatus(snapshot: GuestbookSyncSnapshot): string {
+		if (snapshot.isOffline) return "离线";
+		if (snapshot.syncing) return "同步中";
+		if (snapshot.syncError) return "同步失败";
+		return "同步";
+	}
+
+	// 同步状态文案（在线：同步于/同步中/同步失败/等待同步；离线：离线）
+	const syncStatusText = $derived(formatSyncStatus(syncSnapshot));
+	const syncedAtText = $derived(formatSyncedAt(syncSnapshot.lastSyncedAt));
+	const messageCountText = $derived(
+		syncSnapshot.initialLoading ? "--" : syncSnapshot.totalCount,
+	);
 
 	export function toggle() {
 		isOpen = !isOpen;
@@ -27,6 +64,11 @@
 		}
 	}
 
+	// GuestbookChat 同步状态变更回调
+	function handleSyncChange(snapshot: GuestbookSyncSnapshot) {
+		syncSnapshot = snapshot;
+	}
+
 	onMount(() => {
 		const toggleHandler = () => toggle();
 		window.addEventListener("toggle-guestbook", toggleHandler);
@@ -41,7 +83,7 @@
 {#if isOpen}
 	<div class="ai-overlay guestbook-modal-overlay" onclick={close}>
 		<div class="ai-panel guestbook-modal-panel" onclick={(e) => e.stopPropagation()}>
-			<!-- 标题栏 -->
+			<!-- 标题栏（已合并：原顶部标题 + 留言数量/同步信息） -->
 			<div class="ai-header">
 				<div class="ai-header__left">
 					<span class="guestbook-header-icon">
@@ -49,6 +91,20 @@
 					</span>
 					<span class="ai-header__name">留言板</span>
 					<span class="ai-header__model">有什么想说的，留个言吧~</span>
+					<span class="ai-header__divider" aria-hidden="true">|</span>
+					<span
+						class="ai-header__meta"
+						class:is-offline={syncSnapshot.isOffline}
+						class:is-failed={Boolean(syncSnapshot.syncError) && !syncSnapshot.isOffline}
+					>
+						· {messageCountText} 条留言 · {syncStatusText}
+						{#if !syncSnapshot.isOffline && !syncSnapshot.syncError}
+							{syncedAtText}
+						{:else if !syncSnapshot.isOffline}
+							· {syncedAtText}
+						{/if}
+						· 30 s
+					</span>
 				</div>
 				<div class="ai-header__actions">
 					<a href="/guestbook/" class="ai-icon-btn" title="打开完整页面">
@@ -60,10 +116,10 @@
 				</div>
 			</div>
 
-			<!-- 聊天室内容 -->
+			<!-- 聊天室内容（内部标题栏已隐藏，留言数量/同步信息统一在此头部显示） -->
 			<div class="guestbook-modal-content">
 				{#if chatMounted}
-					<GuestbookChat />
+					<GuestbookChat onSyncChange={handleSyncChange} />
 				{/if}
 			</div>
 		</div>
@@ -85,6 +141,40 @@
 		color: var(--primary);
 	}
 
+	/* 顶部标题栏中的信息模块：原下方标题栏"留言数 + 同步时间"合并到此 */
+	.ai-header__divider {
+		display: inline-block;
+		margin: 0 0.25rem;
+		color: var(--line-divider);
+		opacity: 0.7;
+	}
+
+	.ai-header__meta {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-size: 0.78rem;
+		color: var(--text-muted, var(--secondary));
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.ai-header__meta.is-offline {
+		color: var(--danger, #ef4444);
+	}
+
+	.ai-header__meta.is-failed {
+		color: var(--danger, #ef4444);
+	}
+
+	@media (max-width: 640px) {
+		.ai-header__divider,
+		.ai-header__meta {
+			display: none;
+		}
+	}
+
 	.guestbook-modal-content {
 		flex: 1;
 		overflow: hidden;
@@ -102,14 +192,9 @@
 		background: transparent;
 	}
 
+	/* 隐藏 GuestbookChat 内部标题栏，避免与弹窗顶部标题栏重复显示 */
 	.guestbook-modal-content :global(.guestbook-chat__header) {
-		padding: 0.5rem 1rem;
-		border-bottom: 1px solid var(--line-divider);
-		flex-shrink: 0;
-	}
-
-	.guestbook-modal-content :global(.guestbook-chat__title-row h2) {
-		font-size: 1rem;
+		display: none !important;
 	}
 
 	.guestbook-modal-content {
@@ -121,11 +206,33 @@
 		min-height: 0;
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) var(--guestbook-sidebar-width);
+		/* 两行布局：第 1 行放公告栏（自动高度），第 2 行放聊天列 */
+		grid-template-rows: auto minmax(0, 1fr);
+	}
+
+	/* 在弹窗中：公告栏占据第 1 行，作为正常文档流元素，不再覆盖在消息上方 */
+	.guestbook-modal-content :global(.guestbook-chat__announcement-bar) {
+		grid-column: 1;
+		grid-row: 1;
+		position: relative;
+		top: auto;
+		left: auto;
+		right: auto;
+		margin: var(--space-2) var(--space-2) 0;
+		z-index: 1;
 	}
 
 	.guestbook-modal-content :global(.guestbook-chat__conversation) {
+		grid-column: 1;
+		grid-row: 2;
 		min-height: 0;
-		height: auto;
+		height: 100%;
+	}
+
+	/* 侧边栏横跨两行，保持完整高度 */
+	.guestbook-modal-content :global(.guestbook-chat__sidebar) {
+		grid-column: 2;
+		grid-row: 1 / span 2;
 	}
 
 	.guestbook-modal-content :global(.guestbook-chat__messages) {
@@ -199,10 +306,6 @@
 	@media (max-width: 640px) {
 		.guestbook-modal-content {
 			--guestbook-sidebar-width: 12rem;
-		}
-
-		.guestbook-modal-content :global(.guestbook-chat__header) {
-			padding: 0.4rem 0.75rem;
 		}
 
 		.guestbook-modal-content :global(.guestbook-chat__messages) {

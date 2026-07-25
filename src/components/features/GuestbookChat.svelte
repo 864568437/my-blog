@@ -10,7 +10,6 @@ import {
 	AlertCircle,
 	Bell,
 	ChevronDown,
-	ChevronRight,
 	LoaderCircle,
 	RefreshCw,
 	RotateCcw,
@@ -58,6 +57,29 @@ const lang = commentConfig.waline?.lang ?? "zh-CN";
 const loginMode = commentConfig.waline?.login ?? "enable";
 const announcements = guestbookConfig.announcements;
 
+/**
+ * 同步状态回调：用于父组件（如右下角快捷弹窗）显示留言数量与同步时间。
+ * 当 totalCount / lastSyncedAt / isOffline / syncing / syncError 变化时触发。
+ */
+export type GuestbookSyncSnapshot = {
+	totalCount: number;
+	initialLoading: boolean;
+	lastSyncedAt: number | null;
+	isOffline: boolean;
+	syncing: boolean;
+	syncError: string;
+};
+
+interface Props {
+	/**
+	 * 同步状态变更回调，父组件可通过此回调读取消息数量与同步时间。
+	 * 在 modal 弹窗中用于合并到顶部标题栏，避免重复显示。
+	 */
+	onSyncChange?: (snapshot: GuestbookSyncSnapshot) => void;
+}
+
+let { onSyncChange }: Props = $props();
+
 let messages = $state<GuestbookMessage[]>([]);
 let profile = $state<GuestbookProfile>({ nick: "", mail: "", link: "" });
 let authUser = $state<GuestbookAuthUser | null>(null);
@@ -81,6 +103,7 @@ let announcementDialog = $state<HTMLDialogElement | null>(null);
 let deleteDialog = $state<HTMLDialogElement | null>(null);
 let selectedAnnouncement = $state<GuestbookAnnouncementItem | null>(null);
 let sidebarOpen = $state(false);
+let announcementBarVisible = $state(true);
 let showScrollToBottom = $state(false);
 let editingMessageId = $state<string | null>(null);
 let editDraft = $state("");
@@ -116,6 +139,22 @@ const chatMembers = $derived.by(() => {
 	return [...members.values()].sort(
 		(left, right) => Number(right.isAdmin) - Number(left.isAdmin),
 	);
+});
+
+/**
+ * 将同步状态对外暴露：每当 totalCount / 同步时间 / 离线状态变化时通知父组件。
+ * 在右下角弹窗场景下，父组件会把这些信息合并到顶部标题栏，从而避免内部标题栏重复显示。
+ */
+$effect(() => {
+	if (!onSyncChange) return;
+	onSyncChange({
+		totalCount,
+		initialLoading,
+		lastSyncedAt,
+		isOffline,
+		syncing,
+		syncError,
+	});
 });
 
 function canManageMessage(message: GuestbookMessage): boolean {
@@ -994,6 +1033,8 @@ onMount(() => {
 	isOffline = !navigator.onLine;
 	const returnedToken = new URL(window.location.href).searchParams.get("token");
 	void initializeGuestbook(returnedToken);
+	// 进入页面自动弹出第一条公告（评论及留言规则）
+	if (announcements[0]) void openAnnouncement(announcements[0]);
 	startPolling();
 	document.addEventListener("visibilitychange", handleVisibilityChange);
 	window.addEventListener("online", handleOnline);
@@ -1075,7 +1116,38 @@ onMount(() => {
 		</div>
 	</header>
 
-	<div class="guestbook-chat__workspace">
+	<div
+		class:has-announcement-bar={announcementBarVisible && announcements.length > 0}
+		class="guestbook-chat__workspace"
+	>
+		{#if announcementBarVisible && announcements.length > 0}
+			<aside class="guestbook-chat__announcement-bar" aria-label="公告">
+				<div class="guestbook-chat__announcement-bar-label">
+					<Bell size={16} aria-hidden="true" />
+					<strong>公告</strong>
+				</div>
+				<div class="guestbook-chat__announcement-bar-items">
+					{#each announcements as announcement (announcement.id)}
+						<button
+							type="button"
+							onclick={() => void openAnnouncement(announcement)}
+						>
+							{announcement.title}
+						</button>
+					{/each}
+				</div>
+				<button
+					class="guestbook-chat__announcement-bar-close"
+					type="button"
+					onclick={() => (announcementBarVisible = false)}
+					aria-label="关闭公告"
+					title="关闭公告"
+				>
+					<X size={17} aria-hidden="true" />
+				</button>
+			</aside>
+		{/if}
+
 		<div class="guestbook-chat__conversation">
 			{#if initialLoading}
 				<div
@@ -1231,37 +1303,19 @@ onMount(() => {
 			id="guestbook-chat-sidebar"
 			class:is-open={sidebarOpen}
 			class="guestbook-chat__sidebar"
-			aria-label="群信息"
+			aria-label="聊天成员"
 		>
 			<div class="guestbook-chat__sidebar-heading">
-				<strong>群信息</strong>
+				<strong>聊天成员</strong>
+				<span class="guestbook-chat__sidebar-count">{chatMembers.length}</span>
 				<button
 					type="button"
 					onclick={() => (sidebarOpen = false)}
-					aria-label="关闭群信息"
+					aria-label="关闭聊天成员"
 				>
 					<X size={18} aria-hidden="true" />
 				</button>
 			</div>
-
-			<section class="guestbook-chat__announcement-panel" aria-label="群公告">
-				<div class="guestbook-chat__panel-title">
-					<Bell size={16} aria-hidden="true" />群公告
-				</div>
-				{#each announcements as announcement}
-					<button
-						class="guestbook-chat__announcement"
-						type="button"
-						onclick={() => void openAnnouncement(announcement)}
-					>
-						<span>
-							<strong>{announcement.title}</strong>
-							<ChevronRight size={16} aria-hidden="true" />
-						</span>
-						<p>{announcement.summary}</p>
-					</button>
-				{/each}
-			</section>
 
 			<section class="guestbook-chat__members" aria-label="聊天成员">
 				<div class="guestbook-chat__panel-title">
