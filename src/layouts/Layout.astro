@@ -597,21 +597,25 @@ const siteLang = lang.replace("_", "-");
   }
 
   function applyFriendStatus(statusEl, info) {
-    statusEl.style.display = "inline-block";
+    statusEl.style.display = "inline-flex";
     const lat = info.latency;
+    let status = "success";
+    let label = "";
     if (lat === -1) {
-      statusEl.style.backgroundColor = "#ef4444";
-      statusEl.textContent = "超时";
+      status = "timeout";
+      label = "超时";
     } else if (lat < 1) {
-      statusEl.style.backgroundColor = "#22c55e";
-      statusEl.textContent = lat.toFixed(2) + "s";
+      status = "success";
+      label = (Math.round(lat * 1000)) + " MS";
     } else if (lat < 2) {
-      statusEl.style.backgroundColor = "#f59e0b";
-      statusEl.textContent = lat.toFixed(2) + "s";
+      status = "slow";
+      label = (Math.round(lat * 1000)) + " MS";
     } else {
-      statusEl.style.backgroundColor = "#f97316";
-      statusEl.textContent = lat.toFixed(2) + "s";
+      status = "warn";
+      label = (Math.round(lat * 1000)) + " MS";
     }
+    statusEl.setAttribute("data-status", status);
+    statusEl.textContent = label;
   }
 
   // 友链截图背景图：注入 --siteshot-url CSS 变量，由 FriendCard.astro 渲染
