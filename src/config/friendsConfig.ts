@@ -544,6 +544,18 @@ export const friendsConfig: FriendLink[] = [
 		  "weight": 10,
 		  "enabled": true
 		},
+
+		{
+		"title": "天狗的博客",
+		"imgurl": "http://tengu.l2.ink/wp-content/uploads/2026/07/cropped-Camera_XHS_17834972703201040g00831dq5qmlm0m6g5od3.jpg",
+		"desc": "一个记录生活的博客",
+		"siteurl": "https://tengu.l2.ink/",
+		"tags": [
+			"Blog"
+		],
+		"weight": 10,
+		"enabled": true
+		},
 	];
 
 // 获取启用的友链并进行排序
