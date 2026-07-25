@@ -952,9 +952,14 @@ html:has(.guestbook-page) #category-bar-wrapper {
 }
 
 .guestbook-message__badge--waiting {
-	border-color: var(--guestbook-muted);
+	border-color: color-mix(
+		in srgb,
+		var(--guestbook-bubble) 80%,
+		var(--guestbook-bubble-text) 20%
+	);
 	background: var(--guestbook-bubble);
-	color: var(--deep-text);
+	/* 暗色气泡背景下必须使用浅色文字，否则浅色主题下会变成"黑字黑底" */
+	color: var(--guestbook-bubble-text);
 }
 
 .guestbook-message__bubble-row {

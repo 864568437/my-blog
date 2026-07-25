@@ -6,6 +6,7 @@ import {
 	login as loginWithWaline,
 	updateComment,
 } from "@waline/api";
+import type { WalineRootComment } from "@waline/api";
 import {
 	AlertCircle,
 	Bell,
@@ -52,6 +53,13 @@ const MAX_MESSAGE_LENGTH = 300;
 const PROFILE_STORAGE_KEY = "guestbook-chat-profile";
 const AUTH_STORAGE_KEY = "guestbook-chat-auth";
 const DRAFT_STORAGE_KEY = "guestbook-chat-draft";
+/**
+ * 存储"我提交的、当前仍处于审核中"状态的留言。
+ * Waline 服务端默认对非管理员隐藏 status=waiting 的留言，
+ * 因此若不在本地缓存，刷新后用户的待审核留言就会消失。
+ * 这里用 objectId 作为唯一键（addComment 返回时由服务端分配）。
+ */
+const PENDING_STORAGE_KEY = "guestbook-chat-pending";
 const serverURL = commentConfig.waline?.serverURL ?? "";
 const lang = commentConfig.waline?.lang ?? "zh-CN";
 const loginMode = commentConfig.waline?.login ?? "enable";
@@ -240,6 +248,124 @@ function removeStoredValue(storage: Storage, key: string) {
 	}
 }
 
+/**
+ * 读取本地缓存的"待审核"留言列表。
+ * 返回的消息均为当前用户提交、且服务端 status 仍为 waiting 的留言。
+ * 损坏的 JSON / 单条记录会被静默丢弃，避免拖垮整个页面。
+ */
+function readPendingMessages(): GuestbookMessage[] {
+	const raw = readStoredValue<unknown>(localStorage, PENDING_STORAGE_KEY);
+	if (!Array.isArray(raw)) return [];
+	const list: GuestbookMessage[] = [];
+	for (const entry of raw) {
+		if (!entry || typeof entry !== "object") continue;
+		const record = entry as Partial<GuestbookMessage> & { objectId?: unknown };
+		// 只保留必要的最小字段，避免陈旧/不兼容的数据被展示
+		if (
+			typeof record.id !== "string" ||
+			typeof record.nick !== "string" ||
+			typeof record.body !== "string" ||
+			typeof record.createdAt !== "number" ||
+			record.status !== "waiting" ||
+			typeof record.objectId !== "number"
+		) {
+			continue;
+		}
+		list.push({
+			id: record.id,
+			objectId: record.objectId,
+			userId: record.userId,
+			nick: record.nick,
+			avatar: record.avatar ?? "",
+			link: record.link,
+			body: record.body,
+			createdAt: record.createdAt,
+			browser: record.browser,
+			os: record.os,
+			addr: record.addr,
+			label: record.label,
+			isAdmin: Boolean(record.isAdmin),
+			replyToId: record.replyToId,
+			replyToNick: record.replyToNick,
+			status: "waiting",
+		});
+	}
+	return list;
+}
+
+function writePendingMessages(list: GuestbookMessage[]) {
+	// 仅持久化审核中的记录，避免占满 localStorage
+	const filtered = list.filter((item) => item.status === "waiting");
+	if (filtered.length === 0) {
+		removeStoredValue(localStorage, PENDING_STORAGE_KEY);
+		return;
+	}
+	const payload = filtered.map((item) => ({
+		id: item.id,
+		objectId: item.objectId,
+		userId: item.userId,
+		nick: item.nick,
+		avatar: item.avatar,
+		link: item.link,
+		body: item.body,
+		createdAt: item.createdAt,
+		browser: item.browser,
+		os: item.os,
+		addr: item.addr,
+		label: item.label,
+		isAdmin: item.isAdmin,
+		replyToId: item.replyToId,
+		replyToNick: item.replyToNick,
+		status: item.status,
+	}));
+	writeStoredString(localStorage, PENDING_STORAGE_KEY, JSON.stringify(payload));
+}
+
+/**
+ * 将"服务端已经返回"的留言从本地待审核列表中移除。
+ * 当 pending 的 objectId 出现在 server 列表中时，认为已被审核通过。
+ */
+function prunePendingAgainstServer(
+	pending: GuestbookMessage[],
+	server: GuestbookChatMessage[] | WalineRootComment[] | null | undefined,
+): GuestbookMessage[] {
+	if (!pending.length) return pending;
+	const serverIds = new Set<number>();
+	if (Array.isArray(server)) {
+		const walk = (entry: WalineRootComment | GuestbookChatMessage) => {
+			const id = (entry as { objectId?: number }).objectId;
+			if (typeof id === "number") serverIds.add(id);
+			const children = (entry as { children?: WalineRootComment[] }).children;
+			if (Array.isArray(children)) children.forEach((child) => walk(child as WalineRootComment));
+		};
+		server.forEach((entry) => walk(entry));
+	}
+	const next = pending.filter((item) => !serverIds.has(item.objectId ?? -1));
+	if (next.length !== pending.length) writePendingMessages(next);
+	return next;
+}
+
+/**
+ * 把本地待审核留言合并到从服务端拉取的留言列表中。
+ * 同一 objectId 的服务端版本优先（审核通过后的状态覆盖 waiting 状态）。
+ */
+function mergePendingIntoServer(
+	serverMessages: GuestbookMessage[],
+	pending: GuestbookMessage[],
+): GuestbookMessage[] {
+	if (!pending.length) return serverMessages;
+	const serverIds = new Set(
+		serverMessages
+			.map((message) => message.objectId)
+			.filter((id): id is number => typeof id === "number"),
+	);
+	const extras = pending.filter(
+		(item) => typeof item.objectId === "number" && !serverIds.has(item.objectId),
+	);
+	if (!extras.length) return serverMessages;
+	return mergeGuestbookMessages(serverMessages, extras);
+}
+
 function isAuthUser(value: unknown): value is GuestbookAuthUser {
 	if (!value || typeof value !== "object") return false;
 	const user = value as Partial<GuestbookAuthUser>;
@@ -398,10 +524,18 @@ async function loadInitial() {
 	try {
 		const response = await fetchPage(1, controller.signal);
 		if (dataController !== controller) return;
-		messages = mergeGuestbookMessages(
-			messages,
-			flattenGuestbookComments(response.data),
+		// 服务端默认对非管理员隐藏"待审核"留言，
+		// 所以这里把本地缓存的待审核留言合并进列表，确保刷新后仍可见。
+		const serverComments = flattenGuestbookComments(response.data);
+		const pending = prunePendingAgainstServer(
+			readPendingMessages(),
+			response.data as WalineRootComment[],
 		);
+		const merged = mergePendingIntoServer(
+			mergeGuestbookMessages(messages, serverComments),
+			pending,
+		);
+		messages = merged;
 		currentPage = 1;
 		totalPages = response.totalPages;
 		totalCount = response.count;
@@ -455,7 +589,16 @@ async function syncLatest() {
 		const freshCount = incoming.filter(
 			(message) => !knownIds.has(message.id),
 		).length;
-		messages = mergeGuestbookMessages(messages, incoming);
+		// 轮询同步时同样需要把本地待审核留言保留下来，
+		// 若服务端已通过审核，prunePendingAgainstServer 会自动从 localStorage 移除。
+		const pending = prunePendingAgainstServer(
+			readPendingMessages(),
+			response.data as WalineRootComment[],
+		);
+		messages = mergePendingIntoServer(
+			mergeGuestbookMessages(messages, incoming),
+			pending,
+		);
 		totalPages = response.totalPages;
 		totalCount = response.count;
 		lastSyncedAt = Date.now();
@@ -801,9 +944,18 @@ async function sendMessage(
 		}
 
 		messages = messages.filter((message) => message.id !== tempId);
-		messages = mergeGuestbookMessages(messages, [
-			normalizeGuestbookComment(response.data),
-		]);
+		const normalized = normalizeGuestbookComment(response.data);
+		messages = mergeGuestbookMessages(messages, [normalized]);
+		// 当留言被服务端判定为"待审核"时，本地缓存一份用于在刷新后继续显示，
+		// 等到下次同步发现它已经出现在已审核列表中时再自动清除。
+		if (normalized.status === "waiting" && typeof normalized.objectId === "number") {
+			const pendingSnapshot = readPendingMessages();
+			const nextPending = prunePendingAgainstServer(pendingSnapshot, messages);
+			if (!nextPending.some((item) => item.objectId === normalized.objectId)) {
+				nextPending.push(normalized);
+			}
+			writePendingMessages(nextPending);
+		}
 		totalCount += 1;
 		initialError = "";
 		syncError = "";
