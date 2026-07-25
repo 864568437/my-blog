@@ -342,4 +342,9 @@ export const ja: Translation = {
 	[Key.welcomeCardClose]: "閉じる",
 	[Key.welcomeCardLearnMore]: "詳しく見る",
 	[Key.welcomeCardRecentLabel]: "最近の更新",
+
+	// 主题设置面板 Tab 标签
+	[Key.displayTabTheme]: "テーマ",
+	[Key.displayTabWallpaper]: "壁紙",
+	[Key.displayTabLayout]: "レイアウト",
 };

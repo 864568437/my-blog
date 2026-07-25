@@ -373,6 +373,11 @@ enum I18nKey {
 	welcomeCardClose = "welcomeCardClose",
 	welcomeCardLearnMore = "welcomeCardLearnMore",
 	welcomeCardRecentLabel = "welcomeCardRecentLabel",
+
+	// 主题设置面板 Tab 标签
+	displayTabTheme = "displayTabTheme",
+	displayTabWallpaper = "displayTabWallpaper",
+	displayTabLayout = "displayTabLayout",
 }
 
 export default I18nKey;

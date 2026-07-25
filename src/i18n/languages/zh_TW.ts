@@ -336,4 +336,9 @@ export const zh_TW: Translation = {
 	[Key.welcomeCardClose]: "關閉",
 	[Key.welcomeCardLearnMore]: "了解更多",
 	[Key.welcomeCardRecentLabel]: "最近更新",
+
+	// 主题设置面板 Tab 标签
+	[Key.displayTabTheme]: "主題",
+	[Key.displayTabWallpaper]: "壁紙",
+	[Key.displayTabLayout]: "佈局",
 };

@@ -346,4 +346,9 @@ export const en: Translation = {
 	[Key.welcomeCardClose]: "Close",
 	[Key.welcomeCardLearnMore]: "Learn More",
 	[Key.welcomeCardRecentLabel]: "Recent Updates",
+
+	// 主题设置面板 Tab 标签
+	[Key.displayTabTheme]: "Theme",
+	[Key.displayTabWallpaper]: "Wallpaper",
+	[Key.displayTabLayout]: "Layout",
 };

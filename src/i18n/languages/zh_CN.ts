@@ -380,4 +380,9 @@ export const zh_CN: Translation = {
 	[Key.welcomeCardClose]: "关闭",
 	[Key.welcomeCardLearnMore]: "了解更多",
 	[Key.welcomeCardRecentLabel]: "最近更新",
+
+	// 主题设置面板 Tab 标签
+	[Key.displayTabTheme]: "主题",
+	[Key.displayTabWallpaper]: "壁纸",
+	[Key.displayTabLayout]: "布局",
 };

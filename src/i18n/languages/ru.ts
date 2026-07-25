@@ -344,4 +344,9 @@ export const ru: Translation = {
 	[Key.welcomeCardClose]: "Закрыть",
 	[Key.welcomeCardLearnMore]: "Подробнее",
 	[Key.welcomeCardRecentLabel]: "Последние обновления",
+
+	// 主题设置面板 Tab 标签
+	[Key.displayTabTheme]: "Тема",
+	[Key.displayTabWallpaper]: "Обои",
+	[Key.displayTabLayout]: "Макет",
 };
