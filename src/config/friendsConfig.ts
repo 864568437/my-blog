@@ -468,16 +468,16 @@ export const friendsConfig: FriendLink[] = [
 		  "enabled": true
 		},
 		{
-		  "title": "Yukihime",
-		  "imgurl": "https://yukihime.dev/favicon/favicon.ico",
-		  "desc": "你的瞳色 是我生命苦寻的永生花",
-		  "siteurl": "https://yukihime.dev/",
-		  "tags": [
-		    "Blog"
-		  ],
-		  "weight": 10,
-		  "enabled": true
-		},
+		"title": "Yukihime",
+		"imgurl": "https://yukihime.dev/assets/images/moments-avatar.webp?v=20260725-avatar",
+		"desc": "你的瞳色 是我生命苦寻的永生花",
+		"siteurl": "https://yukihime.dev/",
+		"tags": [
+			"Blog"
+		],
+		"weight": 10,
+		"enabled": true
+		}
 		{
 		  "title": "旧梦与花",
 		  "imgurl": "https://zhh2001.github.io/avatar.jpg",
