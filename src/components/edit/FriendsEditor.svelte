@@ -140,7 +140,7 @@ export const friendsPageConfig: FriendsPageConfig = {
 	applyLink: "https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml",
 	siteInfo: {
 		name: "fqzlr",
-		desc: "坐而言不如起而行.",
+		desc: "躬身入局，心为主理，行有尺度，自持本心.",
 		url: "https://fqzlr.com/",
 		avatar: "https://fqzlr.com/avatar.png",
 		email: "",
@@ -150,6 +150,12 @@ export const friendsPageConfig: FriendsPageConfig = {
 		{ title: "链接维护", content: "友链网站长期无法访问或内容违规，将会被移除" },
 		{ title: "内容要求", content: "内容积极向上，不含有任何含色情/反动/暴力等违法违规内容" },
 		{ title: "站点要求", content: "支持 HTTPS，以原创内容为主，能够正常访问且有持续更新" },
+		{ title: "广告规范", content: "站点禁止充斥大量弹窗、诱导跳转、恶意悬浮广告，影响阅读体验" },
+		{ title: "域名规范", content: "不接纳垃圾短链、多级跳转域名、已被标记风险的域名站点" },
+		{ title: "版权规范", content: "尊重原创版权，不盗用他人文章、图片、资源，杜绝洗稿搬运站点" },
+		{ title: "站点氛围", content: "不发布引战、对立、恶意引流量、抹黑攻击他人的情绪化内容" },
+		{ title: "失效清理", content: "站点关停、域名过期、长期停更超过6个月，会直接清理友链" },
+		{ title: "个人主页限制", content: "纯空白个人主页、无任何原创文字内容的展示站暂不互换" },
 	],
 };
 

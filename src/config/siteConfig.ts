@@ -55,51 +55,7 @@ export const siteConfig: SiteConfig = {
 	// Favicon 配置
 	favicon: [
 		{
-			src: "/favicon/favicon.ico",
-			sizes: "32x32",
-		},
-		{
-			src: "/favicon/favicon-16x16.png",
-			sizes: "16x16",
-		},
-		{
-			src: "/favicon/favicon-32x32.png",
-			sizes: "32x32",
-		},
-		{
-			src: "/favicon/favicon-48x48.png",
-			sizes: "48x48",
-		},
-		{
-			src: "/favicon/favicon.svg",
-			sizes: "any",
-		},
-		{
-			src: "/favicon/apple-touch-icon.png",
-			sizes: "180x180",
-		},
-		{
-			src: "/favicon/apple-touch-icon-152x152.png",
-			sizes: "152x152",
-		},
-		{
-			src: "/favicon/apple-touch-icon-167x167.png",
-			sizes: "167x167",
-		},
-		{
-			src: "/favicon/apple-touch-icon-180x180.png",
-			sizes: "180x180",
-		},
-		{
-			src: "/favicon/android-chrome-192x192.png",
-			sizes: "192x192",
-		},
-		{
-			src: "/favicon/android-chrome-512x512.png",
-			sizes: "512x512",
-		},
-		{
-			src: "/favicon/safari-pinned-tab.svg",
+			src: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
 			sizes: "any",
 		},
 	],

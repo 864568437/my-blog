@@ -36,6 +36,12 @@ const isCommentEnabled =
 // 页面标题和描述
 const title = i18n(I18nKey.friends);
 const description = i18n(I18nKey.friendsDescription);
+
+// 本站信息整合文本（一键复制）
+const _si = friendsPageConfig.siteInfo;
+const siteInfoText = _si
+	? `Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "${_si.name}",\n    imgurl: "${_si.avatar}",\n    desc: "${_si.desc}",\n    siteurl: "${_si.url}",\n    tags: ["Blog"],\n}`
+	: "";
 ---
 
 <MainGridLayout title={title} description={description}>
@@ -121,11 +127,67 @@ const description = i18n(I18nKey.friendsDescription);
       <Markdown class="mt-2">
         <Content />
       </Markdown>
+
+      <!-- 友链申请指南：左侧本站信息 + 右侧注意事项 -->
+      <section class="flink-guide mt-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          <!-- 左侧：本站信息（单卡片 + 一键复制） -->
+          {siteInfoText && (
+            <div class="min-w-0 flex flex-col">
+              <h3 class="flex items-center gap-2 text-sm font-semibold text-neutral-800 dark:text-neutral-200 mb-2.5">
+                <span class="flink-guide-dot bg-(--primary)"></span>
+                本站信息
+              </h3>
+              <div class="flink-panel-card flex-1">
+                <button
+                  class="flink-copy-btn flink-panel-copy"
+                  data-copy={siteInfoText}
+                  aria-label="复制全部信息"
+                  title="一键复制"
+                >
+                  <Icon name="material-symbols:content-copy-outline-rounded" class="flink-copy-icon" />
+                  <Icon name="material-symbols:check-rounded" class="flink-check-icon" />
+                </button>
+                <pre class="flink-code-text">{siteInfoText}</pre>
+              </div>
+            </div>
+          )}
+
+          <!-- 右侧：注意事项（卡片形式） -->
+          {friendsPageConfig.notes && friendsPageConfig.notes.length > 0 && (
+            <div class="min-w-0 flex flex-col">
+              <h3 class="flex items-center gap-2 text-sm font-semibold text-neutral-800 dark:text-neutral-200 mb-2.5">
+                <span class="flink-guide-dot bg-amber-500"></span>
+                注意事项
+              </h3>
+              <div class="flink-panel-card flex-1">
+                <div class="flex flex-col gap-1.5">
+                  {friendsPageConfig.notes.map((item) => (
+                    <div class="flex items-start gap-2 text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                      <span class="flink-note-dot mt-1.5"></span>
+                      <p><strong class="text-neutral-800 dark:text-neutral-200">{item.title}</strong>：{item.content}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   </div>
 
   <!-- 评论区 -->
-  <div class="mt-4" id="post-comments">
+  <div class="mt-4 relative" id="post-comments">
+    {isCommentEnabled && (
+      <button
+        id="flink-import-template-btn"
+        class="absolute -top-1 right-2 z-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900 text-xs font-medium hover:opacity-85 transition-opacity cursor-pointer"
+      >
+        <Icon name="material-symbols:drive-folder-upload-outline" class="text-sm" />
+        一键导入模板
+      </button>
+    )}
     <Comment post={friendsPost} customPath="/friends/" />
   </div>
 
@@ -197,9 +259,225 @@ const description = i18n(I18nKey.friendsDescription);
       }
       customElements.define("friend-filter", FriendFilter);
     }
+
+    // 友链申请指南 - 复制按钮
+    function initFlinkCopyButtons() {
+      document.querySelectorAll(".flink-copy-btn").forEach((btn) => {
+        if (btn.dataset.copyInit) return;
+        btn.dataset.copyInit = "1";
+        btn.addEventListener("click", () => {
+          const text = btn.getAttribute("data-copy") || "";
+          navigator.clipboard.writeText(text).then(() => {
+            btn.classList.add("copied");
+            setTimeout(() => btn.classList.remove("copied"), 1500);
+          });
+        });
+      });
+    }
+
+    // 一键导入友链模板到评论区
+    function initFlinkImportTemplate() {
+      const btn = document.getElementById("flink-import-template-btn");
+      if (!btn || btn.dataset.importInit) return;
+      btn.dataset.importInit = "1";
+      btn.addEventListener("click", () => {
+        const template = 'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    tags: ["Blog"],\n },';
+        // 查找评论系统输入框（Twikoo / Waline / Artalk）
+        const textarea =
+          document.querySelector("#tcomment .tk-textarea") ||
+          document.querySelector("#tcomment textarea") ||
+          document.querySelector(".wl-editor textarea") ||
+          document.querySelector(".wl-editor") ||
+          document.querySelector("#post-comments textarea");
+        if (textarea) {
+          if (textarea.tagName === "TEXTAREA" || textarea.tagName === "INPUT") {
+            textarea.value = template;
+            textarea.dispatchEvent(new Event("input", { bubbles: true }));
+            textarea.focus({ preventScroll: true });
+          } else {
+            // contenteditable 元素
+            textarea.innerText = template;
+            textarea.dispatchEvent(new Event("input", { bubbles: true }));
+            textarea.focus({ preventScroll: true });
+          }
+          textarea.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          // 输入框未加载时复制到剪贴板
+          navigator.clipboard.writeText(template);
+          const orig = btn.innerHTML;
+          btn.textContent = "已复制到剪贴板";
+          setTimeout(() => { btn.innerHTML = orig; }, 1500);
+        }
+      });
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => { initFlinkCopyButtons(); initFlinkImportTemplate(); });
+    } else {
+      initFlinkCopyButtons();
+      initFlinkImportTemplate();
+    }
+    document.addEventListener("astro:page-load", () => { initFlinkCopyButtons(); initFlinkImportTemplate(); });
+    document.addEventListener("astro:after-swap", () => { initFlinkCopyButtons(); initFlinkImportTemplate(); });
   </script>
 
   <style>
+    /* ============ 友链申请指南区域 ============ */
+    .flink-guide-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .flink-panel-card {
+      position: relative;
+      border-radius: var(--sidebar-card-radius, 0.75rem);
+      background: var(--sidebar-card-bg, oklch(100% 0 0));
+      border: 1px solid var(--sidebar-card-border, oklch(85% 0 0));
+      box-shadow: var(--sidebar-card-shadow, 0 4px 12px rgba(0, 0, 0, 0.04));
+      padding: 12px 14px;
+      transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    .flink-panel-card:hover {
+      border-color: var(--sidebar-card-border-hover, var(--primary));
+      box-shadow: var(--sidebar-card-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.08));
+    }
+    :global(.dark) .flink-panel-card {
+      background: var(--sidebar-card-bg, oklch(8% 0 0));
+      border-color: var(--sidebar-card-border, oklch(25% 0 0));
+    }
+
+    .flink-panel-copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+
+    .flink-code-text {
+      font-size: 12px;
+      line-height: 1.7;
+      color: oklch(0.45 0 0);
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    :global(.dark) .flink-code-text {
+      color: oklch(0.7 0 0);
+    }
+
+    .flink-copy-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: oklch(0.55 0 0);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .flink-copy-btn:hover {
+      background: oklch(0.9 0 0);
+      color: oklch(0.3 0 0);
+    }
+    :global(.dark) .flink-copy-btn:hover {
+      background: oklch(0.28 0 0);
+      color: oklch(0.8 0 0);
+    }
+    .flink-copy-btn .flink-check-icon {
+      display: none;
+    }
+    .flink-copy-btn.copied .flink-copy-icon {
+      display: none;
+    }
+    .flink-copy-btn.copied .flink-check-icon {
+      display: block;
+      color: oklch(0.65 0.15 145);
+    }
+
+    .flink-step {
+      display: flex;
+      gap: 12px;
+      position: relative;
+    }
+    .flink-step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: oklch(0.93 0 0);
+      color: oklch(0.45 0 0);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    :global(.dark) .flink-step-num {
+      background: oklch(0.25 0 0);
+      color: oklch(0.7 0 0);
+    }
+    .flink-step-line {
+      position: absolute;
+      left: 11px;
+      top: 28px;
+      bottom: 2px;
+      width: 2px;
+      background: oklch(0.9 0 0);
+    }
+    :global(.dark) .flink-step-line {
+      background: oklch(0.25 0 0);
+    }
+    .flink-step-body {
+      padding-bottom: 18px;
+      min-width: 0;
+    }
+    .flink-step:last-child .flink-step-body {
+      padding-bottom: 0;
+    }
+
+    .flink-template {
+      position: relative;
+      border-radius: 10px;
+      background: oklch(0.965 0 0);
+      padding: 12px 14px;
+    }
+    :global(.dark) .flink-template {
+      background: oklch(0.2 0 0);
+    }
+    .flink-template-copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+    .flink-template-text {
+      font-size: 12px;
+      line-height: 1.7;
+      color: oklch(0.45 0 0);
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    :global(.dark) .flink-template-text {
+      color: oklch(0.7 0 0);
+    }
+
+    .flink-note-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: oklch(0.7 0.12 70);
+      flex-shrink: 0;
+    }
+
     .edit-main-btn-style {
       display: inline-flex !important;
       align-items: center !important;

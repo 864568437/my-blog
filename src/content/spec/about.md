@@ -52,7 +52,7 @@
 如果你想和我交流技术问题，分享有趣的想法，或者只是想打个招呼，欢迎通过以下方式联系我：
 
 - 💻 **GitHub**: [fqzlr](https://github.com/fqzlr)
-- ✉️ **Email**: [20447289@qq.com](mailto:20447289@qq.com)
+- ✉️ **Email**: [fqzlr@outlook.com](mailto:fqzlr@outlook.com)
 
 ---
 

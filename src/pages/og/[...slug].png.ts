@@ -139,12 +139,19 @@ export async function GET({
 		avatarBase64 = `data:image/png;base64,${avatarBuffer.toString("base64")}`;
 	}
 
-	let iconPath = "./public/favicon/favicon-dark-192.png";
-	if (siteConfig.favicon.length > 0) {
-		iconPath = `./public${siteConfig.favicon[0].src}`;
+	let iconBase64: string;
+	const iconSrc = siteConfig.favicon.length > 0 ? siteConfig.favicon[0].src : "";
+	if (iconSrc.startsWith("http")) {
+		// 远程 URL 直接使用
+		iconBase64 = iconSrc;
+	} else {
+		let iconPath = "./public/favicon/favicon-dark-192.png";
+		if (iconSrc.length > 0) {
+			iconPath = `./public${iconSrc}`;
+		}
+		const iconBuffer = fs.readFileSync(iconPath);
+		iconBase64 = `data:image/png;base64,${iconBuffer.toString("base64")}`;
 	}
-	const iconBuffer = fs.readFileSync(iconPath);
-	const iconBase64 = `data:image/png;base64,${iconBuffer.toString("base64")}`;
 
 	const hue = siteConfig.themeColor.hue;
 	const primaryColor = `hsl(${hue}, 90%, 65%)`;

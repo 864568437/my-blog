@@ -90,7 +90,7 @@ const notes = (friendsPageConfig as any).notes;
                   <Icon name="material-symbols:content-copy-outline-rounded" class="fr-copy-icon" />
                   <Icon name="material-symbols:check-rounded" class="fr-check-icon" />
                 </button>
-                <pre class="fr-template-text">{`站点名称：您的站点名称\n站点描述：您的站点描述\n站点链接：您的站点链接\n头像链接：您的站点头像`}</pre>
+                <pre class="fr-template-text">{'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    tags: ["Blog"],\n },'}</pre>
               </div>
             </div>
           </div>
@@ -133,7 +133,7 @@ const notes = (friendsPageConfig as any).notes;
           class="fr-btn fr-btn-primary"
         >
           <Icon name="material-symbols:edit-square-outline" class="text-base" />
-          自助申请友链（推荐）
+          自助申请友链（暂停使用）
         </a>
       )}
       {commentEnabled && (
@@ -172,6 +172,29 @@ const notes = (friendsPageConfig as any).notes;
         modal.close();
         document.body.style.overflow = '';
         document.getElementById('post-comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // 同时将友链模板填充到评论输入框
+        const template = 'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    tags: ["Blog"],\n },';
+        const fillTemplate = (retries = 0) => {
+          const textarea =
+            document.querySelector('#tcomment .tk-textarea') ||
+            document.querySelector('#tcomment textarea') ||
+            document.querySelector('.wl-editor textarea') ||
+            document.querySelector('.wl-editor') ||
+            document.querySelector('#post-comments textarea');
+          if (textarea) {
+            if ((textarea as HTMLElement).tagName === 'TEXTAREA' || (textarea as HTMLElement).tagName === 'INPUT') {
+              (textarea as HTMLTextAreaElement).value = template;
+            } else {
+              (textarea as HTMLElement).innerText = template;
+            }
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            (textarea as HTMLElement).focus({ preventScroll: true });
+          } else if (retries < 10) {
+            setTimeout(() => fillTemplate(retries + 1), 300);
+          }
+        };
+        setTimeout(() => fillTemplate(), 400);
       });
     });
 

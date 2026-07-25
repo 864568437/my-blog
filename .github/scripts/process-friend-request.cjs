@@ -11,7 +11,7 @@ const SITE_INFO = {
 	name: 'fqzlr',
 	url: 'https://fqzlr.com',
 	avatar: 'https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640',
-	desc: '坐而言不如起而行.',
+	desc: '躬身入局，心为主理，行有尺度，自持本心.',
 };
 
 const DEFAULT_TAG = 'Blog';
