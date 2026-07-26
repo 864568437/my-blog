@@ -281,7 +281,7 @@ const siteInfoText = _si
       if (!btn || btn.dataset.importInit) return;
       btn.dataset.importInit = "1";
       btn.addEventListener("click", () => {
-        const template = 'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    tags: ["Blog"],\n },';
+        const template = 'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    linkpage: "友链页面,\n    tags: ["Blog"],\n },';
         // 查找评论系统输入框（Twikoo / Waline / Artalk）
         const textarea =
           document.querySelector("#tcomment .tk-textarea") ||

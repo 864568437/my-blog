@@ -90,7 +90,7 @@ const notes = (friendsPageConfig as any).notes;
                   <Icon name="material-symbols:content-copy-outline-rounded" class="fr-copy-icon" />
                   <Icon name="material-symbols:check-rounded" class="fr-check-icon" />
                 </button>
-                <pre class="fr-template-text">{'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    tags: ["Blog"],\n },'}</pre>
+                <pre class="fr-template-text">{'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    linkpage: "友链页面,\n    tags: ["Blog"],\n },'}</pre>
               </div>
             </div>
           </div>
@@ -174,7 +174,7 @@ const notes = (friendsPageConfig as any).notes;
         document.getElementById('post-comments')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         // 同时将友链模板填充到评论输入框
-        const template = 'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    tags: ["Blog"],\n },';
+        const template = 'Hi~我已加贵站了，现在申请一下友链！\n\n{\n    title: "站点名称",\n    imgurl: "头像链接",\n    desc: "站点描述",\n    siteurl: "站点链接",\n    linkpage: "友链页面,\n    tags: ["Blog"],\n    },';
         const fillTemplate = (retries = 0) => {
           const textarea =
             document.querySelector('#tcomment .tk-textarea') ||
