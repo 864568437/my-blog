@@ -805,6 +805,8 @@ const mobileQuality = Math.round(configQuality * 0.9);
     /* 去掉 main-grid 的左右内边距，让 3 列恰好 280+1024+280+gap×2 = 1632 */
     padding-left: 0 !important;
     padding-right: 0 !important;
+    /* 文章页列间距：与参考站 1.5rem 对齐，修复侧边栏与正文紧贴的问题 */
+    column-gap: var(--sidebar-gap);
   }
 
   /* 移动端恢复间距 */
