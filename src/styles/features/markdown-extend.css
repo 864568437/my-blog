@@ -98,18 +98,27 @@
 /* GitHub 卡片 */
 a.card-github {
   display: block;
-  background: var(--license-block-bg);
   position: relative;
   margin: 0.5rem 0;
   padding: 1.1rem 1.5rem;
   color: var(--tw-prose-body);
-  border-radius: var(--radius-large);
   text-decoration-thickness: 0px;
   text-decoration-line: none;
 
+  /* 复用侧边栏卡片设计令牌，与目录/音乐等侧边栏 widget 保持视觉一致 */
+  background: var(--sidebar-card-bg, var(--card-bg));
+  border: 1px solid var(--sidebar-card-border, var(--line-divider));
+  border-radius: var(--sidebar-card-radius, 0.75rem);
+  box-shadow: var(--sidebar-card-shadow, 0 4px 12px rgba(0, 0, 0, 0.04));
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
   &:hover {
-    background-color: var(--btn-regular-bg-hover);
-    .gc-titlebar { color: var(--btn-content); }
+    border-color: var(--sidebar-card-border-hover, var(--primary));
+    box-shadow: var(--sidebar-card-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.08));
+    transform: translateY(-1px);
     .gc-stars, .gc-forks, .gc-license, .gc-description {
       color: var(--tw-prose-headings);
       &::before { background-color: var(--tw-prose-headings); }
@@ -118,7 +127,6 @@ a.card-github {
 
   &:active {
     scale: 0.98;
-    background-color: var(--btn-regular-bg-active);
   }
 }
 
@@ -363,4 +371,285 @@ a.card-github.fetch-error {
 @media (max-width: 768px) {
   .mermaid-wrapper { padding: 1rem; }
   .mermaid svg { max-height: 400px; }
+}
+
+/* ─── Wiki Link 文章卡片（视觉规格完全对齐列表页 .article-list-row-card） ───── */
+a.card-wiki-link {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 14rem;
+  margin: 1.5rem 0;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--sidebar-card-border, var(--line-divider));
+  border-radius: 1rem;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
+  color: var(--tw-prose-body);
+  text-decoration-line: none;
+  text-decoration-thickness: 0px;
+  transition:
+    border-color 0.3s ease,
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+a.card-wiki-link:hover,
+a.card-wiki-link:focus-within {
+  border-color: var(--sidebar-card-border-hover, var(--deep-text));
+  transform: translateY(-2px);
+}
+
+:root.dark a.card-wiki-link:hover,
+:root.dark a.card-wiki-link:focus-within {
+  box-shadow: none;
+}
+
+/* 内容区（左文），右侧 padding 为绝对定位的封面让位 */
+a.card-wiki-link .wlc-info {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.625rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 calc(17.1875rem + 4rem + 1.5rem) 0 0;
+  z-index: 2;
+}
+
+/* 标题 */
+a.card-wiki-link .wlc-title {
+  margin: 0;
+  color: var(--deep-text);
+  font-size: 1.55rem;
+  font-weight: 900;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-width: 0;
+  transition: color 0.2s ease;
+}
+
+a.card-wiki-link:hover .wlc-title {
+  color: var(--primary);
+}
+
+/* 元信息行（分类 + 日期） */
+a.card-wiki-link .wlc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--content-meta);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+a.card-wiki-link .wlc-date,
+a.card-wiki-link .wlc-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+a.card-wiki-link .wlc-date::before,
+a.card-wiki-link .wlc-category::before {
+  content: ' ';
+  display: inline-block;
+  height: 0.95rem;
+  width: 0.95rem;
+  flex-shrink: 0;
+  background-color: currentColor;
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+}
+
+a.card-wiki-link .wlc-date::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z'/%3E%3C/svg%3E");
+}
+
+a.card-wiki-link .wlc-category::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E");
+}
+
+/* 描述 */
+a.card-wiki-link .wlc-description {
+  margin: 0;
+  color: var(--content-meta);
+  font-size: 1rem;
+  font-weight: 450;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 标签胶囊 */
+a.card-wiki-link .wlc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+a.card-wiki-link .wlc-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--sidebar-card-border, rgba(15, 23, 42, 0.12));
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--content-meta);
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+  opacity: 1;
+}
+
+:root.dark a.card-wiki-link .wlc-tag {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* 封面：绝对定位右侧，撑满高度，向左渐隐融合 */
+a.card-wiki-link .wlc-cover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  flex: 0 0 auto;
+  width: calc(17.1875rem + 4rem);
+  overflow: hidden;
+  border-radius: 0 1rem 1rem 0;
+}
+
+a.card-wiki-link .wlc-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  object-fit: cover;
+  border-radius: 0;
+  filter: brightness(0.92);
+  transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+  -webkit-mask-image: linear-gradient(
+    270deg,
+    rgb(0, 0, 0) 0%,
+    rgb(0, 0, 0) 10%,
+    rgba(0, 0, 0, 0.92) 25%,
+    rgba(0, 0, 0, 0.75) 40%,
+    rgba(0, 0, 0, 0.5) 55%,
+    rgba(0, 0, 0, 0.25) 70%,
+    rgba(0, 0, 0, 0.08) 85%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    270deg,
+    rgb(0, 0, 0) 0%,
+    rgb(0, 0, 0) 10%,
+    rgba(0, 0, 0, 0.92) 25%,
+    rgba(0, 0, 0, 0.75) 40%,
+    rgba(0, 0, 0, 0.5) 55%,
+    rgba(0, 0, 0, 0.25) 70%,
+    rgba(0, 0, 0, 0.08) 85%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+a.card-wiki-link:hover .wlc-cover img {
+  transform: scale(1.05);
+  filter: brightness(1);
+}
+
+/* 随机封面图（image: api）容器 */
+a.card-wiki-link .cover-image-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+a.card-wiki-link .cover-image-container[data-error="true"] img {
+  display: none;
+}
+
+/* 无封面变体：内容占满全宽 */
+a.card-wiki-link.no-cover .wlc-info {
+  flex: 1 1 100%;
+  padding-right: 0;
+}
+
+/* ─── 响应式（断点与列表卡片一致） ─── */
+@media (max-width: 900px) {
+  a.card-wiki-link {
+    min-height: 11rem;
+    padding: 1rem 1.25rem;
+  }
+
+  a.card-wiki-link .wlc-cover {
+    width: calc(14rem + 4rem);
+  }
+
+  a.card-wiki-link .wlc-info {
+    padding: 0 calc(14rem + 4rem + 1.25rem) 0 0;
+    gap: 0.5rem;
+  }
+
+  a.card-wiki-link .wlc-title {
+    font-size: 1.25rem;
+  }
+
+  a.card-wiki-link .wlc-description {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 640px) {
+  /* 移动端：图上文下 */
+  a.card-wiki-link {
+    flex-direction: column-reverse;
+    min-height: auto;
+    padding: 0;
+  }
+
+  a.card-wiki-link .wlc-cover {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100%;
+    align-self: stretch;
+    aspect-ratio: 16 / 9;
+    border-radius: 1rem 1rem 0 0;
+  }
+
+  /* 移动端移除 mask 渐变（图片在顶部完整显示） */
+  a.card-wiki-link .wlc-cover img {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  a.card-wiki-link .wlc-info {
+    padding: 1.1rem 1.1rem 1.2rem;
+    gap: 0.5rem;
+  }
+
+  a.card-wiki-link .wlc-title {
+    font-size: 1.1rem;
+  }
+
+  a.card-wiki-link .wlc-description {
+    font-size: 0.85rem;
+  }
+
+  a.card-wiki-link .wlc-meta {
+    gap: 0.75rem;
+    font-size: 0.8rem;
+  }
 }

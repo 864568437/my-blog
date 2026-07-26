@@ -33,6 +33,7 @@ import mdx from "@astrojs/mdx";
 import rehypeEmailProtection from "./src/plugins/rehype-email-protection.mjs";
 import rehypeExternalLinks from "./src/plugins/rehype-external-links.mjs";
 import rehypeFigure from "./src/plugins/rehype-figure.mjs";
+import { remarkWikiLink } from "./src/plugins/remark-wiki-link.js";
 
 // https://astro.build/config
 export default defineConfig({
@@ -168,6 +169,7 @@ export default defineConfig({
 				remarkPlugins: [
 					remarkMath,
 					remarkReadingTime,
+					remarkWikiLink,
 					remarkExcerpt,
 					remarkDirective,
 					remarkSectionize,
@@ -224,6 +226,7 @@ export default defineConfig({
 			remarkPlugins: [
 				remarkMath,
 				remarkReadingTime,
+				remarkWikiLink,
 				remarkExcerpt,
 				remarkDirective,
 				remarkSectionize,
