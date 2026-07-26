@@ -390,10 +390,10 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 			if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
 		});
 
-		// 返回书架
+		// 返回番组
 		document.getElementById("dock-bookshelf-btn")?.addEventListener("click", (e) => {
 			e.stopPropagation();
-			window.location.href = "/books/";
+			window.location.href = "/bangumi/";
 		});
 
 		// TOC 懒加载

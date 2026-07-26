@@ -136,6 +136,35 @@ export const siteConfig: SiteConfig = {
 	bangumi: {
 		// Bangumi用户ID
 		userId: "1219895",
+		// 数据加载模式："static" 构建时获取全部数据，"dynamic" 客户端按需加载
+		mode: "static",
+		// Bangumi API 地址
+		apiUrl: "https://api.bangumi.one",
+		// 条目详情页基础 URL
+		subjectBaseUrl: "https://bangumi.one/subject/",
+		// 分类映射：将 Bangumi subject type 映射到显示分类
+		categories: {
+			anime: ["2"],
+			real: ["6"],
+			book: ["1"],
+			game: ["4"],
+			music: ["3"],
+		},
+		// 分类显示顺序
+		categoryOrder: ["anime", "real", "book", "game", "music"],
+		// 分页配置
+		pagination: { itemsPerPage: 18 },
+	},
+
+	// 追番配置（TMDB + Bilibili 双源）
+	anime: {
+		tmdb: {
+			apiKey: "",
+			listId: "",
+		},
+		bilibili: {
+			uid: "2017273493",
+		},
 	},
 
 	// 豆瓣配置
@@ -150,12 +179,12 @@ export const siteConfig: SiteConfig = {
 		sponsor: true,
 		// 留言板页面开关，需要配置评论系统
 		guestbook: true,
-		// 原番组计划页面开关（已拆分，保留关闭）
-		bangumi: false,
-		// 书架页面开关
-		books: true,
-		// 影视与游戏页面开关
-		moviesGames: true,
+		// 番组计划页面开关
+		bangumi: true,
+		// 追番页面开关
+		anime: true,
+		// 相册页面开关
+		gallery: true,
 		// 音乐页面开关
 		musicPage: true,
 		// 更新日志页面开关

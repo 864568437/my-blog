@@ -67,6 +67,16 @@ export const changelogConfig: ChangelogItem[] = [
 		body: "",
 		enabled: true,
 	},	
+				{
+		id: "2026-07-26-v1-0-3",
+		version: "v1.0.3",
+		date: "2026-07-26",	
+		time: "22:00",
+		type: "feature",
+		description: "大幅度精简页面，删除大量的前端设置页面，书籍和影视页面,增加友链检测及背景，修复各种bug，统一风格等等",
+		body: "",
+		enabled: true,
+	},	
 ];
 
 export function getEnabledChangelog(): ChangelogItem[] {

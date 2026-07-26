@@ -347,6 +347,48 @@ export const en: Translation = {
 	[Key.welcomeCardLearnMore]: "Learn More",
 	[Key.welcomeCardRecentLabel]: "Recent Updates",
 
+	// Anime page
+	[Key.anime]: "Anime",
+	[Key.animeSubtitle]: "Tracking my favorite anime, movies and documentaries",
+	[Key.animeLastUpdated]: "Last updated: ",
+	[Key.animeNotConfigured]: "Not Configured",
+	[Key.animeNotConfiguredDesc]: "Please configure TMDB or Bilibili data source in siteConfig.ts",
+	[Key.animeTotal]: "Total",
+	[Key.animeBilibiliAvg]: "Bilibili Avg",
+	[Key.animeTmdbAvg]: "TMDB Avg",
+	[Key.animeSource]: "Source",
+	[Key.animeDualSynced]: "Dual Sync",
+	[Key.animeSearch]: "Search anime...",
+	[Key.animeRatingDesc]: "Rating: High to Low",
+	[Key.animeRatingAsc]: "Rating: Low to High",
+	[Key.animeDateDesc]: "Date: Newest First",
+	[Key.animeDateAsc]: "Date: Oldest First",
+	[Key.animeNoResults]: "No anime found",
+	[Key.animeNoOverview]: "No synopsis available",
+	[Key.animeViewDetails]: "View Details",
+	[Key.animeClose]: "Close",
+	[Key.animeSynopsis]: "Synopsis",
+	[Key.animeWatchNow]: "Watch Now",
+	[Key.animeViewTmdb]: "View on TMDB",
+	[Key.animeTypeAnime]: "Anime",
+	[Key.animeTypeMovie]: "Movie",
+	[Key.animeTypeDocumentary]: "Documentary",
+	[Key.animeTypeChinese]: "Chinese",
+	[Key.animeTypeDrama]: "Drama",
+	[Key.animeTypeConcert]: "Concert",
+
+	// Gallery page
+	[Key.gallery]: "Gallery",
+	[Key.galleryDescription]: "Capturing beautiful moments in life",
+	[Key.galleryPhotos]: "photos",
+	[Key.galleryBackToAlbums]: "Back to Albums",
+	[Key.galleryNoAlbums]: "No albums yet",
+	[Key.searchAlbums]: "Search albums...",
+
+	// Bangumi API
+	[Key.bangumiFetchError]: "Failed to Fetch Data",
+	[Key.bangumiFetchErrorDesc]: "Cannot connect to Bangumi API. Please try again later or check your network.",
+
 	// 主题设置面板 Tab 标签
 	[Key.displayTabTheme]: "Theme",
 	[Key.displayTabWallpaper]: "Wallpaper",

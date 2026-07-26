@@ -728,6 +728,92 @@
   text-align: center;
 }
 
+/* ========== 内联评论区 ========== */
+
+/* 标签 + 评论按钮同行布局 */
+.moment-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 4px;
+}
+
+.dynamic-inline-comments {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.dynamic-comment-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 4px 12px;
+  border-radius: var(--moments-radius-pill);
+  border: var(--moments-border-width) solid var(--moments-border);
+  background: var(--moments-soft);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dynamic-comment-toggle:hover,
+.dynamic-comment-toggle:focus-visible,
+.dynamic-inline-comments[data-expanded="true"] .dynamic-comment-toggle {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.dynamic-comment-panel {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--moments-border);
+  overflow: hidden;
+}
+
+.dynamic-comment-panel[hidden] {
+  display: none;
+}
+
+/* ========== Waline 评论组件内嵌样式（融入动态卡片） ========== */
+.dynamic-waline {
+  font-size: 14px;
+}
+
+/* 去除 Waline 默认卡片装饰，融入动态卡片背景 */
+.dynamic-waline .wl-card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.dynamic-waline .wl-panel {
+  background: var(--moments-soft);
+  border: var(--moments-border-width) solid var(--moments-border);
+  border-radius: 8px;
+}
+
+/* 评论列表紧凑化 */
+.dynamic-waline .wl-cards .wl-card {
+  padding: 0.5rem 0;
+}
+
+.dynamic-waline .wl-card .wl-nick {
+  font-size: 13px;
+}
+
+.dynamic-waline .wl-card .wl-content {
+  font-size: 13px;
+}
+
+/* 隐藏 Waline 底部版权信息（可选） */
+.dynamic-waline .wl-power {
+  display: none;
+}
+
 /* ========== 响应式 ========== */
 @media (max-width: 640px) {
   .moments-title {

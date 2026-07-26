@@ -40,7 +40,7 @@ import DynamicItemTemplate from "@/components/pages/dynamic/DynamicItemTemplate.
 import DynamicEditor from "@/components/edit/DynamicEditor.svelte";
 import PageHeader from "@/components/common/PageHeader.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { dynamicConfig } from "@/config";
+import { dynamicConfig, commentConfig } from "@/config";
 import { url } from "@/utils/url-utils";
 import "@/styles/dynamic.css";
 
@@ -54,8 +54,23 @@ const itemsPerPage = Math.max(1, dynamicConfig.itemsPerPage ?? 10);
 // 是否启用内联评论：当 showComment !== false（即默认 true）且 commentConfig.type
 // 配置了非 'none' 的评论系统时启用。供 DynamicFeed 渲染 dynamic-inline-comments 节点
 const showInlineComments = Boolean(
-	dynamicConfig.showComment !== false,
+	dynamicConfig.showComment !== false &&
+	commentConfig.type &&
+	commentConfig.type !== "none",
 );
+
+// Waline 配置（注入到 window.__WALINE_CONFIG__ 供客户端自定义元素读取）
+const walineConfig = showInlineComments && commentConfig.type === "waline"
+	? {
+			serverURL: commentConfig.waline?.serverURL || "",
+			lang: commentConfig.waline?.lang || "zh-CN",
+			emoji: commentConfig.waline?.emoji,
+			login: commentConfig.waline?.login || "enable",
+			dark: "html.dark",
+			wordLimit: ["2", "300"],
+			pageview: commentConfig.waline?.visitorCount || false,
+		}
+	: null;
 
 // 动态数据源 URL：
 //   - 若 apiUrl 以 http 开头（外部 Memos 等 API），直接使用；
@@ -166,3 +181,15 @@ const showCover = dynamicConfig.showCover !== false;
 		<DynamicItemTemplate />
 	</section>
 </MainGridLayout>
+
+{/* Waline CSS（评论组件样式） */}
+{showInlineComments && (
+	<link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
+)}
+
+{/* 注入 Waline 配置到全局，供 dynamic-inline-comments 自定义元素读取 */}
+{walineConfig && (
+	<script define:vars={{ walineConfig }} is:inline>
+		window.__WALINE_CONFIG__ = walineConfig;
+	</script>
+)}

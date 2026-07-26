@@ -374,6 +374,48 @@ enum I18nKey {
 	welcomeCardLearnMore = "welcomeCardLearnMore",
 	welcomeCardRecentLabel = "welcomeCardRecentLabel",
 
+	// 追番页面
+	anime = "anime",
+	animeSubtitle = "animeSubtitle",
+	animeLastUpdated = "animeLastUpdated",
+	animeNotConfigured = "animeNotConfigured",
+	animeNotConfiguredDesc = "animeNotConfiguredDesc",
+	animeTotal = "animeTotal",
+	animeBilibiliAvg = "animeBilibiliAvg",
+	animeTmdbAvg = "animeTmdbAvg",
+	animeSource = "animeSource",
+	animeDualSynced = "animeDualSynced",
+	animeSearch = "animeSearch",
+	animeRatingDesc = "animeRatingDesc",
+	animeRatingAsc = "animeRatingAsc",
+	animeDateDesc = "animeDateDesc",
+	animeDateAsc = "animeDateAsc",
+	animeNoResults = "animeNoResults",
+	animeNoOverview = "animeNoOverview",
+	animeViewDetails = "animeViewDetails",
+	animeClose = "animeClose",
+	animeSynopsis = "animeSynopsis",
+	animeWatchNow = "animeWatchNow",
+	animeViewTmdb = "animeViewTmdb",
+	animeTypeAnime = "animeTypeAnime",
+	animeTypeMovie = "animeTypeMovie",
+	animeTypeDocumentary = "animeTypeDocumentary",
+	animeTypeChinese = "animeTypeChinese",
+	animeTypeDrama = "animeTypeDrama",
+	animeTypeConcert = "animeTypeConcert",
+
+	// 相册页面
+	gallery = "gallery",
+	galleryDescription = "galleryDescription",
+	galleryPhotos = "galleryPhotos",
+	galleryBackToAlbums = "galleryBackToAlbums",
+	galleryNoAlbums = "galleryNoAlbums",
+	searchAlbums = "searchAlbums",
+
+	// Bangumi API 相关
+	bangumiFetchError = "bangumiFetchError",
+	bangumiFetchErrorDesc = "bangumiFetchErrorDesc",
+
 	// 主题设置面板 Tab 标签
 	displayTabTheme = "displayTabTheme",
 	displayTabWallpaper = "displayTabWallpaper",

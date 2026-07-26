@@ -63,11 +63,15 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				url: "/dynamic/",
 				icon: "material-symbols:dynamic-feed-rounded",
 			},
-			{
-				name: "相册",
-				url: "/album/",
-				icon: "material-symbols:photo-album-outline",
-			},
+			...(siteConfig.pages.gallery
+				? [
+						{
+							name: "相册",
+							url: "/gallery/",
+							icon: "material-symbols:photo-library",
+						},
+					]
+				: []),
 			{
 				name: "留言板",
 				url: "/guestbook/",
@@ -86,16 +90,24 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 		],
 	});
 
-	// 记录入口 - 书架、影视与游戏、音乐、规划、足迹
+	// 记录入口 - 音乐、追番、番组、规划、足迹
 	const recordChildren: (NavBarLink | LinkPreset)[] = [];
-	if (siteConfig.pages.books) {
-		recordChildren.push(LinkPreset.Books);
-	}
-	if (siteConfig.pages.moviesGames) {
-		recordChildren.push(LinkPreset.MoviesGames);
-	}
 	if (siteConfig.pages.musicPage) {
 		recordChildren.push(LinkPreset.MusicPage);
+	}
+	if (siteConfig.pages.anime) {
+		recordChildren.push({
+			name: "追番",
+			url: "/anime/",
+			icon: "material-symbols:live-tv",
+		});
+	}
+	if (siteConfig.pages.bangumi) {
+		recordChildren.push({
+			name: "番组",
+			url: "/bangumi/",
+			icon: "material-symbols:movie",
+		});
 	}
 	if (siteConfig.pages.changelog) {
 		recordChildren.push(LinkPreset.Changelog);
@@ -116,11 +128,11 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 	});
 
 	if (recordChildren.length > 0) {
-		const defaultUrl = siteConfig.pages.books
-			? "/books/"
-			: siteConfig.pages.moviesGames
-				? "/movies-games/"
-				: "/music/";
+		const defaultUrl = siteConfig.pages.musicPage
+			? "/music/"
+			: siteConfig.pages.anime
+				? "/anime/"
+				: "/bangumi/";
 
 		links.push({
 			name: "记录",
@@ -148,13 +160,6 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 
 			// 赞助
 			...(siteConfig.pages.sponsor ? [LinkPreset.Sponsor] : []),
-
-			// 站点配置
-			{
-				name: "站点配置",
-				url: "/config/",
-				icon: "material-symbols:settings",
-			},
 		],
 	});
 

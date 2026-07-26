@@ -67,6 +67,23 @@ export type SiteConfig = {
 	// 添加bangumi配置
 	bangumi?: {
 		userId?: string; // Bangumi用户ID
+		mode?: "static" | "dynamic"; // 数据加载模式
+		apiUrl?: string; // Bangumi API 地址
+		subjectBaseUrl?: string; // 条目详情页基础 URL
+		categories?: Record<string, string[]>; // 分类映射
+		categoryOrder?: string[]; // 分类显示顺序
+		pagination?: { itemsPerPage: number }; // 分页配置
+	};
+
+	// 追番配置
+	anime?: {
+		tmdb?: {
+			apiKey?: string; // TMDB API Key
+			listId?: string; // TMDB 列表 ID
+		};
+		bilibili?: {
+			uid?: string; // Bilibili 用户 UID
+		};
 	};
 
 	// 添加豆瓣配置
@@ -103,8 +120,8 @@ export type SiteConfig = {
 		sponsor: boolean; // 赞助页面开关
 		guestbook: boolean; // 留言板页面开关
 		bangumi: boolean;
-		books: boolean; // 书架页面开关
-		moviesGames: boolean; // 影视与游戏页面开关
+		anime: boolean; // 追番页面开关
+		gallery: boolean; // 相册页面开关
 		musicPage: boolean; // 音乐页面开关
 		changelog: boolean; // 更新日志页面开关
 		calendar: boolean; // 日历页面开关
@@ -221,8 +238,6 @@ export enum LinkPreset {
 	Sponsor = 4,
 	Guestbook = 5,
 	Bangumi = 6,
-	Books = 7,
-	MoviesGames = 8,
 	MusicPage = 9,
 	Changelog = 10,
 	Posts = 11,

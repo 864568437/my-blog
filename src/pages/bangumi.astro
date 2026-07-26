@@ -1,23 +1,49 @@
 ---
-import { getCollection } from "astro:content";
 import { Icon } from "astro-icon/components";
-import BangumiSection from "@/components/pages/bangumi/BangumiSection.astro";
-import TabNav from "@/components/pages/bangumi/TabNav.astro";
+import BangumiGrid from "@/components/pages/bangumi/BangumiGrid.svelte";
 import { siteConfig } from "@/config";
-import { bangumiConfig, bangumiPageConfig } from "@/config/bangumiConfig";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
-import PageHeader from "@/components/common/PageHeader.astro";
-import type { UserSubjectCollection } from "@/types/bangumi";
+import type {
+	UserSubjectCollection,
+	UserSubjectCollectionResponse,
+} from "@/types/bangumi";
 import { formatDateI18nWithTime } from "@/utils/date-utils";
 
+// 检查页面是否启用
 if (!siteConfig.pages.bangumi) {
 	return Astro.redirect("/404/");
 }
 
+// 获取构建时间
 const buildTime = formatDateI18nWithTime(new Date());
 
+////////////// Bangumi 配置 ////////////////////////
+const bangumiApiConfig = {
+	username: siteConfig.bangumi?.userId,
+	mode: (siteConfig.bangumi?.mode || "static") as "static" | "dynamic",
+	apiUrl: siteConfig.bangumi?.apiUrl || "https://api.bangumi.one",
+	subjectBaseUrl:
+		siteConfig.bangumi?.subjectBaseUrl || "https://bangumi.one/subject/",
+	categories: {
+		book: siteConfig.bangumi?.categories?.book ? true : false,
+		anime: siteConfig.bangumi?.categories?.anime ? true : false,
+		music: siteConfig.bangumi?.categories?.music ? true : false,
+		game: siteConfig.bangumi?.categories?.game ? true : false,
+		real: siteConfig.bangumi?.categories?.real ? true : false,
+	},
+	pagination: {
+		limit: 50,
+		delay: 50,
+		maxTotal: 1000,
+	},
+};
+//////////////////////////////////////////////////
+
+const isDynamic = bangumiApiConfig.mode === "dynamic";
+
+// 分类映射
 const categoryMap = {
 	book: { id: "book", name: i18n(I18nKey.bangumiCategoryBook), subjectType: 1 },
 	anime: {
@@ -34,113 +60,126 @@ const categoryMap = {
 	real: { id: "real", name: i18n(I18nKey.bangumiCategoryReal), subjectType: 6 },
 };
 
-const allPosts = await getCollection("posts");
+// 获取Bangumi数据的函数 - 支持分页获取所有数据
+async function fetchBangumiData(username: string, subjectType: number) {
+	const { limit, delay, maxTotal } = bangumiApiConfig.pagination;
+	let offset = 0;
+	let allData: UserSubjectCollection[] = [];
+	let hasMore = true;
 
-const enabledBangumi = bangumiConfig.filter((item) => item.enabled !== false);
+	// 开发模式下只获取一页数据，加快调试速度
+	const isDev = import.meta.env.DEV;
+	const maxPages = isDev ? 1 : 0;
 
-const mappedData: UserSubjectCollection[] = enabledBangumi.map((item) => {
-	const categoryInfo = categoryMap[item.category];
+	console.log(
+		`[Bangumi] ${isDev ? "🔧 开发模式" : "🌐 生产模式"} - 开始获取用户 ${username} 的 subjectType ${subjectType} 数据...`,
+	);
 
-	let rawLink = (item.link || "").trim().replace(/\\/g, "/");
+	while (hasMore) {
+		if (isDev && maxPages > 0 && allData.length >= limit * maxPages) {
+			console.log(`[Bangumi] 开发模式：已获取 ${maxPages} 页数据，停止获取`);
+			break;
+		}
 
-	if (!rawLink) {
-		rawLink = `/bangumi/${item.id}/`;
-	}
+		if (maxTotal > 0 && allData.length >= maxTotal) {
+			console.log(`[Bangumi] 已达到最大获取限制 ${maxTotal}，停止获取`);
+			break;
+		}
 
-	let finalLink = rawLink;
+		const url = `${bangumiApiConfig.apiUrl}/v0/users/${username}/collections?subject_type=${subjectType}&limit=${limit}&offset=${offset}`;
 
-	const normalize = (s: string) =>
-		s.toLowerCase().replace(/\\/g, "/").replace(/\/$/, "");
+		console.log(`[Bangumi] 正在获取数据: ${url} (已获取: ${allData.length})`);
 
-	const matchingPost = allPosts.find((p) => {
-		const normalizedId = p.id.replace(/\\/g, "/");
-		const slug = normalizedId.replace(/\.(md|mdx|markdown)$/i, "");
-		const postUrl = `/posts/${slug}/`;
-
-		const nRaw = normalize(rawLink);
-		const nSlug = normalize(slug);
-		const nUrl = normalize(postUrl);
-		const nId = normalize(normalizedId);
-
-		return (
-			nRaw === nUrl ||
-			nRaw === nSlug ||
-			nRaw === nId ||
-			nRaw.endsWith(nSlug) ||
-			nRaw.endsWith(nId) ||
-			p.data.title === item.title
-		);
-	});
-
-	if (matchingPost) {
-		const normalizedId = matchingPost.id.replace(/\\/g, "/");
-		const slug = normalizedId.replace(/\.(md|mdx|markdown)$/i, "");
-		finalLink = `/posts/${slug}/`;
-	}
-
-	if (!finalLink.startsWith("http") && !finalLink.startsWith("/")) {
-		finalLink = "/" + finalLink;
-	}
-
-	return {
-		subject_id: 0,
-		subject_type: categoryInfo.subjectType,
-		rate: item.score || 0,
-		type: item.status as any,
-		comment: item.comment || null,
-		tags: item.tags || [],
-		ep_status: 0,
-		vol_status: 0,
-		updated_at: item.published ? new Date(item.published).toISOString() : new Date().toISOString(),
-		private: false,
-		link: finalLink,
-		subject: {
-			id: 0,
-			type: categoryInfo.subjectType,
-			name: item.title,
-			name_cn: item.name_cn || item.title,
-			short_summary: "",
-			images: {
-				medium: item.image,
-				large: item.image,
-				common: item.image,
-				small: item.image,
-				grid: item.image,
+		const response = await fetch(url, {
+			headers: {
+				"User-Agent": "Fqzlr Blog",
+				Accept: "application/json",
 			},
-			volumes: 0,
-			eps: 0,
-			collection_total: 0,
-			score: item.score || 0,
-			rank: 0,
-			tags: (item.tags || []).map((t) => ({
-				name: t,
-				count: 0,
-				total_cont: 0,
-			})),
-		},
-	};
-});
+		});
 
-mappedData.sort((a, b) => {
-	const dateA = new Date(a.updated_at).getTime();
-	const dateB = new Date(b.updated_at).getTime();
-	return dateB - dateA;
-});
+		if (!response.ok) {
+			throw new Error(
+				`[Bangumi] 无法获取数据 (状态码: ${response.status}): ${url}`,
+			);
+		}
 
+		const data = (await response.json()) as UserSubjectCollectionResponse;
+		const currentBatch = data.data || [];
+
+		if (currentBatch.length > 0) {
+			allData = allData.concat(currentBatch);
+			offset += limit;
+
+			if (currentBatch.length < limit) {
+				hasMore = false;
+			}
+		} else {
+			hasMore = false;
+		}
+
+		if (hasMore) {
+			await new Promise((resolve) => setTimeout(resolve, delay));
+		}
+	}
+
+	console.log(`[Bangumi] 总共获取到 ${allData.length} 条数据`);
+	return allData;
+}
+
+// 获取所有启用分类的数据
 const bangumiData: Record<string, UserSubjectCollection[]> = {};
 const tabs: Array<{ id: string; name: string; count: number }> = [];
+let fetchFailed = false;
 
-const displayCategories = ["anime", "book", "game", "music"];
+// 检查是否已配置 Bangumi 用户ID
+const isUserIdConfigured =
+	bangumiApiConfig.username &&
+	bangumiApiConfig.username.trim() !== "";
 
-for (const key of displayCategories) {
-	if (categoryMap[key as keyof typeof categoryMap]) {
-		const info = categoryMap[key as keyof typeof categoryMap];
-		const items = mappedData.filter((d) => d.subject_type === info.subjectType);
-		bangumiData[key] = items;
-		tabs.push({
-			id: key,
-			name: info.name,
-			count: items.length,
+if (!isUserIdConfigured) {
+	console.log("[Bangumi] ⚠️ 未配置 Bangumi 用户ID，跳过数据获取");
+} else if (!isDynamic) {
+	console.log("[Bangumi] 🌐 从 API 获取数据（static 模式）");
+}
+
+if (!isDynamic) {
+	for (const [categoryKey, enabled] of Object.entries(
+		bangumiApiConfig.categories,
+	)) {
+		if (!isUserIdConfigured) {
+			break;
+		}
+		if (enabled && categoryMap[categoryKey as keyof typeof categoryMap]) {
+			const categoryInfo = categoryMap[categoryKey as keyof typeof categoryMap];
+			try {
+				const data = await fetchBangumiData(
+					bangumiApiConfig.username!,
+					categoryInfo.subjectType,
+				);
+				bangumiData[categoryKey] = data;
+				tabs.push({
+					id: categoryKey,
+					name: categoryInfo.name,
+					count: data.length,
+				});
+			} catch (error) {
+				console.error(`[Bangumi] 获取 ${categoryInfo.name} 数据失败:`, error);
+				fetchFailed = true;
+				break;
+			}
+		}
+	}
+
+	// 根据 categoryOrder 配置对 tabs 进行排序
+	const categoryOrder = siteConfig.bangumi?.categoryOrder || [];
+	if (categoryOrder.length > 0) {
+		tabs.sort((a, b) => {
+			const aIndex = categoryOrder.indexOf(a.id);
+			const bIndex = categoryOrder.indexOf(b.id);
+			if (aIndex === -1 && bIndex === -1) return 0;
+			if (aIndex === -1) return 1;
+			if (bIndex === -1) return -1;
+			return aIndex - bIndex;
 		});
 	}
 }
@@ -149,120 +188,93 @@ const activeTab = tabs[0]?.id || "anime";
 ---
 
 <MainGridLayout title={i18n(I18nKey.bangumi)} description={i18n(I18nKey.bangumiSubtitle)}>
-	<div class="bangumi-page-wrapper flex w-full overflow-hidden relative min-h-32">
-		<div class="card-base z-10 px-6 pt-8 pb-8 relative w-full">
-			<!-- Page header -->
-			<header class="bangumi-header relative w-full mb-8">
-				<!-- 页面页头：面包屑 + 标题（保留原有的图标/描述/更新时间） -->
-			<PageHeader
-				title={i18n(I18nKey.bangumi)}
-				eyebrow="Bangumi"
-				variant="stacked"
-				breadcrumbs={[{ name: i18n(I18nKey.bangumi), icon: "material-symbols:collections-bookmark-outline-rounded" }]}
-			>
-				<p class="text-sm text-[var(--content-meta)] leading-relaxed max-w-2xl">
-					{i18n(I18nKey.bangumiSubtitle)}
-				</p>
-				<p class="text-xs text-[var(--content-meta)] opacity-60 mt-1.5">
-					{i18n(I18nKey.bangumiLastUpdated)} {buildTime}
-				</p>
-			</PageHeader>
-			</header>
+  <div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+    <div class="card-base z-10 px-9 py-6 relative w-full">
+        <!-- 页面标题 -->
+        <div class="relative w-full mb-8">
+            <div class="mb-6">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="h-8 w-8 rounded-lg bg-(--primary) flex items-center justify-center text-white dark:text-black/70">
+                        <Icon is:inline name="material-symbols:movie" class="text-[1.5rem]"></Icon>
+                    </div>
+                    <div class="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+                        {i18n(I18nKey.bangumi)}
+                    </div>
+                </div>
+                <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                    {i18n(I18nKey.bangumiSubtitle)}
+                </p>
+                {!isDynamic && (
+                <p class="text-xs text-neutral-500 dark:text-neutral-500 mt-2">
+                    {i18n(I18nKey.bangumiLastUpdated)} {buildTime}
+                </p>
+                )}
+            </div>
 
-			<!-- Tab navigation and content -->
-			{tabs.length > 0 ? (
-				<>
-					<TabNav tabs={tabs} activeTab={activeTab} />
-
-					{tabs.map((tab) => (
-						<BangumiSection
-							sectionId={tab.id}
-							items={bangumiData[tab.id] || []}
-							isActive={tab.id === activeTab}
-					itemsPerPage={12}
-							itemsPerPageMobile={6}
-						/>
-					))}
-				</>
-			) : (
-				<div class="flex flex-col items-center justify-center py-20 text-center">
-					<div class="inline-flex items-center justify-center w-16 h-16 bg-[var(--btn-regular-bg)] rounded-2xl mb-6 border border-[var(--line-divider)]">
-						<Icon name="material-symbols:settings" class="text-[2rem] text-[var(--btn-content)]" />
-					</div>
-					<h2 class="text-xl font-semibold text-[var(--deep-text)] dark:text-[var(--title-active)] mb-3">
-						{i18n(I18nKey.bangumiEmpty)}
-					</h2>
-					<p class="text-[var(--content-meta)] mb-4 max-w-md mx-auto text-sm">
-						请在 src/config/bangumiConfig.ts 中添加条目以显示在此页面
-					</p>
-				</div>
-			)}
+      {isDynamic ? (
+        /* ==================== Dynamic 模式 ==================== */
+        <>
+          {!isUserIdConfigured ? (
+            <div class="text-center py-16">
+              <div class="inline-flex items-center justify-center w-16 h-16 bg-(--btn-regular-bg) rounded-full mb-6 border border-(--line-divider)">
+                <Icon is:inline name="material-symbols:settings" class="text-[2rem] text-(--btn-content)" />
+              </div>
+              <h2 class="text-xl font-semibold text-black/80 dark:text-white/80 mb-3">
+                未配置 Bangumi 用户ID
+              </h2>
+              <p class="text-black/60 dark:text-white/60 mb-4 max-w-md mx-auto">
+                请在 src/config/siteConfig.ts 中配置你的 Bangumi 用户ID
+              </p>
+            </div>
+          ) : (
+            <BangumiGrid
+              client:load
+              subjectBaseUrl={bangumiApiConfig.subjectBaseUrl}
+              fetchConfig={{
+                username: bangumiApiConfig.username!,
+                apiUrl: bangumiApiConfig.apiUrl,
+                categories: bangumiApiConfig.categories,
+                categoryOrder: siteConfig.bangumi?.categoryOrder || [],
+                pagination: bangumiApiConfig.pagination,
+              }}
+            />
+          )}
+        </>
+      ) : (
+        /* ==================== Static 模式 ==================== */
+        <>
+      {fetchFailed ? (
+        <div class="text-center py-16">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-(--btn-regular-bg) rounded-full mb-6 border border-(--line-divider)">
+            <Icon is:inline name="material-symbols:error-outline" class="text-[2rem] text-red-500" />
+          </div>
+          <h2 class="text-xl font-semibold text-black/80 dark:text-white/80 mb-3">
+            {i18n(I18nKey.bangumiFetchError)}
+          </h2>
+          <p class="text-black/60 dark:text-white/60 mb-4 max-w-md mx-auto">
+            {i18n(I18nKey.bangumiFetchErrorDesc)}
+          </p>
+        </div>
+      ) : tabs.length > 0 ? (
+        <>
+          <BangumiGrid client:load tabs={tabs} initialActiveTab={activeTab} bangumiData={bangumiData} subjectBaseUrl={bangumiApiConfig.subjectBaseUrl} />
+        </>
+      ) : (
+        <div class="text-center py-16">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-(--btn-regular-bg) rounded-full mb-6 border border-(--line-divider)">
+            <Icon is:inline name="material-symbols:settings" class="text-[2rem] text-(--btn-content)" />
+          </div>
+          <h2 class="text-xl font-semibold text-black/80 dark:text-white/80 mb-3">
+            {isUserIdConfigured ? i18n(I18nKey.bangumiEmpty) : "未配置 Bangumi 用户ID"}
+          </h2>
+          <p class="text-black/60 dark:text-white/60 mb-4 max-w-md mx-auto">
+            {isUserIdConfigured ? i18n(I18nKey.bangumiEmptyReason) : "请在 src/config/siteConfig.ts 中配置你的 Bangumi 用户ID"}
+          </p>
+        </div>
+      )}
+        </>
+      )}
 		</div>
-
-	</div>
+    </div>
+  </div>
 </MainGridLayout>
-
-<style>
-	.bangumi-page-wrapper {
-		border-radius: var(--radius-large);
-	}
-
-	/* Responsive grid */
-	.bangumi-grid {
-		/* Mobile-first: already set via Tailwind classes */
-	}
-
-	/* Smooth page-level transitions */
-	.bangumi-header {
-		animation: fadeSlideIn 0.4s ease-[var(--ease-standard)] both;
-	}
-
-	.bangumi-icon {
-		transition: transform 0.2s ease-[var(--ease-standard)];
-	}
-
-	.bangumi-icon:hover {
-		transform: scale(1.05);
-	}
-
-	@keyframes fadeSlideIn {
-		from {
-			opacity: 0;
-			transform: translateY(8px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	/* Section fade in */
-	.bangumi-section {
-		animation: fadeIn 0.3s ease-[var(--ease-standard)] both;
-	}
-
-	@keyframes fadeIn {
-		from { opacity: 0; }
-		to { opacity: 1; }
-	}
-
-	/* Hide scrollbar for tab nav on mobile but keep it functional */
-	.scrollbar-hide {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
-	}
-
-	.scrollbar-hide::-webkit-scrollbar {
-		display: none;
-	}
-
-	/* Responsive padding adjustments */
-	@media (max-width: 640px) {
-		.card-base {
-			padding-left: 1rem;
-			padding-right: 1rem;
-			padding-top: 1.5rem;
-			padding-bottom: 1.5rem;
-		}
-	}
-</style>

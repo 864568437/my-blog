@@ -65,11 +65,9 @@ const allItems = [
 				.replace(/\\/g, "/")
 				.replace(/\.(md|mdx|markdown)$/i, "");
 			url =
-				b.data.category === "book"
-					? `/books/${slug}/`
-					: b.data.category === "music"
-						? "/music/"
-						: "/movies-games/";
+				b.data.category === "music"
+					? "/music/"
+					: "/bangumi/";
 		}
 		return {
 			type: "bangumi",

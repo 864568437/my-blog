@@ -51,7 +51,7 @@ export {
 } from "./notebooksConfig"; // 笔记本配置
 export { routinesConfig, routinePageConfig, getAllRoutines, getEnabledRoutines } from "./routinesConfig"; // 日常规划配置
 export { placesConfig, placesPageConfig, getAllPlaces, getEnabledPlaces, getTotalVisitCount, getThisYearVisitCount } from "./placesConfig"; // 足迹配置
-export { albumConfig, albumPageConfig, getEnabledAlbums, getAlbumById } from "./albumConfig"; // 相册配置
+export { galleryConfig } from "./galleryConfig"; // Gallery 相册配置
 export { pengyouConfig } from "./pengyouConfig"; // 朋友圈配置
 export { homePortfolioShutterConfig } from "./homePortfolioShutterConfig";
 export { licenseConfig } from "./licenseConfig"; // 许可证配置

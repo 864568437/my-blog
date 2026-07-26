@@ -49,11 +49,9 @@ try {
 		if (!u) {
 			const s = b.id.replace(/\\/g, "/").replace(/\.(md|mdx|markdown)$/i, "");
 			u =
-				b.data.category === "book"
-					? `/books/${s}/`
-					: b.data.category === "music"
-						? "/music/"
-						: "/movies-games/";
+				b.data.category === "music"
+					? "/music/"
+					: "/bangumi/";
 		}
 		allItems.push({
 			type: b.data.category === "music" ? "music" : "bangumi",
@@ -107,20 +105,6 @@ try {
 			date: new Date(c.date),
 			url: "/changelog/",
 		});
-} catch {}
-try {
-	const album = await getCollection("album", ({ data }) =>
-		import.meta.env.PROD ? data.draft !== true : true,
-	);
-	for (const a of album) {
-		const s = a.id.replace(/\\/g, "/").replace(/\.(md|mdx|markdown)$/i, "");
-		allItems.push({
-			type: "album",
-			title: a.data.title,
-			date: new Date(a.data.date),
-			url: `/album/${s}/`,
-		});
-	}
 } catch {}
 
 allItems.sort((a, b) => b.date.getTime() - a.date.getTime());

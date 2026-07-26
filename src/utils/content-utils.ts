@@ -133,12 +133,10 @@ export async function getArchiveList(): Promise<ArchiveItem[]> {
 					const slug = b.id
 						.replace(/\\/g, "/")
 						.replace(/\.(md|mdx|markdown)$/i, "");
-					if (b.data.category === "book") {
-						link = `/books/${slug}/`;
-					} else if (b.data.category === "music") {
+					if (b.data.category === "music") {
 						link = "/music/";
 					} else {
-						link = "/movies-games/";
+						link = "/bangumi/";
 					}
 				}
 				return {

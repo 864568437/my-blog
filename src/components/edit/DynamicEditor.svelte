@@ -210,7 +210,7 @@ async function loadDynamics() {
 			device: d.device || "",
 			author: d.author || "",
 			avatar: d.avatar || "",
-			body: "",
+			body: d.body || "",
 		}));
 		dynamics = sortDynamics(items);
 		originalDynamics = deepClone(dynamics);
@@ -599,7 +599,8 @@ function formatDate(dateStr: string): string {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		padding: 12px 16px;
+		gap: 8px;
+		padding: 10px 12px;
 		cursor: pointer;
 		transition: background 0.2s;
 	}
@@ -634,14 +635,15 @@ function formatDate(dateStr: string): string {
 	}
 	.dynamic-edit-item-actions {
 		display: flex;
-		gap: 4px;
+		gap: 2px;
+		flex-shrink: 0;
 	}
 	.dynamic-edit-action {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 28px;
-		height: 28px;
+		width: 26px;
+		height: 26px;
 		border-radius: 6px;
 		border: none;
 		background: transparent;

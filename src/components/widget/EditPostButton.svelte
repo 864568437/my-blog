@@ -36,15 +36,12 @@ const inlineEditPages: PageConfig[] = [
 	{ pageName: "赞助", pageKey: "sponsor", isInlineEdit: true, match: (p) => p.startsWith("/sponsor") },
 	{ pageName: "更新日志", pageKey: "changelog", isInlineEdit: true, match: (p) => p.startsWith("/changelog") },
 	{ pageName: "留言板", pageKey: "guestbook", isInlineEdit: true, match: (p) => p.startsWith("/guestbook") },
-	{ pageName: "影音游戏", pageKey: "movies-games", isInlineEdit: true, match: (p) => p.startsWith("/movies-games") },
 	{ pageName: "日常", pageKey: "routines", isInlineEdit: true, match: (p) => p.startsWith("/life/routines") },
 	{ pageName: "足迹", pageKey: "places", isInlineEdit: true, match: (p) => p.startsWith("/life/places") },
 	{ pageName: "笔记本", pageKey: "notebooks", isInlineEdit: true, match: (p) => p.startsWith("/life/notebooks") },
 	{ pageName: "说说", pageKey: "moments", isInlineEdit: true, match: (p) => p.startsWith("/moments") },
 	{ pageName: "动态", pageKey: "dynamic", isInlineEdit: true, match: (p) => p.startsWith("/dynamic") },
-	{ pageName: "读书", pageKey: "books", isInlineEdit: true, match: (p) => p.startsWith("/books") },
 	{ pageName: "音乐", pageKey: "music", isInlineEdit: true, match: (p) => p.startsWith("/music") },
-	{ pageName: "相册", pageKey: "album", isInlineEdit: true, match: (p) => p.startsWith("/album") },
 	{ pageName: "番剧", pageKey: "bangumi", isInlineEdit: true, match: (p) => p.startsWith("/bangumi") },
 ];
 
@@ -718,9 +715,9 @@ function closeHelpModal() {
 
 	/* ---------- 编辑模式工具栏（草稿/密钥/添加/批量/清除/帮助） ---------- */
 	.edit-toolbar-row {
-		display: flex;
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
 		gap: 6px;
-		flex-wrap: wrap;
 		margin-top: 0.5rem;
 		padding-top: 0.5rem;
 		border-top: 1px dashed var(--sidebar-card-border, rgba(15, 23, 42, 0.10));
@@ -731,7 +728,7 @@ function closeHelpModal() {
 		align-items: center;
 		justify-content: center;
 		gap: 4px;
-		padding: 6px 10px;
+		padding: 6px 8px;
 		border-radius: 6px;
 		font-size: 12px;
 		font-weight: 500;
@@ -744,8 +741,6 @@ function closeHelpModal() {
 		height: 32px;
 		box-sizing: border-box;
 		line-height: 1;
-		flex: 1;
-		min-width: 0;
 	}
 
 	.tb-btn iconify-icon {

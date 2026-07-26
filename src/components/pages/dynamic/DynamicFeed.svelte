@@ -31,6 +31,7 @@
  */
 import { onMount, tick } from "svelte";
 import { registerDynamicGallery } from "./dynamic-gallery";
+import { registerDynamicInlineComments } from "./dynamic-inline-comments";
 
 /** 单张图数据（来自 markdown `![alt](src "title")` 解析结果） */
 type DynamicImage = {
@@ -284,7 +285,7 @@ function createItem(entry: DynamicData) {
 	const tagsContainer = root.querySelector<HTMLElement>("[data-dynamic-tags]");
 	if (tagsContainer && entry.tags && entry.tags.length > 0) {
 		tagsContainer.innerHTML = entry.tags
-			.map((tag) => `<span class="moment-tag">#${tag}</span>`)
+			.map((tag) => `<span class="moment-tag">${tag.startsWith("#") ? tag : `#${tag}`}</span>`)
 			.join("");
 	} else if (tagsContainer) {
 		tagsContainer.style.display = "none";
@@ -333,13 +334,11 @@ function createItem(entry: DynamicData) {
 		}
 	}
 
-	// 评论组件：showComments=true 时挂载 dataset.src（指向评论页），否则移除节点
+	// 评论组件：showComments=true 时设置 dataset.path（Waline 评论路径），否则移除节点
 	const comments = root.querySelector<HTMLElement>("dynamic-inline-comments");
 	if (comments) {
 		if (showComments) {
-			comments.dataset.src = `/dynamic/comments/?path=${encodeURIComponent(
-				`/dynamic/${entry.id}/`,
-			)}`;
+			comments.dataset.path = `/dynamic/${entry.id}/`;
 		} else {
 			comments.remove();
 		}
@@ -406,6 +405,7 @@ $effect(() => {
  *  5) onDestroy 清理事件监听。
  */
 onMount(() => {
+	registerDynamicInlineComments();
 	// 缓存关键 DOM 引用（向上查找 .dynamic-page 容器以避免选择器污染）
 	const page = list.closest(".dynamic-page");
 	template =

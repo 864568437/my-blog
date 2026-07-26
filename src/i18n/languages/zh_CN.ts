@@ -381,6 +381,48 @@ export const zh_CN: Translation = {
 	[Key.welcomeCardLearnMore]: "了解更多",
 	[Key.welcomeCardRecentLabel]: "最近更新",
 
+	// 追番页面
+	[Key.anime]: "追番",
+	[Key.animeSubtitle]: "记录我追过的番剧、电影和纪录片",
+	[Key.animeLastUpdated]: "上次更新：",
+	[Key.animeNotConfigured]: "未配置数据源",
+	[Key.animeNotConfiguredDesc]: "请在 siteConfig.ts 中配置 TMDB 或 Bilibili 数据源",
+	[Key.animeTotal]: "总计",
+	[Key.animeBilibiliAvg]: "B站均分",
+	[Key.animeTmdbAvg]: "TMDB均分",
+	[Key.animeSource]: "数据源",
+	[Key.animeDualSynced]: "双源同步",
+	[Key.animeSearch]: "搜索番剧...",
+	[Key.animeRatingDesc]: "评分从高到低",
+	[Key.animeRatingAsc]: "评分从低到高",
+	[Key.animeDateDesc]: "日期从新到旧",
+	[Key.animeDateAsc]: "日期从旧到新",
+	[Key.animeNoResults]: "没有找到相关番剧",
+	[Key.animeNoOverview]: "暂无简介",
+	[Key.animeViewDetails]: "查看详情",
+	[Key.animeClose]: "关闭",
+	[Key.animeSynopsis]: "剧情简介",
+	[Key.animeWatchNow]: "立即观看",
+	[Key.animeViewTmdb]: "在 TMDB 查看",
+	[Key.animeTypeAnime]: "番剧",
+	[Key.animeTypeMovie]: "电影",
+	[Key.animeTypeDocumentary]: "纪录片",
+	[Key.animeTypeChinese]: "国创",
+	[Key.animeTypeDrama]: "电视剧",
+	[Key.animeTypeConcert]: "演唱会",
+
+	// 相册页面
+	[Key.gallery]: "相册",
+	[Key.galleryDescription]: "记录生活中的美好瞬间",
+	[Key.galleryPhotos]: "张照片",
+	[Key.galleryBackToAlbums]: "返回相册",
+	[Key.galleryNoAlbums]: "暂无相册",
+	[Key.searchAlbums]: "搜索相册...",
+
+	// Bangumi API 相关
+	[Key.bangumiFetchError]: "数据获取失败",
+	[Key.bangumiFetchErrorDesc]: "无法连接到 Bangumi API，请稍后重试或检查网络连接",
+
 	// 主题设置面板 Tab 标签
 	[Key.displayTabTheme]: "主题",
 	[Key.displayTabWallpaper]: "壁纸",

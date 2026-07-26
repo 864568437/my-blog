@@ -343,6 +343,48 @@ export const ja: Translation = {
 	[Key.welcomeCardLearnMore]: "詳しく見る",
 	[Key.welcomeCardRecentLabel]: "最近の更新",
 
+	// 追番ページ
+	[Key.anime]: "追番",
+	[Key.animeSubtitle]: "視聴したアニメ・映画・ドキュメンタリーの記録",
+	[Key.animeLastUpdated]: "最終更新：",
+	[Key.animeNotConfigured]: "未設定",
+	[Key.animeNotConfiguredDesc]: "siteConfig.ts で TMDB または Bilibili データソースを設定してください",
+	[Key.animeTotal]: "合計",
+	[Key.animeBilibiliAvg]: "Bilibili平均",
+	[Key.animeTmdbAvg]: "TMDB平均",
+	[Key.animeSource]: "ソース",
+	[Key.animeDualSynced]: "デュアル同期",
+	[Key.animeSearch]: "アニメを検索...",
+	[Key.animeRatingDesc]: "評価：高い順",
+	[Key.animeRatingAsc]: "評価：低い順",
+	[Key.animeDateDesc]: "日付：新しい順",
+	[Key.animeDateAsc]: "日付：古い順",
+	[Key.animeNoResults]: "該当するアニメが見つかりません",
+	[Key.animeNoOverview]: "あらすじなし",
+	[Key.animeViewDetails]: "詳細を見る",
+	[Key.animeClose]: "閉じる",
+	[Key.animeSynopsis]: "あらすじ",
+	[Key.animeWatchNow]: "今すぐ視聴",
+	[Key.animeViewTmdb]: "TMDBで見る",
+	[Key.animeTypeAnime]: "アニメ",
+	[Key.animeTypeMovie]: "映画",
+	[Key.animeTypeDocumentary]: "ドキュメンタリー",
+	[Key.animeTypeChinese]: "中国アニメ",
+	[Key.animeTypeDrama]: "ドラマ",
+	[Key.animeTypeConcert]: "コンサート",
+
+	// ギャラリーページ
+	[Key.gallery]: "ギャラリー",
+	[Key.galleryDescription]: "生活の美しい瞬間を記録",
+	[Key.galleryPhotos]: "枚",
+	[Key.galleryBackToAlbums]: "アルバムに戻る",
+	[Key.galleryNoAlbums]: "アルバムがありません",
+	[Key.searchAlbums]: "アルバムを検索...",
+
+	// Bangumi API
+	[Key.bangumiFetchError]: "データ取得失敗",
+	[Key.bangumiFetchErrorDesc]: "Bangumi API に接続できません。後で再試行するかネットワークを確認してください",
+
 	// 主题设置面板 Tab 标签
 	[Key.displayTabTheme]: "テーマ",
 	[Key.displayTabWallpaper]: "壁紙",

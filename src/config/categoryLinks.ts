@@ -4,7 +4,7 @@
 
 export const categoryLinks: Record<string, string> = {
 	// ── 按 category 分类 ──
-	book: "", // 空 = 自动跳转书籍详情页 /books/{slug}/
+	book: "", // 空 = 使用默认番组页面链接
 	anime: "", // 空 = 走豆瓣链接 / 子分类链接
 	game: "", // 空 = 走豆瓣链接
 	music: "", // 空 = 音乐页面无跳转

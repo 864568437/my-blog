@@ -21,6 +21,7 @@
  * 修改时请同步检查 DynamicFeed.svelte 中的 querySelector 选择器。
  */
 import { Icon } from "astro-icon/components";
+import DynamicInlineComments from "@/components/pages/dynamic/DynamicInlineComments.astro";
 import { profileConfig } from "@/config";
 
 // 头像 alt 文本（无障碍）：缺省使用「博主」
@@ -96,20 +97,16 @@ const profileLabel = profileConfig.name || "博主";
 				-->
 				<div data-dynamic-gallery class="moment-images" data-count="0" style="display:none;"></div>
 
-				<!-- 标签容器：DynamicFeed 写入 <span class="moment-tag">#tag</span> 序列 -->
-				<div class="moment-tags" data-dynamic-tags></div>
-
-				<!--
-				  操作栏：当前为保留位（display:none）。如需启用分享/点赞，
-				  可移除内联 style 并实现对应按钮，DynamicFeed 已为分享按钮
-				  预留 data-dynamic-share 钩子。
-				-->
-				<div class="moment-actions" style="display:none;">
-					<button class="moment-action-btn moment-share-btn" type="button" data-dynamic-share>
-						<Icon name="material-symbols:share" style="width:14px;height:14px;" />
-						<span>分享</span>
-					</button>
+				<!-- 标签 + 评论按钮同行：标签左侧，评论按钮右侧 -->
+				<div class="moment-footer-row">
+					<!-- 标签容器：DynamicFeed 写入 <span class="moment-tag">#tag</span> 序列 -->
+					<div class="moment-tags" data-dynamic-tags></div>
+					<!-- 内联评论区：DynamicFeed 在 showComments=true 时设置 dataset.src -->
+					<DynamicInlineComments />
 				</div>
+
+				<!-- 评论展开面板 -->
+				<div class="dynamic-comment-panel" data-comment-panel hidden></div>
 			</div>
 		</article>
 	</dynamic-entry>
