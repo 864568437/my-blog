@@ -98,27 +98,18 @@
 /* GitHub 卡片 */
 a.card-github {
   display: block;
+  background: var(--license-block-bg);
   position: relative;
   margin: 0.5rem 0;
   padding: 1.1rem 1.5rem;
   color: var(--tw-prose-body);
+  border-radius: var(--radius-large);
   text-decoration-thickness: 0px;
   text-decoration-line: none;
 
-  /* 复用侧边栏卡片设计令牌，与目录/音乐等侧边栏 widget 保持视觉一致 */
-  background: var(--sidebar-card-bg, var(--card-bg));
-  border: 1px solid var(--sidebar-card-border, var(--line-divider));
-  border-radius: var(--sidebar-card-radius, 0.75rem);
-  box-shadow: var(--sidebar-card-shadow, 0 4px 12px rgba(0, 0, 0, 0.04));
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-
   &:hover {
-    border-color: var(--sidebar-card-border-hover, var(--primary));
-    box-shadow: var(--sidebar-card-shadow-hover, 0 6px 18px rgba(0, 0, 0, 0.08));
-    transform: translateY(-1px);
+    background-color: var(--btn-regular-bg-hover);
+    .gc-titlebar { color: var(--btn-content); }
     .gc-stars, .gc-forks, .gc-license, .gc-description {
       color: var(--tw-prose-headings);
       &::before { background-color: var(--tw-prose-headings); }
@@ -127,6 +118,7 @@ a.card-github {
 
   &:active {
     scale: 0.98;
+    background-color: var(--btn-regular-bg-active);
   }
 }
 
