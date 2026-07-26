@@ -75,12 +75,20 @@ const imageUploadToken = commentConfig.waline?.imageUploadToken || "";
           })
           .then((data) => {
             // cfbed 响应格式: [{ src, publicUrl }] 或 { data: { links: { url } } }
+            var url = '';
             if (Array.isArray(data) && data[0]) {
-              return data[0].publicUrl || data[0].src;
+              url = data[0].publicUrl || data[0].src || '';
+            } else if (data?.data?.links?.url) {
+              url = data.data.links.url;
+            } else if (data?.src) {
+              url = data.src;
             }
-            if (data?.data?.links?.url) return data.data.links.url;
-            if (data?.src) return data.src;
-            throw new Error('图床响应格式异常');
+            if (!url) throw new Error('图床响应格式异常');
+            // publicUrl 未配置时 src 是相对路径（如 /file/xxx.jpg），需拼接图床域名
+            if (url.startsWith('/')) {
+              url = new URL(imageUploadURL).origin + url;
+            }
+            return url;
           });
       };
     }

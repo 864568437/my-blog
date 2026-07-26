@@ -167,6 +167,11 @@ export async function uploadGuestbookImage(
 		throw new Error(message);
 	}
 
+	// publicUrl 未配置时 src 是相对路径（如 /file/xxx.jpg），需拼接图床域名
+	if (resolved.startsWith("/")) {
+		resolved = new URL(uploadURL).origin + resolved;
+	}
+
 	return resolved;
 }
 

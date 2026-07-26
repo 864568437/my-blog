@@ -90,15 +90,22 @@ function buildImageUploader(
 			})
 			.then((data: unknown) => {
 				// cfbed 响应格式: [{ src, publicUrl }] 或 { data: { links: { url } } }
+				let url = "";
 				if (Array.isArray(data) && data[0]) {
-					return data[0].publicUrl || data[0].src;
+					url = data[0].publicUrl || data[0].src || "";
+				} else {
+					const record = data as Record<string, unknown>;
+					const inner = record?.data as Record<string, unknown> | undefined;
+					const links = inner?.links as Record<string, unknown> | undefined;
+					if (typeof links?.url === "string") url = links.url;
+					else if (typeof record?.src === "string") url = record.src;
 				}
-				const record = data as Record<string, unknown>;
-				const inner = record?.data as Record<string, unknown> | undefined;
-				const links = inner?.links as Record<string, unknown> | undefined;
-				if (typeof links?.url === "string") return links.url;
-				if (typeof record?.src === "string") return record.src;
-				throw new Error("图床响应格式异常");
+				if (!url) throw new Error("图床响应格式异常");
+				// publicUrl 未配置时 src 是相对路径（如 /file/xxx.jpg），需拼接图床域名
+				if (url.startsWith("/")) {
+					url = new URL(uploadURL).origin + url;
+				}
+				return url;
 			});
 	};
 }
