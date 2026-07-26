@@ -14,13 +14,77 @@ const config = {
 	wordLimit: ["2", "300"],
 	...(commentConfig.waline?.visitorCount ? { pageview: true } : {}),
 };
+
+// 图床上传配置（传给客户端脚本构造 imageUploader）
+const imageUploadURL = commentConfig.waline?.imageUploadURL || "";
+const imageUploadToken = commentConfig.waline?.imageUploadToken || "";
 ---
 <!-- Waline -->
 <div class="relative w-full">
   <div id="waline"></div>
   <link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
-  <script type="module" is:inline define:vars={{ config }}>
+  <script type="module" is:inline define:vars={{ config, imageUploadURL, imageUploadToken }}>
     import { init } from 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+
+    // 图床接入：当 imageUploadURL 和 imageUploadToken 都配置时，启用评论图片上传
+    // 教程：https://waline.js.org/cookbook/customize/upload-image.html
+    // 图床 API（cfbed 规范）：POST /upload?uploadFolder=xxx，FormData { file }，Bearer Token 认证
+    if (imageUploadURL && imageUploadToken) {
+
+      /**
+       * 根据当前页面 URL 路径自动生成图床上传文件夹
+       * 规则：
+       *   - 前缀统一为 fqzlrcom/
+       *   - 取路径前 2 段作为子文件夹（最多 3 级：fqzlrcom + 2 段）
+       *   - 超出部分截断，不再往下新建子目录
+       *   - 根路径 / 或无法解析时，回退到 fqzlrcom/comments
+       * 示例：
+       *   /friends/              → fqzlrcom/friends
+       *   /dynamic/              → fqzlrcom/dynamic
+       *   /posts/blog/check-flink/ → fqzlrcom/posts/blog（截断第 3 段）
+       *   /                      → fqzlrcom/comments（回退默认）
+       */
+      function getUploadFolder() {
+        var segments = window.location.pathname
+          .split('/')
+          .filter(function (s) { return s.length > 0; });
+        if (segments.length === 0) return 'fqzlrcom/comments';
+        // 最多取前 2 段，超出截断
+        var parts = segments.slice(0, 2);
+        return 'fqzlrcom/' + parts.join('/');
+      }
+
+      config.imageUploader = (file) => {
+        var folder = getUploadFolder();
+        // cfbed 规范：文件夹通过 query 参数 uploadFolder 传递（相对路径，如 fqzlrcom/friends）
+        var uploadURL = imageUploadURL + '?uploadFolder=' + encodeURIComponent(folder);
+
+        var formData = new FormData();
+        formData.append('file', file);
+        return fetch(uploadURL, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + imageUploadToken,
+            'Accept': 'application/json',
+          },
+          body: formData,
+        })
+          .then((resp) => {
+            if (!resp.ok) throw new Error('图片上传失败: ' + resp.status);
+            return resp.json();
+          })
+          .then((data) => {
+            // cfbed 响应格式: [{ src, publicUrl }] 或 { data: { links: { url } } }
+            if (Array.isArray(data) && data[0]) {
+              return data[0].publicUrl || data[0].src;
+            }
+            if (data?.data?.links?.url) return data.data.links.url;
+            if (data?.src) return data.src;
+            throw new Error('图床响应格式异常');
+          });
+      };
+    }
+
     init(config);
   </script>
 </div>

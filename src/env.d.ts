@@ -7,6 +7,7 @@ declare global {
 		readonly PUBLIC_GITHUB_APP_ID: string;
 		readonly PUBLIC_GITHUB_OWNER: string;
 		readonly PUBLIC_GITHUB_REPO: string;
+		readonly PUBLIC_IMG_UPLOAD_TOKEN: string;
 	}
 
 	interface ImportMeta {
