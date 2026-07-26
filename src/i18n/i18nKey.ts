@@ -162,27 +162,6 @@ enum I18nKey {
 	bangumiUpdatedAt = "bangumiUpdatedAt",
 	bangumiDataStatic = "bangumiDataStatic",
 
-	// 书架页面
-	books = "books",
-	booksTitle = "booksTitle",
-	booksSubtitle = "booksSubtitle",
-	bookshelfReading = "bookshelfReading",
-	bookshelfRead = "bookshelfRead",
-	bookshelfWantRead = "bookshelfWantRead",
-	booksNoData = "booksNoData",
-
-	// 影视与游戏页面
-	moviesGames = "moviesGames",
-	moviesGamesTitle = "moviesGamesTitle",
-	moviesGamesSubtitle = "moviesGamesSubtitle",
-	moviesGamesTabAll = "moviesGamesTabAll",
-	moviesGamesTabMovie = "moviesGamesTabMovie",
-	moviesGamesTabTV = "moviesGamesTabTV",
-	moviesGamesTabAnime = "moviesGamesTabAnime",
-	moviesGamesTabDocumentary = "moviesGamesTabDocumentary",
-	moviesGamesTabGame = "moviesGamesTabGame",
-	moviesGamesNoData = "moviesGamesNoData",
-
 	// 音乐页面
 	musicPage = "musicPage",
 	musicPageTitle = "musicPageTitle",

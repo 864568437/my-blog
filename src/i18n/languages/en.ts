@@ -158,28 +158,6 @@ export const en: Translation = {
 	[Key.bangumiUpdatedAt]: "Build time",
 	[Key.bangumiDataStatic]: "Static data",
 
-	// Bookshelf Page
-	[Key.books]: "Bookshelf",
-	[Key.booksTitle]: "My Bookshelf",
-	[Key.booksSubtitle]:
-		"Tracking my reading journey, sharing the beauty of books.",
-	[Key.bookshelfReading]: "Reading",
-	[Key.bookshelfRead]: "Read",
-	[Key.bookshelfWantRead]: "Want to Read",
-	[Key.booksNoData]: "No books on the shelf yet",
-
-	// Movies & Games Page
-	[Key.moviesGames]: "Movies & Games",
-	[Key.moviesGamesTitle]: "Movies & Games",
-	[Key.moviesGamesSubtitle]: "Movies, shows, and games I've enjoyed.",
-	[Key.moviesGamesTabAll]: "All",
-	[Key.moviesGamesTabMovie]: "Movies",
-	[Key.moviesGamesTabTV]: "TV Shows",
-	[Key.moviesGamesTabAnime]: "Anime",
-	[Key.moviesGamesTabDocumentary]: "Documentaries",
-	[Key.moviesGamesTabGame]: "Games",
-	[Key.moviesGamesNoData]: "No content yet",
-
 	// Music Page
 	[Key.musicPage]: "Music",
 	[Key.musicPageTitle]: "My Music",

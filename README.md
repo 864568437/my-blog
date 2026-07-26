@@ -104,7 +104,7 @@
 ## 📁 项目结构
 
 ```
-dumplingandcakeblog/
+fqzlr-bk/
 ├── _backup/                  # 备份文件（旧内容、原始文档、临时文件等）
 ├── api/                      # 服务端 API 脚本
 ├── public/                   # 静态资源（不经过构建优化）
@@ -131,7 +131,7 @@ dumplingandcakeblog/
 │   │   ├── layout/           # 布局组件
 │   │   ├── life/             # 生活相关组件
 │   │   ├── moments/          # 说说组件
-│   │   ├── pages/            # 页面专用组件
+│   │   ├── pages/            # 页面专用组件（dynamic/gallery/anime/bangumi/music）
 │   │   └── widget/           # 侧边栏组件
 │   ├── config/               # 配置文件（核心！）
 │   │   ├── siteConfig.ts     # 站点基础配置
@@ -145,16 +145,10 @@ dumplingandcakeblog/
 │   ├── constants/            # 常量定义
 │   ├── content/              # 内容集合（Markdown 文件）
 │   │   ├── posts/            # 博客文章
-│   │   ├── moments/          # 说说动态
-│   │   ├── album/            # 相册
+│   │   ├── dynamic/          # 动态内容
 │   │   ├── bangumi/          # 番组计划
-│   │   ├── friends/          # 友情链接
 │   │   ├── life/             # 生活记录
-│   │   │   ├── notebooks/    # 笔记本
-│   │   │   ├── places/       # 足迹
-│   │   │   └── routines/     # 日常规划
-│   │   ├── changelog/        # 更新日志
-│   │   ├── daohang/          # 网址导航
+│   │   │   └── notebooks/    # 笔记本
 │   │   ├── spec/             # 特殊页面内容
 │   │   ├── ziyuan/           # 资源（公告、名言等）
 │   │   └── danmu/            # 弹幕
@@ -182,7 +176,7 @@ dumplingandcakeblog/
 1. **克隆仓库：**
    ```bash
    git clone https://github.com/fqzlr/fqzlr-bk.git
-   cd dumplingandcakeblog
+   cd fqzlr-bk
    ```
 
 2. **安装依赖：**

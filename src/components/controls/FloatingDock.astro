@@ -142,12 +142,6 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 				<span class="dock-btn-icon"><Icon name="material-symbols:list-alt-outline" class="text-3xl" /></span>
 				<span class="dock-btn-label">文章</span>
 			</button>
-
-			<!-- 返回书架 (书籍详情页) -->
-			<button class="dock-btn hide" id="dock-bookshelf-btn" aria-label="Back to bookshelf" type="button" data-tooltip="书架">
-				<span class="dock-btn-icon"><Icon name="material-symbols:arrow-back-rounded" class="text-3xl" /></span>
-				<span class="dock-btn-label">书架</span>
-			</button>
 		</div>
 
 		<!-- 展开/收起切换按钮 -->
@@ -390,12 +384,6 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 			if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
 		});
 
-		// 返回番组
-		document.getElementById("dock-bookshelf-btn")?.addEventListener("click", (e) => {
-			e.stopPropagation();
-			window.location.href = "/bangumi/";
-		});
-
 		// TOC 懒加载
 		document.getElementById("dock-toc-btn")?.addEventListener("click", () => {
 			import("@/utils/tocUtils").then(({ TOCManager }) => {
@@ -468,11 +456,8 @@ const dockMusicPlaylist = JSON.stringify(musicEntries);
 			document.getElementById("dock-toc-btn")?.classList.toggle("hide", !isPost);
 			const isPostDetail = /\/posts\/.+\//.test(window.location.pathname);
 			const isMoments = /\/moments/.test(window.location.pathname);
-			const isAlbum = /\/album\//.test(window.location.pathname) && !/\/album\/?$/.test(window.location.pathname);
-			const showComment = isPostDetail || (isMoments && scrolled) || (isAlbum && scrolled);
+			const showComment = isPostDetail || (isMoments && scrolled);
 			document.getElementById("dock-comment-btn")?.classList.toggle("hide", !showComment);
-			const isBookDetail = /\/books\/book\//.test(window.location.pathname);
-			document.getElementById("dock-bookshelf-btn")?.classList.toggle("hide", !isBookDetail);
 
 			lastScrollY = currentScrollY;
 			ticking = false;

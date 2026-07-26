@@ -156,27 +156,6 @@ export const ru: Translation = {
 	[Key.bangumiUpdatedAt]: "Время сборки",
 	[Key.bangumiDataStatic]: "Статические данные",
 
-	// Книжная полка
-	[Key.books]: "Книжная полка",
-	[Key.booksTitle]: "Моя книжная полка",
-	[Key.booksSubtitle]: "Запись чтения, делюсь красотой книг.",
-	[Key.bookshelfReading]: "Читаю",
-	[Key.bookshelfRead]: "Прочитано",
-	[Key.bookshelfWantRead]: "Хочу прочитать",
-	[Key.booksNoData]: "На полке пока нет книг",
-
-	// Фильмы и игры
-	[Key.moviesGames]: "Фильмы и игры",
-	[Key.moviesGamesTitle]: "Фильмы и игры",
-	[Key.moviesGamesSubtitle]: "Фильмы, сериалы и игры, которые мне понравились.",
-	[Key.moviesGamesTabAll]: "Все",
-	[Key.moviesGamesTabMovie]: "Фильмы",
-	[Key.moviesGamesTabTV]: "Сериалы",
-	[Key.moviesGamesTabAnime]: "Аниме",
-	[Key.moviesGamesTabDocumentary]: "Документальные",
-	[Key.moviesGamesTabGame]: "Игры",
-	[Key.moviesGamesNoData]: "Пока нет контента",
-
 	// Музыка
 	[Key.musicPage]: "Музыка",
 	[Key.musicPageTitle]: "Моя музыка",

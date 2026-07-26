@@ -166,27 +166,6 @@ export const zh_CN: Translation = {
 	[Key.bangumiUpdatedAt]: "构建时间",
 	[Key.bangumiDataStatic]: "静态数据",
 
-	// 书架页面
-	[Key.books]: "书架",
-	[Key.booksTitle]: "我的书架",
-	[Key.booksSubtitle]: "记录阅读历程，分享书中精彩。",
-	[Key.bookshelfReading]: "在读",
-	[Key.bookshelfRead]: "读过",
-	[Key.bookshelfWantRead]: "想读",
-	[Key.booksNoData]: "书架上还没有书籍",
-
-	// 影视与游戏页面
-	[Key.moviesGames]: "影视与游戏",
-	[Key.moviesGamesTitle]: "影视与游戏",
-	[Key.moviesGamesSubtitle]: "记录看过的影视作品和玩过的游戏。",
-	[Key.moviesGamesTabAll]: "全部",
-	[Key.moviesGamesTabMovie]: "电影",
-	[Key.moviesGamesTabTV]: "电视剧",
-	[Key.moviesGamesTabAnime]: "动漫",
-	[Key.moviesGamesTabDocumentary]: "纪录片",
-	[Key.moviesGamesTabGame]: "游戏",
-	[Key.moviesGamesNoData]: "暂无内容",
-
 	// 音乐页面
 	[Key.musicPage]: "音乐",
 	[Key.musicPageTitle]: "我的音乐",

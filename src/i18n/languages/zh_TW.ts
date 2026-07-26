@@ -154,27 +154,6 @@ export const zh_TW: Translation = {
 	[Key.bangumiUpdatedAt]: "構建時間",
 	[Key.bangumiDataStatic]: "靜態數據",
 
-	// 書架頁面
-	[Key.books]: "書架",
-	[Key.booksTitle]: "我的書架",
-	[Key.booksSubtitle]: "記錄閱讀歷程，分享書中精彩。",
-	[Key.bookshelfReading]: "在讀",
-	[Key.bookshelfRead]: "讀過",
-	[Key.bookshelfWantRead]: "想讀",
-	[Key.booksNoData]: "書架上還沒有書籍",
-
-	// 影視與遊戲頁面
-	[Key.moviesGames]: "影視與遊戲",
-	[Key.moviesGamesTitle]: "影視與遊戲",
-	[Key.moviesGamesSubtitle]: "記錄看過的影視作品和玩過的遊戲。",
-	[Key.moviesGamesTabAll]: "全部",
-	[Key.moviesGamesTabMovie]: "電影",
-	[Key.moviesGamesTabTV]: "電視劇",
-	[Key.moviesGamesTabAnime]: "動漫",
-	[Key.moviesGamesTabDocumentary]: "紀錄片",
-	[Key.moviesGamesTabGame]: "遊戲",
-	[Key.moviesGamesNoData]: "暫無內容",
-
 	// 音樂頁面
 	[Key.musicPage]: "音樂",
 	[Key.musicPageTitle]: "我的音樂",
