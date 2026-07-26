@@ -788,6 +788,7 @@ export type FriendLink = {
 	imgurl: string; // 头像图片URL
 	desc: string; // 友链描述
 	siteurl: string; // 友链地址
+	linkpage?: string; // 对方友链页面地址，用于反链检测（留空则检测对方首页）
 	tags?: string[]; // 标签数组
 	weight: number; // 权重，数字越大排序越靠前
 	enabled: boolean; // 是否启用

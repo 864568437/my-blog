@@ -38,6 +38,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
 		  "desc": "躬身入局，心为主理，行有尺度，自持本心.",
 		  "siteurl": "https://fqzlr.com/",
+		  "linkpage": "https://fqzlr.com/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -49,6 +50,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://i.stardots.io/784774835/StarDots-2026052116374135506.jpg",
 		  "desc": "哈基米，南北绿豆",
 		  "siteurl": "https://tblog.mmzhiku.xyz/",
+		  "linkpage": "https://tblog.mmzhiku.xyz/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -60,6 +62,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://re.tsh520.cn/zl/tx.webp",
 		  "desc": "如果你喜欢那么欢迎来到我的世界！",
 		  "siteurl": "https://blog.tsh520.cn/",
+		  "linkpage": "https://blog.tsh520.cn/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -71,6 +74,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://q2.qlogo.cn/headimg_dl?dst_uin=9892214&spec=0",
 		  "desc": "分享、实践、学习",
 		  "siteurl": "https://blog.olinl.com/",
+		  "linkpage": "https://blog.olinl.com/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -82,6 +86,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://weavatar.com/avatar/d252655d40d6874417a720bad0a6c5f77f8f6a1fd2f882f8f338402dc37e4190?s=640",
 		  "desc": "飞萤之火自无梦的长夜亮起，绽放在终竟的明天。",
 		  "siteurl": "https://blog.cuteleaf.cn/",
+		  "linkpage": "https://blog.cuteleaf.cn/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -104,6 +109,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://upxuu.com/images/20260214145619.jpg",
 		  "desc": "逐光而上！",
 		  "siteurl": "https://upxuu.com/",
+		  "linkpage": "https://upxuu.com/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -137,6 +143,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://github.com/xfcnl/xfcnl.github.io/blob/main/image/MEITU_20260128_220225596.jpg?raw=true",
 		  "desc": "立志用 cloudflare workers，GitHub pages 和 vercel 做出整个互联网的up（虽然不会成功",
 		  "siteurl": "https://xfcnl.github.io/",
+		  "linkpage": "https://xfcnl.github.io/link/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -148,6 +155,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://q1.qlogo.cn/g?b=qq&nk=1323860289&s=640",
 		  "desc": "分享生活和技术。",
 		  "siteurl": "https://blog.520781.xyz/",
+		  "linkpage": "https://blog.520781.xyz/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -159,6 +167,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://tu.ztyukino.com/file/1778322126543_%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_2026-05-09_182135_917.jpg",
 		  "desc": "一个现充的个人博客网站！",
 		  "siteurl": "https://blog.ztyukino.com/",
+		  "linkpage": "https://blog.ztyukino.com/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -181,6 +190,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://dongyue.org/avatar.webp",
 		  "desc": "分享自己的一些学习心得和生活琐事",
 		  "siteurl": "https://dongyue.org/",
+		  "linkpage": "https://dongyue.org/links/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -214,6 +224,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://img.542000.xyz/file/friend_avatar/1778931720838_f167cb95af9d881f4378b92b3e181d89_4647054993754934443.jpg",
 		  "desc": "技术个人博客",
 		  "siteurl": "https://blog.542000.xyz/",
+		  "linkpage": "https://blog.542000.xyz/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -225,6 +236,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://blog.casto.top/assets/images/icon.png",
 		  "desc": "星穹漫遐，蝶携清梦。",
 		  "siteurl": "https://blog.casto.top/",
+		  "linkpage": "https://blog.casto.top/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -247,6 +259,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://img.z2m.store/file/1779081943822_butterfly-icon.png",
 		  "desc": "读史可以明智,知古方能鉴今",
 		  "siteurl": "https://com.z2m.store/",
+		  "linkpage": "https://com.z2m.store/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -258,6 +271,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://blog.miuo.me/avatar.avif",
 		  "desc": "记录文章、笔记、实验和暂时不想丢掉的内容。",
 		  "siteurl": "https://miuo.me/",
+		  "linkpage": "https://miuo.me/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -269,6 +283,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://q1.qlogo.cn/g?b=qq&nk=2710155768&s=640",
 		  "desc": "来了",
 		  "siteurl": "https://vuekoo.com/",
+		  "linkpage": "https://vuekoo.com/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -291,6 +306,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://img.nw177.cn/blog/100.assets/avatar.webp",
 		  "desc": "欲买桂花同载酒，终不似，少年游。",
 		  "siteurl": "https://blog.nw177.cn/",
+		  "linkpage": "https://blog.nw177.cn/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -302,6 +318,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://iwexe.top/avatar.svg",
 		  "desc": "Go with the flow.",
 		  "siteurl": "https://iwexe.top/",
+		  "linkpage": "https://iwexe.top/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -313,6 +330,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://weavatar.com/avatar/bc0dba25ea5949e8290d012e081ceec669aa7784c7ad765173473c80cbaee404:tv_%E5%A4%A7%E5%93%AD",
 		  "desc": "记录我的二次元之旅",
 		  "siteurl": "https://qwq.sigrika.cc/",
+		  "linkpage": "https://qwq.sigrika.cc/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -324,6 +342,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://easyimg.kejk.cn/i/4484873c-c2cc-4b3d-bc35-5c72ed01cfd9.webp",
 		  "desc": "阳光正好，慢慢前行。",
 		  "siteurl": "https://sunlight.kejk.cn/",
+		  "linkpage": "https://sunlight.kejk.cn/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -346,6 +365,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://tu.irier0023.xyz/file/1780921907488_avatar.avif",
 		  "desc": "当所有剑都归鞘时，真正的较量才刚刚开始——那是人心与天地的对弈。",
 		  "siteurl": "https://blog.irier0023.xyz/",
+		  "linkpage": "https://blog.irier0023.xyz/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -357,6 +377,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://i.stardots.io/366046882645/StarDots-2026052814483375536.png",
 		  "desc": "人生苦短，摆烂优先",
 		  "siteurl": "https://ysdyblog.ccwu.cc/",
+		  "linkpage": "https://ysdyblog.ccwu.cc/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -368,6 +389,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://blog.windstart.top/_astro/xiao.DZR3cwiW_1XI6Uv.webp",
 		  "desc": "无善无恶心之体，有善有恶意之动",
 		  "siteurl": "https://blog.windstart.top/",
+		  "linkpage": "https://blog.windstart.top/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -390,6 +412,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://seasir.top/assets/avatar.avif",
 		  "desc": "人心中的成见是一座大山",
 		  "siteurl": "https://seasir.top/",
+		  "linkpage": "https://seasir.top/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -412,6 +435,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://090909.top/assets/images/logo.ico",
 		  "desc": "梁栋烨的博客网站。",
 		  "siteurl": "https://090909.top/",
+		  "linkpage": "https://090909.top/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -445,6 +469,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://aclsky.sakurafishermua.top/i/2026/05/26/6a15b692c4cb9.jpg",
 		  "desc": "生如利刃，熔炉竟是我自己。",
 		  "siteurl": "https://acblog.sakurafishermua.top/",
+		  "linkpage": "https://acblog.sakurafishermua.top/links/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -456,6 +481,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://cloudflare-imgbed-d88.pages.dev/file/1784102742642_%E5%A4%B4%E5%83%8F.jpg",
 		  "desc": "Keep going.",
 		  "siteurl": "https://xane.eu.cc/",
+		  "linkpage": "https://xane.eu.cc/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -467,6 +493,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://free.picui.cn/free/2026/07/16/6a58eb63ecbd1.png",
 		  "desc": "Enjoy life",
 		  "siteurl": "https://jerry-nis.top/",
+		  "linkpage": "https://jerry-nis.top/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -478,6 +505,7 @@ export const friendsConfig: FriendLink[] = [
 		"imgurl": "https://yukihime.dev/assets/images/moments-avatar.webp?v=20260725-avatar",
 		"desc": "你的瞳色 是我生命苦寻的永生花",
 		"siteurl": "https://yukihime.dev/",
+		"linkpage": "https://yukihime.dev/friends/",
 		"tags": [
 			"Blog"
 		],
@@ -489,6 +517,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://zhh2001.github.io/avatar.jpg",
 		  "desc": "欲买桂花同载酒，终不似，少年游",
 		  "siteurl": "https://zhh2001.github.io/",
+		  "linkpage": "https://zhh2001.github.io/links",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -511,6 +540,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://www.lxlovo.top/png.png",
 		  "desc": "一个爱写文的菜鸡。",
 		  "siteurl": "https://blog.lxlovo.top/",
+		  "linkpage": "https://blog.lxlovo.top/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -522,6 +552,7 @@ export const friendsConfig: FriendLink[] = [
 		  "imgurl": "https://blog.xuioo.com/avatar.jpg",
 		  "desc": "「纯粹祈愿皆成真」",
 		  "siteurl": "https://blog.xuioo.com/",
+		  "linkpage": "https://blog.xuioo.com/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
@@ -543,7 +574,8 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "Pasule",
 		  "imgurl": "https://pasule.com/favicon/favicon-pasule.ico",
 		  "desc": "如果等着遗忘，你又为什么歌唱\n",
-		  "siteurl": " https://pasule.com/",
+		  "siteurl": "https://pasule.com/",
+		  "linkpage": "https://pasule.com/friends/",
 		  "tags": [
 		    "Blog"
 		  ],

@@ -16,7 +16,7 @@ export const GET: APIRoute = () => {
 		avatar: f.imgurl,
 		descr: f.desc,
 		siteshot: "",
-		linkpage: f.siteurl.trim(),
+		linkpage: f.linkpage?.trim() || "",
 	}));
 
 	return new Response(
