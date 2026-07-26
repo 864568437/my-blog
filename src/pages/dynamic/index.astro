@@ -69,6 +69,9 @@ const walineConfig = showInlineComments && commentConfig.type === "waline"
 			dark: "html.dark",
 			wordLimit: ["2", "300"],
 			pageview: commentConfig.waline?.visitorCount || false,
+			// 图床上传配置（用于构造 imageUploader，解除默认 128KB 限制）
+			imageUploadURL: commentConfig.waline?.imageUploadURL || "",
+			imageUploadToken: commentConfig.waline?.imageUploadToken || "",
 		}
 	: null;
 

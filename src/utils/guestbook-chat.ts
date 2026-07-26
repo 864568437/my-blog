@@ -96,6 +96,7 @@ export async function loadGuestbookEmojiPacks(
 export async function uploadGuestbookImage(
 	file: File,
 	uploadURL: string,
+	token = "",
 ): Promise<string> {
 	if (!uploadURL) {
 		if (file.size > WALINE_INLINE_IMAGE_SIZE_LIMIT) {
@@ -113,24 +114,52 @@ export async function uploadGuestbookImage(
 			reader.readAsDataURL(file);
 		});
 	}
+
+	// 图床路径归类：前缀 fqzlrcom/ + 路径前 2 段，根路径回退 fqzlrcom/comments
+	const segments = window.location.pathname
+		.split("/")
+		.filter((s) => s.length > 0);
+	const folder =
+		segments.length === 0
+			? "fqzlrcom/comments"
+			: `fqzlrcom/${segments.slice(0, 2).join("/")}`;
+
 	const formData = new FormData();
 	formData.append("file", file);
 
-	const response = await fetch(uploadURL, {
+	// cfbed 规范：文件夹通过 query 参数 uploadFolder 传递，Token 通过 Bearer 认证
+	const url = `${uploadURL}?uploadFolder=${encodeURIComponent(folder)}`;
+	const response = await fetch(url, {
 		method: "POST",
-		headers: { Accept: "application/json" },
+		headers: {
+			Accept: "application/json",
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+		},
 		body: formData,
 	});
 	const payload: unknown = await response.json().catch(() => null);
-	const data =
-		isRecord(payload) && isRecord(payload.data) ? payload.data : null;
-	const links = data && isRecord(data.links) ? data.links : null;
-	const url =
-		(links && typeof links.url === "string" ? links.url : "") ||
-		(data && typeof data.url === "string" ? data.url : "") ||
-		(isRecord(payload) && typeof payload.url === "string" ? payload.url : "");
 
-	if (!response.ok || !url) {
+	// cfbed 响应格式兼容：
+	//   数组: [{ src, publicUrl }] ← CloudFlare ImgBed 标准响应
+	//   对象: { data: { links: { url } } } ← lsky-pro 等兼容格式
+	let resolved = "";
+	if (Array.isArray(payload) && payload[0]) {
+		const item = payload[0] as Record<string, unknown>;
+		resolved =
+			(typeof item.publicUrl === "string" && item.publicUrl) ||
+			(typeof item.src === "string" && item.src) ||
+			"";
+	} else {
+		const data =
+			isRecord(payload) && isRecord(payload.data) ? payload.data : null;
+		const links = data && isRecord(data.links) ? data.links : null;
+		resolved =
+			(links && typeof links.url === "string" ? links.url : "") ||
+			(data && typeof data.url === "string" ? data.url : "") ||
+			(isRecord(payload) && typeof payload.url === "string" ? payload.url : "");
+	}
+
+	if (!response.ok || !resolved) {
 		const message =
 			isRecord(payload) && typeof payload.message === "string"
 				? payload.message
@@ -138,7 +167,7 @@ export async function uploadGuestbookImage(
 		throw new Error(message);
 	}
 
-	return url;
+	return resolved;
 }
 
 export function appendGuestbookImage(

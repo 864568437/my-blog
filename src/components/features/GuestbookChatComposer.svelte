@@ -67,6 +67,7 @@ const MIN_MESSAGE_PANE_HEIGHT = 128;
 const RESIZE_KEYBOARD_STEP = 16;
 const emojiSources = commentConfig.waline?.emoji ?? [];
 const imageUploadURL = commentConfig.waline?.imageUploadURL ?? "";
+const imageUploadToken = commentConfig.waline?.imageUploadToken ?? "";
 const maxImageSize = imageUploadURL
 	? MAX_REMOTE_IMAGE_SIZE
 	: WALINE_INLINE_IMAGE_SIZE_LIMIT;
@@ -383,7 +384,7 @@ async function handleImageSelection(event: Event) {
 	isUploadingImage = true;
 	onToolError("");
 	try {
-		const url = await uploadGuestbookImage(file, imageUploadURL);
+		const url = await uploadGuestbookImage(file, imageUploadURL, imageUploadToken);
 		const name = file.name
 			.replace(/\.[^.]+$/u, "")
 			.replace(/[[\]]/gu, "")
