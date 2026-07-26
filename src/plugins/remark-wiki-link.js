@@ -306,26 +306,33 @@ function createWikiLinkCard(parsed, context) {
 		? meta.data.tags.filter((tag) => typeof tag === "string" && tag)
 		: [];
 
-	// 元信息行（分类 + 日期），顺序与列表页卡片的 layer-2 保持一致
 	const metaItems = [];
-	if (category) {
-		metaItems.push(
-			createElement("span", { class: "wlc-category" }, [createText(category)]),
-		);
-	}
 	if (published) {
 		metaItems.push(
 			createElement("span", { class: "wlc-date" }, [createText(published)]),
 		);
 	}
+	if (category) {
+		metaItems.push(
+			createElement("span", { class: "wlc-category" }, [createText(category)]),
+		);
+	}
+	if (tags.length > 0) {
+		// 标签作为一个整体，宽度不够时整组换行
+		metaItems.push(
+			createElement(
+				"span",
+				{ class: "wlc-tags" },
+				tags.map((tag) =>
+					createElement("span", { class: "wlc-tag" }, [createText(`#${tag}`)]),
+				),
+			),
+		);
+	}
 
-	// 信息区顺序对齐列表页单列卡片：标题 → 分类/日期 → 描述 → 标签（独立成行）
 	const info = [
 		createElement("div", { class: "wlc-title" }, [createText(title)]),
 	];
-	if (metaItems.length > 0) {
-		info.push(createElement("div", { class: "wlc-meta" }, metaItems));
-	}
 	if (description) {
 		info.push(
 			createElement("div", { class: "wlc-description" }, [
@@ -333,17 +340,8 @@ function createWikiLinkCard(parsed, context) {
 			]),
 		);
 	}
-	if (tags.length > 0) {
-		// 标签独立成行（胶囊样式），宽度不够时整组换行
-		info.push(
-			createElement(
-				"div",
-				{ class: "wlc-tags" },
-				tags.map((tag) =>
-					createElement("span", { class: "wlc-tag" }, [createText(`#${tag}`)]),
-				),
-			),
-		);
+	if (metaItems.length > 0) {
+		info.push(createElement("div", { class: "wlc-meta" }, metaItems));
 	}
 
 	const children = [createElement("div", { class: "wlc-info" }, info)];
@@ -356,9 +354,7 @@ function createWikiLinkCard(parsed, context) {
 	return createElement(
 		"a",
 		{
-			class: cover
-				? "card-wiki-link no-styling"
-				: "card-wiki-link no-styling no-cover",
+			class: "card-wiki-link no-styling",
 			href: createPostUrl(parsed.contentPath, meta),
 		},
 		children,

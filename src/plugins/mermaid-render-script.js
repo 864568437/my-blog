@@ -204,14 +204,13 @@
 
 							element.innerHTML = svg;
 
-							// 添加响应式支持：保留 SVG 自然宽度，仅用 max-width 封顶。
-							// 不强制 width=100%，避免窄高的垂直流程图被拉伸到整个内容区宽度。
+							// 添加响应式支持
 							const svgElement = element.querySelector("svg");
 							if (svgElement) {
+								svgElement.setAttribute("width", "100%");
+								svgElement.removeAttribute("height");
 								svgElement.style.maxWidth = "100%";
 								svgElement.style.height = "auto";
-								svgElement.style.display = "block";
-								svgElement.style.margin = "0 auto";
 
 								// 强制应用样式
 								if (isDark) {
