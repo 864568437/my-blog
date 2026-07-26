@@ -9,7 +9,7 @@ tags:
   - 博客搭建
 category: 建站随笔
 draft: false
-pinned: true
+pinned: false
 author: fqzlr
 ---
 
