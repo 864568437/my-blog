@@ -12,6 +12,16 @@ const config = {
 	path: Astro.props.path,
 	dark: "html.dark",
 	wordLimit: ["2", "300"],
+	// 修仙摆烂等级自定义，其余文案默认
+	locale: {
+		level0: "凡尘路人",
+		level1: "摆烂练气",
+		level2: "躺平筑基",
+		level3: "摸鱼金丹",
+		level4: "怠惰元婴",
+		level5: "摆烂仙帝",
+		admin: "番茄主理人"
+	},
 	...(commentConfig.waline?.visitorCount ? { pageview: true } : {}),
 };
 
