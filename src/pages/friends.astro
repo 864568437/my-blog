@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿---
+﻿﻿﻿﻿﻿﻿﻿﻿---
 import { getEntry, render } from "astro:content";
 import Comment from "@components/comment/index.astro";
 import Markdown from "@components/common/Markdown.astro";
@@ -71,23 +71,25 @@ const siteInfoText = _si
       >
         {
           description && (
-            <p class="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed max-w-2xl mb-4">
+            <p class="friend-header-desc text-base text-neutral-600 dark:text-neutral-400 leading-relaxed w-full">
               {description}
             </p>
           )
         }
-        <div class="page-header-toolbar-slot flex-shrink-0 flex items-center gap-2 flex-wrap">
-          {friendsPageConfig.applyLink && (
-            <button
-              data-open-friend-rules
-              class="edit-main-btn-style rounded-lg border border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-900 hover:text-neutral-100 dark:hover:bg-neutral-100 dark:hover:text-neutral-900 transition-colors duration-200 font-medium flex items-center gap-1.5 cursor-pointer"
-              style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.9);background:transparent;color:rgba(0,0,0,0.9);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;line-height:1;height:32px;box-sizing:border-box;"
-            >
-              <Icon name="material-symbols:help-outline-rounded" class="text-base" />
-              如何申请友链
-            </button>
-          )}
-        </div>
+        {
+          friendsPageConfig.applyLink && (
+            <div class="friend-header-toolbar w-full flex justify-end">
+              <button
+                data-open-friend-rules
+                class="edit-main-btn-style rounded-lg border border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-900 hover:text-neutral-100 dark:hover:bg-neutral-100 dark:hover:text-neutral-900 transition-colors duration-200 font-medium flex items-center gap-1.5 cursor-pointer"
+                style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.9);background:transparent;color:rgba(0,0,0,0.9);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;line-height:1;height:32px;box-sizing:border-box;"
+              >
+                <Icon name="material-symbols:help-outline-rounded" class="text-base" />
+                如何申请友链
+              </button>
+            </div>
+          )
+        }
       </PageHeader>
 
       <!-- 友链编辑器 -->

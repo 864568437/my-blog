@@ -209,3 +209,25 @@
 		font-size: 32px;
 	}
 }
+
+/* ==========================================================================
+ * 友链页专用：描述 + 工具栏垂直堆叠（修复移动端单字竖排问题）
+ *  - 描述独占一行（不与工具栏共享 flex 行，避免工具栏把文字挤压到 ~30px 宽）
+ *  - 工具栏独占一行，靠右对齐
+ *  - 仅在 .friend-header-desc 存在时生效（不影响其他页面）
+ * ========================================================================== */
+.friend-header-desc {
+	margin: 0.5rem 0 1rem;
+	word-break: break-word;
+	overflow-wrap: anywhere;
+}
+
+.friend-header-toolbar {
+	margin-top: 0.5rem;
+}
+
+@media (max-width: 640px) {
+	.friend-header-toolbar {
+		justify-content: flex-start;
+	}
+}
