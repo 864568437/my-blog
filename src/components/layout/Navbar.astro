@@ -79,8 +79,18 @@ if (isLocalSrcLogo) {
 			</div>
 		</div>
 
-		<!-- 右段：搜索 + 快捷键（滚动收缩成球），移动端追加菜单按钮 -->
+		<!-- 右段：搜索 + 主题切换 + 快捷键（滚动收缩成球），移动端追加菜单按钮 -->
 		<div class="navbar-seg navbar-seg--right">
+			<button
+				aria-label="切换主题"
+				name="Theme Switch"
+				class="btn-plain h-9 w-9 nav-theme-btn"
+				id="nav-theme-btn"
+				type="button"
+			>
+				<Icon name="material-symbols:wb-sunny-outline-rounded" is:inline class="text-[1.2rem] nav-theme-icon-light" style="font-variation-settings: 'wght' 700" />
+				<Icon name="material-symbols:dark-mode-outline-rounded" is:inline class="text-[1.2rem] nav-theme-icon-dark hidden" style="font-variation-settings: 'wght' 700" />
+			</button>
 			<button aria-label="Search" name="Search" class="btn-plain h-9 nav-search-btn" id="nav-search-btn">
 				<span class="nav-search-btn__shortcut" data-shortcut>⌘ K</span>
 				<Icon name="material-symbols:search-rounded" is:inline class="text-[1.4rem]" style="font-variation-settings: 'wght' 700"></Icon>
@@ -348,11 +358,54 @@ document.addEventListener("astro:page-load", () => {
 // Navbar search button → open search modal
 // 使用事件委托绑定在 #navbar 上，Swup 导航后无需重新绑定
 document.getElementById("navbar")?.addEventListener("click", (e) => {
-	const btn = (e.target as HTMLElement)?.closest?.("#nav-search-btn");
-	if (!btn) return;
-	e.stopPropagation();
-	requestSearchModalToggle();
+	const btn = (e.target as Element)?.closest?.("#nav-search-btn");
+	if (btn) {
+		e.stopPropagation();
+		requestSearchModalToggle();
+		return;
+	}
+
+	// 主题切换按钮（日/夜模式循环：light → dark → system → light）
+	const themeBtn = (e.target as Element)?.closest?.("#nav-theme-btn");
+	if (themeBtn) {
+		e.stopPropagation();
+		const cycle: Record<string, string> = { light: "dark", dark: "light" };
+		try {
+			const cur = localStorage.getItem("theme") || "light";
+			const next = cycle[cur] || "dark";
+			localStorage.setItem("theme", next);
+			const isDark = next === "dark";
+			document.documentElement.classList.toggle("dark", isDark);
+			// 触发 theme-change 事件，通知其他组件
+			window.dispatchEvent(new CustomEvent("theme-change"));
+		} catch {
+			// 静默失败
+		}
+	}
 });
+
+/**
+ * 主题图标随 dark 类同步切换（太阳/月亮）
+ */
+function initNavThemeIcon() {
+	const lightIcon = document.querySelector("#nav-theme-btn .nav-theme-icon-light");
+	const darkIcon = document.querySelector("#nav-theme-btn .nav-theme-icon-dark");
+	if (!lightIcon || !darkIcon) return;
+
+	function sync() {
+		const isDark = document.documentElement.classList.contains("dark");
+		lightIcon.classList.toggle("hidden", isDark);
+		darkIcon.classList.toggle("hidden", !isDark);
+	}
+
+	sync();
+	// 监听 class 变化以同步图标
+	const observer = new MutationObserver(sync);
+	observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+}
+
+initNavThemeIcon();
+document.addEventListener("astro:page-load", initNavThemeIcon);
 </script>
 
 {

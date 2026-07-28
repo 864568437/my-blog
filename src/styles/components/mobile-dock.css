@@ -81,20 +81,24 @@
 		background-color: var(--btn-plain-bg-active, rgba(0, 0, 0, 0.08));
 	}
 
-	/* ── 中间搜索按钮（顶部凸出 dock，底部贴合 dock 底边） ── */
+	/* ── 中间圆形按钮（顶部凸出 dock，底部贴合 dock 底边） ── */
 	.mobile-dock__btn--center {
 		width: 4.5rem;
 		height: 4.5rem;
 		margin: -1.5rem 0.375rem 0;
 		border-radius: var(--radius-full, 9999px);
-		background: var(--deep-text);
-		color: var(--page-bg);
-		border: none;
-		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+		/* 参考图1：中间按钮固定纯黑色（不论日夜模式），与周围小按钮形成强对比 */
+		background: #000;
+		color: #fff;
+		border: 3px solid var(--page-bg, #fff);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 		transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.2s, color 0.2s;
 	}
 
 	:root.dark .mobile-dock__btn--center {
+		background: #000;
+		color: #fff;
+		border-color: var(--page-bg, #1a1d24);
 		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
 	}
 
@@ -271,6 +275,17 @@
 	/* ── 移动端文章工具栏调整 ── */
 	.mobile-post-toolbar {
 		top: 0 !important;
+	}
+
+	/* ── 移动端：主题色面板（display-setting）定位适配 ── */
+	#display-setting {
+		left: 0.5rem !important;
+		right: 0.5rem !important;
+		bottom: calc(0.75rem + 4.25rem + 4.5rem) !important;
+		top: auto !important;
+		width: auto !important;
+		max-width: none !important;
+		max-height: 70vh;
 	}
 }
 

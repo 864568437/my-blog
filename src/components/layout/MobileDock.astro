@@ -13,16 +13,25 @@ const showAnnouncement = !!announcementConfig.content;
 		<span class="mobile-dock__label">首页</span>
 	</button>
 
+	<button class="mobile-dock__btn" id="mobile-dock-search-btn" aria-label="搜索" type="button">
+		<span class="mobile-dock__icon"><Icon name="material-symbols:search-rounded" class="text-2xl" /></span>
+		<span class="mobile-dock__label">搜索</span>
+	</button>
+
+	<button class="mobile-dock__btn mobile-dock__btn--center" id="mobile-dock-menu-btn" aria-label="菜单" type="button">
+		<span class="mobile-dock__icon">
+			<Icon name="material-symbols:menu-rounded" class="text-2xl mobile-dock-menu-icon-collapsed" />
+			<Icon name="material-symbols:close-rounded" class="text-2xl mobile-dock-menu-icon-open hidden" />
+		</span>
+	</button>
+
 	<button class="mobile-dock__btn" id="mobile-dock-theme-btn" aria-label="主题" type="button">
 		<span class="mobile-dock__icon">
 			<Icon name="material-symbols:wb-sunny-outline-rounded" class="text-2xl mobile-dock-theme-icon-light" />
 			<Icon name="material-symbols:dark-mode-outline-rounded" class="text-2xl mobile-dock-theme-icon-dark hidden" />
 		</span>
-		<span class="mobile-dock__label">主题</span>
-	</button>
-
-	<button class="mobile-dock__btn mobile-dock__btn--center" id="mobile-dock-search-btn" aria-label="搜索" type="button">
-		<span class="mobile-dock__icon"><Icon name="material-symbols:search-rounded" class="text-2xl" /></span>
+		<span class="mobile-dock__label mobile-dock-theme-label-light">亮色</span>
+		<span class="mobile-dock__label mobile-dock-theme-label-dark hidden">暗色</span>
 	</button>
 
 	<button class="mobile-dock__btn" id="mobile-dock-tools-btn" aria-label="工具栏" type="button">
@@ -31,14 +40,6 @@ const showAnnouncement = !!announcementConfig.content;
 			<Icon name="material-symbols:close-rounded" class="text-2xl mobile-dock-tools-icon-open hidden" />
 		</span>
 		<span class="mobile-dock__label">工具</span>
-	</button>
-
-	<button class="mobile-dock__btn" id="mobile-dock-menu-btn" aria-label="菜单" type="button">
-		<span class="mobile-dock__icon">
-			<Icon name="material-symbols:menu-rounded" class="text-2xl mobile-dock-menu-icon-collapsed" />
-			<Icon name="material-symbols:close-rounded" class="text-2xl mobile-dock-menu-icon-open hidden" />
-		</span>
-		<span class="mobile-dock__label">菜单</span>
 	</button>
 </div>
 
@@ -54,6 +55,10 @@ const showAnnouncement = !!announcementConfig.content;
 		<button class="mobile-dock__sheet-item" id="md-ai-search-btn" aria-label="AI 搜索" type="button">
 			<span class="mobile-dock__sheet-item-icon"><Icon name="material-symbols:smart-toy-outline" class="text-2xl" /></span>
 			<span class="mobile-dock__sheet-item-label">AI 搜索</span>
+		</button>
+		<button class="mobile-dock__sheet-item" id="md-hue-btn" aria-label="主题色" type="button">
+			<span class="mobile-dock__sheet-item-icon"><Icon name="material-symbols:palette-outline" class="text-2xl" /></span>
+			<span class="mobile-dock__sheet-item-label">主题色</span>
 		</button>
 		{showMusic && (
 			<button class="mobile-dock__sheet-item" id="md-music-btn" aria-label="音乐" type="button">
@@ -87,6 +92,8 @@ const showAnnouncement = !!announcementConfig.content;
 </div>
 
 <script>
+import { getHue, setHue, setTheme, getStoredTheme } from "@utils/setting-utils";
+
 (function initMobileDock() {
 	const dockEl = document.getElementById("mobile-dock");
 	const overlayEl = document.getElementById("mobile-dock-overlay");
@@ -119,22 +126,30 @@ const showAnnouncement = !!announcementConfig.content;
 	const themeBtn = document.getElementById("mobile-dock-theme-btn");
 	const themeLightIcon = themeBtn?.querySelector(".mobile-dock-theme-icon-light");
 	const themeDarkIcon = themeBtn?.querySelector(".mobile-dock-theme-icon-dark");
+	const themeLightLabel = themeBtn?.querySelector(".mobile-dock-theme-label-light");
+	const themeDarkLabel = themeBtn?.querySelector(".mobile-dock-theme-label-dark");
 
-	function updateThemeIcon() {
+	function updateThemeDisplay() {
 		const isDark = document.documentElement.classList.contains("dark");
 		if (themeLightIcon) themeLightIcon.classList.toggle("hidden", isDark);
 		if (themeDarkIcon) themeDarkIcon.classList.toggle("hidden", !isDark);
+		if (themeLightLabel) themeLightLabel.classList.toggle("hidden", isDark);
+		if (themeDarkLabel) themeDarkLabel.classList.toggle("hidden", !isDark);
 	}
 
 	themeBtn?.addEventListener("click", (e) => {
 		e.stopPropagation();
-		const sunMoonBtn = document.getElementById("sun-moon-theme-btn");
-		if (sunMoonBtn) sunMoonBtn.click();
-		setTimeout(updateThemeIcon, 100);
+		const current = getStoredTheme();
+		const resolved = current === "system"
+			? (document.documentElement.classList.contains("dark") ? "dark" : "light")
+			: current;
+		const next = resolved === "light" ? "dark" : "light";
+		setTheme(next as any);
+		updateThemeDisplay();
 	});
 
-	updateThemeIcon();
-	const observer = new MutationObserver(updateThemeIcon);
+	updateThemeDisplay();
+	const observer = new MutationObserver(updateThemeDisplay);
 	observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
 	document.getElementById("mobile-dock-home-btn")?.addEventListener("click", (e) => {
@@ -145,11 +160,13 @@ const showAnnouncement = !!announcementConfig.content;
 		}
 	});
 
+	// 左 2：搜索（普通按钮）
 	document.getElementById("mobile-dock-search-btn")?.addEventListener("click", (e) => {
 		e.stopPropagation();
 		document.getElementById("dock-search-btn")?.click();
 	});
 
+	// 中间：大圆形按钮 = 菜单
 	const menuBtn = document.getElementById("mobile-dock-menu-btn");
 	const menuCollapsedIcon = menuBtn?.querySelector(".mobile-dock-menu-icon-collapsed");
 	const menuOpenIcon = menuBtn?.querySelector(".mobile-dock-menu-icon-open");
@@ -233,6 +250,20 @@ const showAnnouncement = !!announcementConfig.content;
 		e.stopPropagation();
 		closeSheet();
 		window.dispatchEvent(new CustomEvent("toggle-ai-search"));
+	});
+
+	// 主题色：优先复用桌面端 #display-setting 面板（与电脑端一致体验），
+	// 若面板不存在（如仅 Layout.astro 的页面），则直接轮换 hue 值
+	document.getElementById("md-hue-btn")?.addEventListener("click", (e) => {
+		e.stopPropagation();
+		const panel = document.getElementById("display-setting");
+		if (panel) {
+			closeSheet();
+			panel.classList.toggle("float-panel-closed");
+		} else {
+			const next = (getHue() + 30) % 360;
+			setHue(next);
+		}
 	});
 
 	document.getElementById("md-edit-btn")?.addEventListener("click", (e) => {

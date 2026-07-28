@@ -371,3 +371,23 @@ html:has(.home-hero):not(.dark) .navbar-seg {
  * 小于1280px时隐藏一级导航触发器图标（仅 active 时显示由 dropdown-menu.css 控制）
  * 这里仅控制非 active 的默认隐藏逻辑由 dropdown-menu.css 统一处理
  * ============================================ */
+
+/* ── 主题切换按钮（仅桌面端显示，移动端由 MobileDock 承担） ── */
+.nav-theme-btn {
+	display: inline-flex;
+	transition: transform 0.2s ease;
+}
+
+.nav-theme-btn:hover {
+	transform: rotate(20deg);
+}
+
+.nav-theme-btn:active {
+	transform: rotate(0deg) scale(0.92);
+}
+
+@media (max-width: 768px) {
+	.nav-theme-btn {
+		display: none !important;
+	}
+}

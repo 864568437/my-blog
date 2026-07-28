@@ -1,6 +1,7 @@
 /* ============================================
    移动端抽屉菜单 — 来自 NavMenuPanel.astro
    侧滑导航面板、遮罩层、链接样式
+   布局：分类标题（英文小标） + 下级 2 列网格图标卡片（参考 blog.tsh520.cn）
    ============================================ */
 
 .nav-drawer-overlay {
@@ -113,7 +114,7 @@
 	flex: 1;
 	overflow-y: auto;
 	overflow-x: hidden;
-	padding: 0.75rem 0.75rem 2rem;
+	padding: 0.5rem 0.5rem 2rem;
 	-webkit-overflow-scrolling: touch;
 }
 
@@ -129,18 +130,19 @@
 	transform: translateX(0);
 }
 
+/* 分类标题（带图标 + 名称）—— 浅灰英文小字 */
 .nav-drawer-link {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	width: 100%;
-	padding: 0.875rem 1rem;
+	padding: 0.75rem 1rem 0.5rem;
 	border-radius: 0;
 	font-weight: 600;
 	color: var(--deep-text);
 	transition: background-color 0.2s ease, color 0.2s ease;
 	text-decoration: none;
-	min-height: 3.25rem;
+	min-height: 2.5rem;
 	border: none;
 }
 
@@ -162,26 +164,101 @@
 	opacity: 0.7;
 }
 
+/* 分类标题（无链接，纯标题样式）—— 上方小图标 + 下方小字 */
+.nav-drawer-section-title {
+	cursor: default;
+	pointer-events: none;
+	opacity: 0.55;
+	font-size: 0.7rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.nav-drawer-section-title:hover,
+.nav-drawer-section-title:active {
+	background-color: transparent;
+	color: var(--deep-text);
+}
+
+/* 子菜单容器 —— 默认折叠，可点击展开 */
+.mobile-submenu {
+	max-height: 0;
+	overflow: hidden;
+	transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 展开态 */
+.mobile-submenu.is-open {
+	max-height: 1200px;
+}
+
+.mobile-submenu--flat {
+	/* flat = 始终展开，2 列网格 */
+	max-height: none;
+	overflow: visible;
+}
+
+/* ── 子菜单网格（2 列图标卡片）── */
+.nav-drawer-sublink-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.5rem;
+	padding: 0.25rem 0.5rem 0.5rem;
+}
+
+/* 单一子项（无子菜单的顶级菜单）—— 1 列横排 */
+.nav-drawer-link-single {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	margin: 0.25rem 0.5rem;
+	border-radius: 0.75rem;
+	background: var(--btn-regular-bg, transparent);
+	color: var(--deep-text);
+	text-decoration: none;
+	font-size: 0.9375rem;
+	font-weight: 500;
+	transition: background-color 0.2s ease, color 0.2s ease;
+	min-height: 2.75rem;
+	border: none;
+}
+
+.nav-drawer-link-single:hover {
+	background-color: var(--btn-plain-bg-hover);
+	color: var(--primary);
+}
+
+.nav-drawer-link-single:active {
+	background-color: var(--btn-plain-bg-active);
+	color: var(--primary);
+}
+
+/* 2 列网格中的卡片 */
 .nav-drawer-sublink {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	padding: 0.75rem 1rem 0.75rem 2.5rem;
-	border-radius: 0;
+	gap: 0.5rem;
+	padding: 0.625rem 0.75rem;
+	border-radius: 0.625rem;
+	background: var(--btn-regular-bg, transparent);
 	font-weight: 500;
-	font-size: 0.9375rem;
+	font-size: 0.8125rem;
 	color: var(--deep-text);
-	opacity: 0.7;
+	opacity: 0.85;
 	transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 	text-decoration: none;
-	min-height: 2.75rem;
-	border: none;
+	min-height: 2.5rem;
+	border: 1px solid transparent;
 }
 
 .nav-drawer-sublink:hover {
 	background-color: var(--btn-plain-bg-hover);
 	color: var(--primary);
 	opacity: 1;
+	border-color: var(--line-divider);
 }
 
 .nav-drawer-sublink:active {
@@ -190,33 +267,44 @@
 	opacity: 1;
 }
 
-.mobile-submenu--flat {
-	border-top: 1px solid var(--line-divider);
-	padding-top: 0.25rem;
-	margin-top: 0.25rem;
+.nav-drawer-sublink-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	font-size: 1rem;
 }
 
-.mobile-submenu {
-	max-height: 0;
+.nav-drawer-sublink-icon svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.nav-drawer-sublink-text {
+	flex: 1;
+	min-width: 0;
 	overflow: hidden;
-	transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
-.mobile-submenu--flat {
-	max-height: none;
-	overflow: visible;
+/* 分类标题可点击时的小箭头 */
+.nav-drawer-section-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--content-meta);
+	transition: transform 0.3s ease;
 }
 
-.nav-drawer-section-title {
-	cursor: default;
-	pointer-events: none;
-	opacity: 0.5;
+.nav-drawer-section-toggle svg {
+	width: 0.9rem;
+	height: 0.9rem;
 }
 
-.nav-drawer-section-title:hover,
-.nav-drawer-section-title:active {
-	background-color: transparent;
-	color: var(--deep-text);
+.mobile-submenu.is-open ~ .nav-drawer-section-toggle,
+.nav-drawer-section.is-open .nav-drawer-section-toggle {
+	transform: rotate(180deg);
 }
 
 @media (min-width: 1024px) {
