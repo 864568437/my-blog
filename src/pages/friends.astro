@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿---
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿---
 import { getEntry, render } from "astro:content";
 import Comment from "@components/comment/index.astro";
 import Markdown from "@components/common/Markdown.astro";
@@ -121,7 +121,7 @@ const siteInfoText = _si
 
       <!-- 友链网格 -->
       <div class="friends-grid" id="friends-grid">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 my-4">
+        <div class="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 my-4">
         {
           items.map((item) => (
             <div class="friend-card" data-friend-id={item.siteurl} data-tags={item.tags?.join(",")}>

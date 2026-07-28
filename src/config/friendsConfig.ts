@@ -609,18 +609,54 @@ export const friendsConfig: FriendLink[] = [
 		"enabled": true
 		},
 		{
-		  "title": "星诺的博客",
-		  "imgurl": "https://blog.astrvow.com/_astro/logo.DuHgmi9I_1k5uPc.webp",
-		  "desc": "只要热爱，太阳就会升起！",
-		  "siteurl": "https://blog.astrvow.com/",
-		  "linkpage": "https://blog.astrvow.com/friends/",
-		  "tags": [
-		    "Blog"
-		  ],
-		  "weight": 10,
-		  "enabled": true
-		},
-	];
+	  "title": "星诺的博客",
+	  "imgurl": "https://blog.astrvow.com/_astro/logo.DuHgmi9I_1k5uPc.webp",
+	  "desc": "只要热爱，太阳就会升起！",
+	  "siteurl": "https://blog.astrvow.com/",
+	  "linkpage": "https://blog.astrvow.com/friends/",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "LQQ",
+	  "imgurl": "https://lqq.ai/assets/avatar-128.webp",
+	  "desc": "关于设计、技术与长期主义的个人记录。",
+	  "siteurl": "https://lqq.ai/",
+	  "linkpage": "https://lqq.ai/friends",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "萤火虫之国",
+	  "imgurl": "https://forum.hanakos.cc/icons/icon-512.png",
+	  "desc": "分享想法 · 探索音乐",
+	  "siteurl": "https://forum.hanakos.cc/",
+	  "linkpage": "https://forum.hanakos.cc/links",
+	  "tags": [
+	    "Forum"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "逸树の小屋",
+	  "imgurl": "https://474029.xyz/assets/images/mmexport1766207871022.png",
+	  "desc": "逸枝向野，静木生风。",
+	  "siteurl": "https://474029.xyz/",
+	  "linkpage": "https://474029.xyz/friends/",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+];
 
 // 获取启用的友链并进行排序
 export const getEnabledFriends = (): FriendLink[] => {

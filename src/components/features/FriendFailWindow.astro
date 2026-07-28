@@ -235,16 +235,23 @@ const dataUrl = cfg.dataUrl || "https://check.fqzlr.com/result.json";
     line-height: 1;
   }
 
-  /* ========== 移动端 ========== */
+  /* ========== 移动端：与上方友链卡片保持一致的 3 列紧凑布局 ========== */
   @media (max-width: 1024px) {
     .fail-zone-body { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   @media (max-width: 768px) {
-    .fail-zone-body { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* 移动端：3 列（与上方友链卡片一致），进一步压缩 */
+    .fail-zone-body { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.4rem; }
+    .fail-card { padding: 0.4rem 0.45rem; gap: 0.4rem; border-radius: 10px; }
+    .fail-card-avatar { width: 1.75rem; height: 1.75rem; border-width: 1.5px; }
+    .fail-card-name { font-size: 0.7rem; }
+    .fail-card-host { font-size: 0.6rem; margin-top: 0; }
   }
-  @media (max-width: 480px) {
-    .fail-zone-body { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
-    .fail-card { padding: 0.5rem 0.6rem; gap: 0.5rem; }
-    .fail-card-avatar { width: 32px; height: 32px; }
+  @media (max-width: 380px) {
+    .fail-zone-body { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.3rem; }
+    .fail-card { padding: 0.3rem 0.35rem; gap: 0.3rem; }
+    .fail-card-avatar { width: 1.5rem; height: 1.5rem; }
+    .fail-card-name { font-size: 0.65rem; }
+    .fail-card-host { display: none; }
   }
 </style>
