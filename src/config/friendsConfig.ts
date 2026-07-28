@@ -29,6 +29,17 @@ export const friendsPageConfig: FriendsPageConfig = {
 		{ title: "个人主页限制", content: "纯空白个人主页、无任何原创文字内容的展示站暂不互换" },
 		
 	],
+	// 失效友链分区配置（基于 check-flink result.json 中的 fail_count 分组）
+	failZones: {
+		// 失效暂留：fail_count 1-6 次的友链
+		failWindow: [1, 6],
+		// 友链墓碑：fail_count ≥ 7 次的友链
+		tombstone: [7, 9999],
+		// 墓碑说明区里"联系恢复"链接
+		contactLink: "https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml",
+		// 检测数据源 URL
+		dataUrl: "https://check.fqzlr.com/result.json",
+	},
 };
 
 // 友链配置

@@ -1,10 +1,12 @@
----
+﻿﻿﻿﻿﻿﻿﻿﻿﻿---
 import { getEntry, render } from "astro:content";
 import Comment from "@components/comment/index.astro";
 import Markdown from "@components/common/Markdown.astro";
 import { Icon } from "astro-icon/components";
 import FriendCard from "@components/features/FriendCard.astro";
 import FriendRulesModal from "@components/features/FriendRulesModal.astro";
+import FriendFailWindow from "@components/features/FriendFailWindow.astro";
+import FriendFailTombstone from "@components/features/FriendFailTombstone.astro";
 import { friendsPageConfig, getEnabledFriends, commentConfig } from "@/config";
 import FriendsEditor from "@/components/edit/FriendsEditor.svelte";
 import I18nKey from "@i18n/i18nKey";
@@ -22,6 +24,17 @@ const { Content } = await render(friendsPost);
 
 // 从 friendsConfig.ts 读取友链数据
 const items = getEnabledFriends();
+
+// 生成 inline JSON（完整字段），供失效分区客户端脚本按 fail_count 分组渲染
+const friendListForInline = JSON.stringify(
+	items.map((it) => ({
+		name: it.title,
+		link: it.siteurl,
+		avatar: it.imgurl,
+		desc: it.desc || "",
+		siteshot: it.siteshot || "",
+	}))
+);
 
 const allTags = [
 	...new Set(items.flatMap((item) => item.tags || [])),
@@ -123,6 +136,10 @@ const siteInfoText = _si
         }
         </div>
       </div>
+
+      <!-- 失效暂留 + 友链墓碑（客户端拉 check-flink result.json 后按 fail_count 分组） -->
+      <FriendFailWindow />
+      <FriendFailTombstone />
 
       <Markdown class="mt-2">
         <Content />
@@ -319,6 +336,222 @@ const siteInfoText = _si
     }
     document.addEventListener("astro:page-load", () => { initFlinkCopyButtons(); initFlinkImportTemplate(); });
     document.addEventListener("astro:after-swap", () => { initFlinkCopyButtons(); initFlinkImportTemplate(); });
+  </script>
+
+  <script set:html={`window.__FRIEND_LIST__ = ${friendListForInline};`}></script>
+
+  <script>
+    /* ========== 三区互不重复分组：正常友链 / 失效暂留 / 友链墓碑 ==========
+     * 数据流：总友链 = window.__FRIEND_LIST__（来自 friendsConfig.ts SSR 注入）
+     *       叠加 result.json 的 fail_count 字段
+     * 分组规则：
+     *   fail_count === 0     → 正常友链（保留显示在 #friends-grid）
+     *   fail_count ∈ [1, 6]  → 失效暂留（从正常区隐藏 + 渲染到 #friend-fail-window）
+     *   fail_count ≥ 7       → 友链墓碑（从正常区隐藏 + 渲染到 #friend-fail-tombstone）
+     * 保证三区互不重复。
+     */
+    (function () {
+      const FZ_CACHE_KEY = "checkFlinkResultCache_v1";
+      const FZ_CACHE_TTL = 30 * 60 * 1000;
+      const FAIL_WINDOW = [1, 6];
+      const TOMBSTONE = [7, 9999];
+      const DATA_URL = "https://check.fqzlr.com/result.json";
+
+      function normalizeUrl(u) {
+        return (u || "").replace(/\/$/, "").trim();
+      }
+      function inRange(n, range) {
+        const [min, max] = range;
+        return n >= min && n <= max;
+      }
+      function readCache() {
+        try {
+          const raw = localStorage.getItem(FZ_CACHE_KEY);
+          if (!raw) return null;
+          const p = JSON.parse(raw);
+          if (!p || !p.data || !p.ts) return null;
+          if (Date.now() - p.ts > FZ_CACHE_TTL) return null;
+          return p.data;
+        } catch { return null; }
+      }
+      function writeCache(data) {
+        try { localStorage.setItem(FZ_CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch {}
+      }
+      function faviconUrl(host) {
+        if (!host) return inlineSvgUrl("?");
+        return "https://www.google.com/s2/favicons?domain=" + encodeURIComponent(host) + "&sz=64";
+      }
+      function hostOf(url) {
+        try { return new URL(url).host.replace(/^www\./, ""); } catch { return ""; }
+      }
+      function escapeHtml(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+        }[c]));
+      }
+      // 头像三级容错链：博主提供 → dicebear → 内联 SVG（永远不失败）
+      function dicebearUrl(name) {
+        const s = (name || "guest").trim().toLowerCase();
+        return "https://api.dicebear.com/7.x/notionists/svg?seed=" + encodeURIComponent(s);
+      }
+      function inlineSvgUrl(name) {
+        const text = (name || "?").trim().slice(0, 1).toUpperCase() || "?";
+        const hash = Array.from(text).reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 0);
+        const hue = hash % 360;
+        const bg = "hsl(" + hue + ", 55%, 55%)";
+        const svg =
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">' +
+          '<rect width="80" height="80" fill="' + bg + '"/>' +
+          '<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" ' +
+          'font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-weight="700" ' +
+          'font-size="40" fill="#fff">' + text + '</text>' +
+          '</svg>';
+        return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+      }
+      function pickAvatar(link, avatar, host, name) {
+        return avatar || dicebearUrl(name);
+      }
+
+      // 渲染"失效暂留" - 4 列横向小卡（样式对齐 prototype）
+      function renderFailWindow(items) {
+        const sec = document.getElementById("friend-fail-window");
+        const body = sec?.querySelector("[data-ffz-body]");
+        const sub = sec?.querySelector("[data-ffz-sub]");
+        const badge = sec?.querySelector("[data-ffz-badge]");
+        if (!sec || !body) return;
+        if (!items.length) { sec.classList.add("hidden"); return; }
+        sec.classList.remove("hidden");
+        if (sub) sub.textContent = "这里有 " + items.length + " 个正在发光的小站点。";
+        if (badge) badge.textContent = items.length + " sites";
+        body.innerHTML = items.map((it) => {
+          const host = hostOf(it.link);
+          const avatar = pickAvatar(it.link, it.avatar, host);
+          return (
+            '<a class="fail-card" role="listitem" href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener noreferrer" title="' + escapeHtml(it.name) + '">' +
+              '<img class="fail-card-avatar" loading="lazy" decoding="async" src="' + escapeHtml(avatar) + '" alt="' + escapeHtml(it.name) + '" onerror="this.classList.add(\'is-error\');this.onerror=null;this.src=\'' + escapeHtml(faviconUrl(host)) + '\'" />' +
+              '<div class="fail-card-text">' +
+                '<div class="fail-card-name">' + escapeHtml(it.name) + '</div>' +
+                '<div class="fail-card-host">' + escapeHtml(host) + '</div>' +
+              '</div>' +
+            '</a>'
+          );
+        }).join("");
+      }
+
+      // 渲染"友链墓碑" - 横向多列头像墙（样式对齐 prototype）
+      function renderTombstone(items) {
+        const sec = document.getElementById("friend-fail-tombstone");
+        const wall = sec?.querySelector("[data-fft-wall]");
+        if (!sec || !wall) return;
+        if (!items.length) { sec.classList.add("hidden"); return; }
+        sec.classList.remove("hidden");
+        wall.innerHTML = items.map((it) => {
+          const host = hostOf(it.link);
+          const userAvatar = it.avatar || "";
+          const dicebear = dicebearUrl(it.name);
+          const initialSrc = userAvatar || dicebear;
+          const dicebearAttr = userAvatar ? dicebear : "";
+          const inlineAttr = inlineSvgUrl(it.name);
+          return (
+            '<span class="tomb-chip" role="listitem" title="' + escapeHtml(it.name) + '">' +
+              '<img class="tomb-avatar" loading="lazy" decoding="async" ' +
+                'src="' + escapeHtml(initialSrc) + '" ' +
+                'alt="' + escapeHtml(it.name) + '" ' +
+                'data-dicebear="' + escapeHtml(dicebearAttr) + '" ' +
+                'data-fb-inline="' + escapeHtml(inlineAttr) + '" ' +
+                'onerror="var d=this.dataset;if(d.fb1Used!==\'1\'&&d.dicebear){d.fb1Used=\'1\';var s=this;this.onerror=function(){s.onerror=null;s.src=d.fbInline;};this.src=d.dicebear;}else{this.onerror=null;this.src=d.fbInline;}" />' +
+              '<span class="tomb-name">' + escapeHtml(it.name) + '</span>' +
+            '</span>'
+          );
+        }).join("");
+      }
+
+      /**
+       * 核心分组 + 渲染
+       * 互不重复：每个友链按 fail_count 落入唯一分组
+       *   0 → 正常区（保留 .friend-card 显示）
+       *   1-6 → 失效暂留（先隐藏 .friend-card，再渲染到 ffz-body）
+       *   ≥7 → 友链墓碑（先隐藏 .friend-card，再渲染到 fft-wall）
+       */
+      function applyData(data) {
+        const list = (data && Array.isArray(data.link_status)) ? data.link_status : [];
+        // 1) 构建 link→fail_count map
+        const failMap = new Map();
+        for (const it of list) {
+          if (it && it.link) failMap.set(normalizeUrl(it.link), Number(it.fail_count || 0));
+        }
+
+        // 2) 总友链数据（来自 SSR 注入）
+        const friendList = Array.isArray(window.__FRIEND_LIST__) ? window.__FRIEND_LIST__ : [];
+        const friendByLink = new Map();
+        for (const f of friendList) {
+          if (f && f.link) friendByLink.set(normalizeUrl(f.link), f);
+        }
+
+        // 3) 遍历正常区 .friend-card：分类
+        const failList = [];   // 失效暂留
+        const tombList = [];   // 友链墓碑
+        const grid = document.getElementById("friends-grid");
+        if (grid) {
+          const cards = grid.querySelectorAll(".friend-card[data-friend-id]");
+          cards.forEach((cardEl) => {
+            const link = cardEl.getAttribute("data-friend-id") || "";
+            const fc = failMap.get(normalizeUrl(link)) || 0;
+            const friend = friendByLink.get(normalizeUrl(link)) || { name: link, link };
+            if (inRange(fc, FAIL_WINDOW)) {
+              // 失效暂留：从正常区隐藏 + 加入 failList
+              cardEl.style.display = "none";
+              failList.push({ ...friend, link, fail_count: fc });
+            } else if (inRange(fc, TOMBSTONE)) {
+              // 友链墓碑：从正常区隐藏 + 加入 tombList
+              cardEl.style.display = "none";
+              tombList.push({ ...friend, link, fail_count: fc });
+            } else {
+              // fail_count === 0：保留显示（正常友链）
+              // 可选：更新 .friend-status 徽章
+              cardEl.style.display = "";
+            }
+          });
+        }
+
+        // 4) 按 fail_count 降序排序
+        const sortDesc = (a, b) => (b.fail_count || 0) - (a.fail_count || 0);
+        failList.sort(sortDesc);
+        tombList.sort(sortDesc);
+
+        // 5) 渲染失效暂留 + 友链墓碑
+        renderFailWindow(failList);
+        renderTombstone(tombList);
+      }
+
+      async function init() {
+        // 非友链页不执行
+        if (!document.getElementById("friend-fail-window")) return;
+
+        // 1) 先用缓存快速渲染（避免闪烁）
+        const cached = readCache();
+        if (cached) applyData(cached);
+
+        // 2) 后台拉取最新数据
+        try {
+          const res = await fetch(DATA_URL, { cache: "no-store" });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          writeCache(data);
+          applyData(data);
+        } catch (err) {
+          console.warn("[friend-zones] 拉取失败，使用缓存：", err);
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+      document.addEventListener("astro:page-load", init);
+      document.addEventListener("astro:after-swap", init);
+    })();
   </script>
 
   <style>

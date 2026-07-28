@@ -815,6 +815,17 @@ export type FriendsPageConfig = {
 		title: string; // 注意事项标题
 		content: string; // 注意事项内容
 	}[];
+	// 失效友链分区配置（基于 check-flink 失败计数 fail_count 分组）
+	failZones?: {
+		// 失效暂留：fail_count 在 [min, max] 区间内的友链，横向 4 列小卡展示
+		failWindow?: [number, number];
+		// 友链墓碑：fail_count 在 [min, max] 区间内的友链，多列头像墙展示
+		tombstone?: [number, number];
+		// 联系恢复链接（墓碑说明区里"联系恢复"的 href）
+		contactLink?: string;
+		// 失效检测数据源 URL（result.json）
+		dataUrl?: string;
+	};
 };
 
 // 收藏 API 条目（projects 页面使用）

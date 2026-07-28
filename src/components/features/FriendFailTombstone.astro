@@ -1,0 +1,38 @@
+---
+/**
+ * FriendFailTombstone.astro
+ * 友链墓碑 - 样式严格匹配 .trae/prototype/friend-fail-zones.html
+ * 标题：🪵 友链墓碑·相逢何必曾相识
+ * 内容：浅蓝虚线说明区 + 横向多列头像墙（fail_count ≥ 7）
+ *
+ * 注意：共享样式（设计令牌 + 区域容器 + 墓碑 chip）在 FriendFailWindow.astro 定义（is:global）
+ */
+import { friendsPageConfig } from "@/config";
+
+const cfg = friendsPageConfig.failZones || {};
+const contactLink = cfg.contactLink || "https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml";
+---
+
+<section id="friend-fail-tombstone" class="friend-zone hidden" aria-label="友链墓碑">
+  <div class="zone-header">
+    <div class="zone-title-row">
+      <div class="zone-title">
+        <span class="emoji" aria-hidden="true">🪵</span>
+        <span>友链墓碑<span class="zone-sep">·</span>相逢何必曾相识</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 浅蓝虚线说明区（参考站样式） -->
+  <div class="tomb-info">
+    <div class="tomb-info-title">
+      <span aria-hidden="true">💡</span>
+      <span>说明</span>
+    </div>
+    <p>此处记录的友链因长期无法访问、站点关闭、或友链反链丢失，长期未更新(一年)等原因，由站长慎重考虑后，手动下线。</p>
+    <p>若因技术问题导致下线，欢迎站长修复后随时 <a href={contactLink} target="_blank" rel="noopener noreferrer">联系恢复</a>。若站点已停止维护，则可能不再接受恢复请求。如有特殊情况，可联系站长详询。</p>
+  </div>
+
+  <!-- 横向多列头像墙 -->
+  <div class="tomb-wall" data-fft-wall role="list"></div>
+</section>

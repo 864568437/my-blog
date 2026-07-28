@@ -1,0 +1,250 @@
+---
+/**
+ * FriendFailWindow.astro
+ * 失效暂留分区 - 样式严格匹配 .trae/prototype/friend-fail-zones.html
+ * 标题：😭 失效暂留·临时的别离，只为更美的重途
+ * 卡片：横向 4 列紧凑小卡（一行 4 个，fail_count 1-6）
+ */
+import { friendsPageConfig } from "@/config";
+
+const cfg = friendsPageConfig.failZones || {};
+const dataUrl = cfg.dataUrl || "https://check.fqzlr.com/result.json";
+---
+
+<!-- 失效暂留容器：客户端 JS 填充，SSR 输出空壳保证 SEO/不闪烁 -->
+<section
+  id="friend-fail-window"
+  class="friend-zone hidden"
+  aria-label="失效暂留友链"
+  data-data-url={dataUrl}
+>
+  <div class="zone-header">
+    <div class="zone-title-row">
+      <div>
+        <div class="zone-title">
+          <span class="emoji" aria-hidden="true">😭</span>
+          <span>失效暂留<span class="zone-sep">·</span>临时的别离，只为更美的重途</span>
+        </div>
+        <div class="zone-sub" data-ffz-sub>这里有 0 个正在发光的小站点。</div>
+      </div>
+      <span class="site-badge" data-ffz-badge>0 sites</span>
+    </div>
+  </div>
+
+  <div class="zone-body fail-zone-body" data-ffz-body role="list"></div>
+</section>
+
+<style is:global>
+  /* ========== 失效暂留 + 友链墓碑 共享设计令牌（对齐 prototype） ========== */
+  :root {
+    --fz-page-bg: #ffffff;
+    --fz-card-bg: rgba(15, 23, 42, 0.04);
+    --fz-card-bg-hover: rgba(15, 23, 42, 0.07);
+    --fz-card-border: rgba(15, 23, 42, 0.08);
+    --fz-card-border-hover: rgba(99, 179, 237, 0.35);
+    --fz-text-primary: #0f172a;
+    --fz-text-secondary: rgba(15, 23, 42, 0.7);
+    --fz-text-muted: rgba(15, 23, 42, 0.5);
+    --fz-accent: #3b82f6;
+    --fz-accent-soft: rgba(59, 130, 246, 0.12);
+    --fz-badge-bg: rgba(59, 130, 246, 0.08);
+    --fz-badge-border: rgba(59, 130, 246, 0.35);
+    --fz-badge-text: #3b82f6;
+    --fz-tomb-info-bg: rgba(59, 130, 246, 0.05);
+    --fz-tomb-info-border: rgba(59, 130, 246, 0.25);
+    --fz-tomb-info-text: rgba(30, 41, 59, 0.85);
+  }
+  :root.dark {
+    --fz-page-bg: #1a1d24;
+    --fz-card-bg: rgba(255, 255, 255, 0.04);
+    --fz-card-bg-hover: rgba(255, 255, 255, 0.07);
+    --fz-card-border: rgba(255, 255, 255, 0.08);
+    --fz-text-primary: #e8eaed;
+    --fz-text-secondary: rgba(232, 234, 237, 0.7);
+    --fz-text-muted: rgba(232, 234, 237, 0.5);
+    --fz-accent: #63b3ed;
+    --fz-accent-soft: rgba(99, 179, 237, 0.12);
+    --fz-badge-bg: rgba(99, 179, 237, 0.08);
+    --fz-badge-border: rgba(99, 179, 237, 0.35);
+    --fz-badge-text: #63b3ed;
+    --fz-tomb-info-bg: rgba(99, 179, 237, 0.05);
+    --fz-tomb-info-border: rgba(99, 179, 237, 0.25);
+    --fz-tomb-info-text: rgba(226, 232, 240, 0.85);
+  }
+
+  /* ========== 区域统一容器 ========== */
+  .friend-zone { margin-top: 2.5rem; }
+  .friend-zone.hidden { display: none; }
+  .zone-header { margin-bottom: 1rem; }
+  .zone-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .zone-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--fz-text-primary);
+    letter-spacing: 0.01em;
+  }
+  .zone-title .emoji { font-size: 1.15rem; }
+  .zone-sep { color: var(--fz-text-muted); margin: 0 0.15rem; }
+  .zone-sub {
+    margin-top: 0.35rem;
+    color: var(--fz-text-secondary);
+    font-size: 0.875rem;
+  }
+  .site-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--fz-badge-bg);
+    color: var(--fz-badge-text);
+    border: 1px solid var(--fz-badge-border);
+    flex-shrink: 0;
+  }
+  .site-badge::before {
+    content: "";
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--fz-accent);
+    box-shadow: 0 0 0 0 rgba(99, 179, 237, 0.5);
+  }
+
+  /* ========== 失效暂留卡片：横向 4 列紧凑小卡 ========== */
+  .fail-zone-body {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.625rem;
+  }
+  .fail-card {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.75rem;
+    background: var(--fz-card-bg);
+    border: 1px solid var(--fz-card-border);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    min-width: 0;
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .fail-card:hover {
+    background: var(--fz-card-bg-hover);
+    border-color: var(--fz-card-border-hover);
+    transform: translateY(-1px);
+  }
+  .fail-card-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: oklch(0.3 0 0);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+  :root:not(.dark) .fail-card-avatar {
+    border-color: rgba(15, 23, 42, 0.08);
+  }
+  .fail-card-text { flex: 1; min-width: 0; line-height: 1.35; }
+  .fail-card-name {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--fz-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .fail-card-host {
+    font-size: 0.6875rem;
+    color: var(--fz-text-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+  .fail-card-desc { display: none; /* 紧凑布局隐藏描述，对齐 prototype */ }
+
+  /* ========== 友链墓碑：横向多列头像墙 ========== */
+  .tomb-info {
+    margin: 1rem 0 1.25rem;
+    padding: 1rem 1.25rem;
+    background: var(--fz-tomb-info-bg);
+    border: 1px dashed var(--fz-tomb-info-border);
+    border-radius: 10px;
+    color: var(--fz-tomb-info-text);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+  }
+  .tomb-info-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+    color: var(--fz-accent);
+    margin-bottom: 0.5rem;
+  }
+  .tomb-info p { margin: 0.25rem 0; }
+  .tomb-info a {
+    color: var(--fz-accent);
+    text-decoration: underline;
+    text-decoration-color: rgba(99, 179, 237, 0.4);
+    text-underline-offset: 2px;
+  }
+  .tomb-info a:hover { text-decoration-color: var(--fz-accent); }
+
+  .tomb-wall {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.85rem;
+    padding: 0.75rem 0;
+  }
+  .tomb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.4rem 0.2rem 0.2rem;
+    border-radius: 9999px;
+    transition: background 0.2s ease;
+  }
+  .tomb-chip:hover { background: var(--fz-card-bg-hover); }
+  .tomb-avatar {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: oklch(0.3 0 0);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+  :root:not(.dark) .tomb-avatar { border-color: rgba(15, 23, 42, 0.08); }
+  .tomb-name {
+    font-size: 0.8125rem;
+    color: var(--fz-text-secondary);
+    line-height: 1;
+  }
+
+  /* ========== 移动端 ========== */
+  @media (max-width: 1024px) {
+    .fail-zone-body { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 768px) {
+    .fail-zone-body { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 480px) {
+    .fail-zone-body { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5rem; }
+    .fail-card { padding: 0.5rem 0.6rem; gap: 0.5rem; }
+    .fail-card-avatar { width: 32px; height: 32px; }
+  }
+</style>

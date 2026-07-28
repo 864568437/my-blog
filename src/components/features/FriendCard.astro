@@ -8,6 +8,8 @@ export interface Props {
 	siteshot?: string;
 }
 
+import { dicebearUrl, inlineSvgAvatar } from "@/utils/avatar-fallback";
+
 const { title, href, imgurl, desc, tags = [], siteshot = "" } = Astro.props;
 
 // 从 href 提取 host（去掉 www. 前缀）
@@ -19,8 +21,9 @@ const host = (() => {
 	}
 })();
 
-// 头像加载失败时的降级文字（取 title 前 2 个字符）
-const avatarFallback = title.slice(0, 2);
+// 三级头像容错链 SSR 初始值：主头像 → dicebear → 内联 SVG（用于 data-avatar-fallback）
+const fallbackDicebear = dicebearUrl(title);
+const fallbackInline = inlineSvgAvatar(title);
 ---
 
 <a
@@ -32,6 +35,8 @@ const avatarFallback = title.slice(0, 2);
   data-desc={desc}
   data-host={host}
   data-siteshot={siteshot}
+  data-avatar-fallback-dicebear={fallbackDicebear}
+  data-avatar-fallback-inline={fallbackInline}
   style={siteshot ? `--siteshot-url: url("${siteshot}");` : ""}
 >
   <!-- 顶部：友链主页截图 + 状态徽章（去除 Blog 角标） -->
@@ -42,14 +47,16 @@ const avatarFallback = title.slice(0, 2);
 
   <!-- 中部：圆形头像 + 姓名 + 描述（压缩版） -->
   <div class="friend-card-info">
-    <div class="friend-card-avatar-wrap" data-fallback={avatarFallback}>
+    <div class="friend-card-avatar-wrap" data-fallback={title.slice(0, 2)}>
       <img
         src={imgurl}
         alt={title}
         class="friend-card-avatar"
         loading="lazy"
         decoding="async"
-        onerror="this.classList.add('is-error');this.parentElement?.classList.add('is-error');"
+        data-fb-1={fallbackDicebear}
+        data-fb-2={fallbackInline}
+        onerror="var d=this.dataset;if(d.fb1Used!=='1'){d.fb1Used='1';this.onerror=function(){this.classList.add('is-error');this.parentElement?.classList.add('is-error');};this.src=d.fb1;}else{this.classList.add('is-error');this.parentElement?.classList.add('is-error');}"
       />
     </div>
     <div class="friend-card-text">
