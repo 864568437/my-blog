@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿---
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿---
 import { getEntry, render } from "astro:content";
 import Comment from "@components/comment/index.astro";
 import Markdown from "@components/common/Markdown.astro";
@@ -553,6 +553,84 @@ const siteInfoText = _si
       }
       document.addEventListener("astro:page-load", init);
       document.addEventListener("astro:after-swap", init);
+    })();
+  </script>
+
+  <script>
+    /* ========== 客户端动态更新：从 friends.json.ts 端点获取最新数据，更新网格 ==========
+     * SSR 渲染提供初始数据（SEO + 首屏），页面加载后通过此脚本实时更新。
+     * 当 FriendsEditor.svelte 提交变更到 GitHub 后，下一次刷新即可看到最新数据。
+     */
+    (function refreshFriendsGrid() {
+      async function doRefresh() {
+        try {
+          const res = await fetch("/friends.json", { cache: "no-store" });
+          if (!res.ok) return;
+          const data = await res.json();
+          const grid = document.getElementById("friends-grid");
+          if (!grid || !Array.isArray(data.link_list)) return;
+
+          const latestMap = new Map();
+          data.link_list.forEach(function (f) {
+            var key = (f.link || "").replace(/\/$/, "");
+            latestMap.set(key, f);
+          });
+
+          // 更新现有卡片：名称、头像、描述、链接
+          grid.querySelectorAll(".friend-card[data-friend-id]").forEach(function (card) {
+            var link = (card.getAttribute("data-friend-id") || "").replace(/\/$/, "");
+            var latest = latestMap.get(link);
+            if (!latest) return;
+
+            // 更新 <a> 链接
+            var anchor = card.tagName === "A" ? card : card.querySelector("a");
+            if (anchor && latest.link) {
+              anchor.href = latest.link;
+            }
+
+            // 更新头像
+            var img = card.querySelector("img");
+            if (img && latest.avatar) {
+              img.src = latest.avatar;
+            }
+
+            // 更新标题
+            var titleEl = card.querySelector(".font-bold");
+            if (titleEl && latest.name) {
+              titleEl.textContent = latest.name;
+            }
+
+            // 更新描述
+            var descEl = card.querySelector(".text-sm.text-neutral-500");
+            if (descEl && latest.descr) {
+              descEl.textContent = latest.descr;
+            }
+          });
+
+          // 更新 window.__FRIEND_LIST__（供失效分区脚本使用）
+          if (Array.isArray(data.link_list)) {
+            window.__FRIEND_LIST__ = data.link_list.map(function (f) {
+              return {
+                name: f.name,
+                link: f.link,
+                avatar: f.avatar,
+                desc: f.descr || "",
+                siteshot: f.siteshot || "",
+              };
+            });
+          }
+        } catch (e) {
+          console.warn("[friends] 动态更新失败，使用 SSR 数据:", e);
+        }
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", doRefresh);
+      } else {
+        doRefresh();
+      }
+      document.addEventListener("astro:page-load", doRefresh);
+      document.addEventListener("astro:after-swap", doRefresh);
     })();
   </script>
 
