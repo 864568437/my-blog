@@ -633,23 +633,35 @@ export const friendsConfig: FriendLink[] = [
 	  "enabled": true
 	},
 	{
-	  "title": "萤火虫之国",
-	  "imgurl": "https://forum.hanakos.cc/icons/icon-512.png",
-	  "desc": "分享想法 · 探索音乐",
-	  "siteurl": "https://forum.hanakos.cc/",
-	  "linkpage": "https://forum.hanakos.cc/links",
-	  "tags": [
-	    "Forum"
-	  ],
-	  "weight": 10,
-	  "enabled": true
-	},
-	{
 	  "title": "逸树の小屋",
 	  "imgurl": "https://474029.xyz/assets/images/mmexport1766207871022.png",
 	  "desc": "逸枝向野，静木生风。",
 	  "siteurl": "https://474029.xyz/",
 	  "linkpage": "https://474029.xyz/friends/",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "睿朗的小窝",
+	  "imgurl": "https://iamcrl.cn/avatar.jpg",
+	  "desc": "睿朗的个人网站",
+	  "siteurl": "https://iamcrl.cn",
+	  "linkpage": "https://blog.iamcrl.cn/youlian",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "灵阈研都",
+	  "imgurl": "http://mu.baimu.live/a/img/ico-baimu.png",
+	  "desc": "让知识御风而行，也始终有线牵引",
+	  "siteurl": "https://gl.baimu.live/",
+	  "linkpage": "https://gl.baimu.live/friendlinks",
 	  "tags": [
 	    "Blog"
 	  ],
