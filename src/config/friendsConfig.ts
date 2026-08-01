@@ -680,6 +680,18 @@ export const friendsConfig: FriendLink[] = [
 	  "weight": 10,
 	  "enabled": true
 	},
+	{
+	  "title": "知遥",
+	  "imgurl": "https://imadu.cn/api/files/946c5ae1c6ec4f24_logo20250718050939309.png",
+	  "desc": "知世故而不世故，历山河而慕山河。",
+	  "siteurl": "https://imadu.cn",
+	  "linkpage": "https://imadu.cn/link",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
 	
 ];
 
