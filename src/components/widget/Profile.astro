@@ -24,10 +24,7 @@ const mainActionHref = url("/about/");
 const mainActionLabel = "跳转主页";
 const mainActionIcon = "material-symbols:home-rounded";
 
-// 过滤掉用于主按钮的链接
-const socialLinks = profileConfig.links.filter(
-	(item) => item.name !== "Bilibili",
-);
+const socialLinks = profileConfig.links;
 ---
 
 <div class="profile-card card-base p-4">
