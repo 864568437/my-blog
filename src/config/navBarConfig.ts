@@ -42,11 +42,37 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 			],
 		},
 
-		// 网站导航
+		// 网站
 		{
-			name: "网站导航",
+			name: "网站",
 			url: "/projects/",
 			icon: "material-symbols:public",
+			children: [
+				{
+					name: "我的主页",
+					url: "https://home.fqzlr.com/",
+					icon: "material-symbols:home",
+					external: true,
+				},
+				{
+					name: "我的笔记",
+					url: "https://bj.fqzlr.com/",
+					icon: "material-symbols:menu-book",
+					external: true,
+				},
+				{
+					name: "友链检测",
+					url: "https://check.fqzlr.com/",
+					icon: "material-symbols:link",
+					external: true,
+				},
+				// 网站导航
+				{
+					name: "网站导航",
+					url: "/projects/",
+					icon: "material-symbols:public",
+				},
+			],
 		},
 	];
 

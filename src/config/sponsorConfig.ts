@@ -19,11 +19,11 @@ export const sponsorConfig: SponsorConfig = {
 	// 赞助方式列表
 	methods: [
 		{
-			name: "爱发电",
-			icon: "simple-icons:afdian",
-			qrCode: "",
-			link: "https://ifdian.net/a/fqzlr",
-			description: "通过 爱发电 进行赞助",
+			name: "支付宝",
+			icon: "fa7-brands:alipay",
+			qrCode: "/assets/images/sponsor/alipay.png",
+			link: "",
+			description: "使用 支付宝 扫码赞助",
 			enabled: true,
 		},
 		{
@@ -35,11 +35,11 @@ export const sponsorConfig: SponsorConfig = {
 			enabled: true,
 		},
 		{
-			name: "支付宝",
-			icon: "fa7-brands:alipay",
-			qrCode: "/assets/images/sponsor/alipay.png",
-			link: "",
-			description: "使用 支付宝 扫码赞助",
+			name: "爱发电",
+			icon: "simple-icons:afdian",
+			qrCode: "",
+			link: "https://ifdian.net/a/fqzlr",
+			description: "使用 爱发电 进行赞助",
 			enabled: true,
 		},
 	],
