@@ -63,6 +63,7 @@
     "marked": "^16.4.2",
     "mdast-util-to-string": "^4.0.0",
     "node-html-parser": "^7.0.2",
+    "oddmisc": "^1.2.8",
     "overlayscrollbars": "^2.14.0",
     "pagefind": "^1.5.2",
     "photoswipe": "^5.4.4",

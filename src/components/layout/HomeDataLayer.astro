@@ -187,42 +187,42 @@ const skillItems = normalizeSkillItems({ items: skillsConfig.items });
 		const detail = layer.querySelector(".data-card[data-stat-kind='visits'] .data-card__detail");
 		const valueNodes = layer.querySelectorAll<HTMLElement>("[data-stat-value]");
 
-		const UMAMI_BASE = "https://umami.tsh520.cn";
-		const WEBSITE_ID = "cea54104-ebb9-4237-911d-67043d2dae74";
-
-		fetch(`${UMAMI_BASE}/api/auth/login`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ username: "fqzlr", password: "Tsh20447289" }),
-		})
-			.then((res) => {
-				if (!res.ok) throw new Error(`Login ${res.status}`);
-				return res.json();
-			})
-			.then((data) => {
-				if (!data.token) throw new Error("No token");
-				return fetch(`${UMAMI_BASE}/api/websites/${WEBSITE_ID}/stats?startAt=0&endAt=${Date.now()}`, {
-					headers: { Authorization: `Bearer ${data.token}` },
-				});
-			})
-			.then((res) => {
-				if (!res.ok) throw new Error(`Stats ${res.status}`);
-				return res.json();
-			})
-			.then((stats) => {
-				const uv = formatCompactNumber(stats.visitors ?? 0);
-				const pv = formatCompactNumber(stats.pageviews ?? 0);
-				if (detail) detail.textContent = `访客 ${uv} / 浏览 ${pv}`;
-				valueNodes.forEach((node) => {
-					const key = node.dataset.statValue;
-					if (key === "UV") node.textContent = uv;
-					if (key === "PV") node.textContent = pv;
-				});
-			})
-			.catch((err) => {
-				console.warn("[Umami] Stats fetch failed:", err.message);
-				if (detail) detail.textContent = "访客 -- / 浏览 --";
+		const render = (stats: { visitors: number; pageviews: number }) => {
+			const uv = formatCompactNumber(stats.visitors ?? 0);
+			const pv = formatCompactNumber(stats.pageviews ?? 0);
+			if (detail) detail.textContent = `访客 ${uv} / 浏览 ${pv}`;
+			valueNodes.forEach((node) => {
+				const key = node.dataset.statValue;
+				if (key === "UV") node.textContent = uv;
+				if (key === "PV") node.textContent = pv;
 			});
+		};
+
+		const fallback = () => {
+			console.warn("[Umami] Stats fetch failed, using fallback");
+			if (detail) detail.textContent = "访客 -- / 浏览 --";
+		};
+
+		const fetchStats = async () => {
+			try {
+				if (window.oddmisc?.getSiteStats) {
+					const stats = await window.oddmisc.getSiteStats();
+					render({ visitors: stats.visitors ?? 0, pageviews: stats.pageviews ?? 0 });
+				} else {
+					fallback();
+				}
+			} catch (err) {
+				console.warn("[Umami] Stats fetch failed:", err);
+				fallback();
+			}
+		};
+
+		if (window.oddmisc) {
+			fetchStats();
+		} else {
+			window.addEventListener("oddmisc-ready", () => fetchStats(), { once: true });
+			setTimeout(fetchStats, 3000); // fallback timeout
+		}
 	}
 
 	function initMetricCards() {

@@ -1,4 +1,5 @@
 import sitemap from "@astrojs/sitemap";
+import { oddmisc } from "oddmisc/astro";
 import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
@@ -49,6 +50,11 @@ export default defineConfig({
 	},
 
 	integrations: [
+		oddmisc({
+			umami: {
+				shareUrl: "https://umami.fqzlr.com/share/kHCJG2ZUL1r6q5Js",
+			},
+		}),
 		swup({
 			theme: false,
 			animationClass: "transition-swup-", // see https://swup.js.org/options/#animationselector
