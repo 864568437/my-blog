@@ -245,12 +245,15 @@ const textLine2 = `${i18n(I18nKey.siteStatsPageViewPrefix)}${i18n(I18nKey.siteSt
 		var textLine1 = document.getElementById('text-line-1');
 		var textLine2 = document.getElementById('text-line-2');
 
-		fetch(walineUrl + '/api/comment?type=count&url=/')
+		fetch(walineUrl + '/api/page?path=/')
 			.then(function(r) { return r.json(); })
 			.then(function(data) {
-				var count = typeof data === 'number' ? data : (data && data.data ? data.data : null);
-				if (count != null) {
-					var pv = Number(count).toLocaleString();
+				// Waline /api/page 返回 [{ path, views, time }] 或 { data: [{ path, views, time }] }
+				var arr = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+				var item = arr && arr.length > 0 ? arr[0] : null;
+				var views = item && item.views != null ? Number(item.views) : null;
+				if (views != null) {
+					var pv = views.toLocaleString();
 					if (textLine1) {
 						var prefix1 = textLine1.dataset.visitorPrefix || '您是造访本站的第 ';
 						var suffix1 = textLine1.dataset.visitorSuffix || ' 位旅人，很高兴与你相遇。';
@@ -260,7 +263,7 @@ const textLine2 = `${i18n(I18nKey.siteStatsPageViewPrefix)}${i18n(I18nKey.siteSt
 				if (textLine2) {
 					var prefix2 = textLine2.dataset.pageviewPrefix || '小破站访问量为 ';
 					var suffix2 = textLine2.dataset.pageviewSuffix || '';
-					textLine2.textContent = prefix2 + (count != null ? Number(count).toLocaleString() : '--') + suffix2;
+					textLine2.textContent = prefix2 + (views != null ? views.toLocaleString() : '--') + suffix2;
 				}
 			})
 			.catch(function() {

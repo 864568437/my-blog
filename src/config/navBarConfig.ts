@@ -68,7 +68,7 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				},
 				{
 					name: "网站统计",
-					url: "https://umami.fqzlr.com",
+					url: "https://umami.fqzlr.com/share/kHCJG2ZUL1r6q5Js",
 					icon: "material-symbols:monitoring",
 					external: true,
 				},
