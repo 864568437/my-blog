@@ -692,6 +692,30 @@ export const friendsConfig: FriendLink[] = [
 	  "weight": 10,
 	  "enabled": true
 	},
+	{
+	  "title": "拾玖的博客",
+	  "imgurl": "https://shijiucode.cn/avatar.jpg",
+	  "desc": "诗酒趁年华",
+	  "siteurl": "https://shijiucode.cn",
+	  "linkpage": "https://shijiucode.cn/friends",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "花海博客",
+	  "imgurl": "https://hhwzk.cc.cd/_astro/avatar.DSL-xax2_Z1E5RPs.webp",
+	  "desc": "记录生活，分享美好。",
+	  "siteurl": "https://hhwzk.cc.cd",
+	  "linkpage": "https://hhwzk.cc.cd/friends/",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
 	
 ];
 
