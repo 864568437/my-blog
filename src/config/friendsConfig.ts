@@ -716,6 +716,30 @@ export const friendsConfig: FriendLink[] = [
 	  "weight": 10,
 	  "enabled": true
 	},
+	{
+	  "title": "Amiya's书桌",
+	  "imgurl": "https://blog.sayori.org/assets/profile/avatar-sayori-optimized.jpg",
+	  "desc": "Amiya_desi的博客站，会记录一个真实的想要分享的人，欢迎！",
+	  "siteurl": "https://blog.sayori.org/",
+	  "linkpage": "https://blog.sayori.org/friends/",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "YuJing的记忆终端",
+	  "imgurl": "https://www.yujingblog.top/assets/home/avatar.webp",
+	  "desc": "不怪天气不好，是我心事太多。",
+	  "siteurl": "https://www.yujingblog.top/",
+	  "linkpage": "https://www.yujingblog.top/friends/",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
 	
 ];
 
