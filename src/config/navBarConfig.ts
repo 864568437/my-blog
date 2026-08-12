@@ -78,6 +78,24 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 					url: "/projects/",
 					icon: "material-symbols:public",
 				},
+				{
+					name: "邮箱",
+					url: "https://fqzlr.edu.kg/inbox",
+					icon: "material-symbols:mail",
+					external: true,
+				},
+				{
+					name: "临时邮箱",
+					url: "https://email.fqzlr.com/",
+					icon: "material-symbols:alternate-email",
+					external: true,
+				},
+				{
+					name: "排行工具",
+					url: "https://ranktool.fqzlr.com",
+					icon: "material-symbols:leaderboard",
+					external: true,
+				},
 			],
 		},
 	];

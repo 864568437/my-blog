@@ -707,7 +707,7 @@ export const friendsConfig: FriendLink[] = [
 	{
 	  "title": "花海博客",
 	  "imgurl": "https://hhwzk.cc.cd/_astro/avatar.DSL-xax2_Z1E5RPs.webp",
-	  "desc": "记录生活，分享美好。",
+	  "desc": "个人技术博客",
 	  "siteurl": "https://hhwzk.cc.cd",
 	  "linkpage": "https://hhwzk.cc.cd/friends/",
 	  "tags": [
@@ -740,7 +740,29 @@ export const friendsConfig: FriendLink[] = [
 	  "weight": 10,
 	  "enabled": true
 	},
-	
+	{
+	  "title": "Brandon's Blog",
+	  "imgurl": "https://cdn.oopss.top/icon.jpg",
+	  "desc": "Brandon 的个人博客，分享技术与生活",
+	  "siteurl": "https://blog.oopss.top",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "星宇安全实验室",
+	  "imgurl": "https://bk.zhaozhiqiang.pw/wp-content/uploads/2026/07/1784847314130_148x148.png",
+	  "desc": "星宇安全实验室，专注网络安全技术分享，记录团队实战经历、安全研究与编程成长笔记，致力于分享网安学习干货。",
+	  "siteurl": "https://bk.zhaozhiqiang.pw/",
+	  "linkpage": "https://bk.zhaozhiqiang.pw/friendship-links",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
 ];
 
 // 获取启用的友链并进行排序
