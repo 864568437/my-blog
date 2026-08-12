@@ -130,6 +130,8 @@
 	.guestbook-modal-overlay {
 		backdrop-filter: blur(8px) !important;
 		-webkit-backdrop-filter: blur(8px) !important;
+		/* 强制 GPU 合成层，修复 Vercel 生产环境 backdrop-filter 失效问题 */
+		transform: translateZ(0);
 	}
 
 	.guestbook-header-icon {

@@ -92,6 +92,8 @@
 	background: oklch(0 0 0 / 0.3);
 	backdrop-filter: blur(8px);
 	-webkit-backdrop-filter: blur(8px);
+	/* 强制 GPU 合成层，修复 Vercel 生产环境 backdrop-filter 失效问题 */
+	transform: translateZ(0);
 	display: flex;
 	align-items: center;
 	justify-content: center;
