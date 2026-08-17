@@ -768,7 +768,7 @@ export const friendsConfig: FriendLink[] = [
 	  "imgurl": "https://rainzt.cn/zzty.png",
 	  "desc": "物物而不物于物，念念而不念于念",
 	  "siteurl": "https://rainzt.cn/",
-	  "linkpage": "https://rainzt.cn/",
+	  "linkpage": "https://rainzt.cn/friends/",
 	  "tags": [
 	    "Blog"
 	  ],
