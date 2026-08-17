@@ -787,6 +787,20 @@ export const friendsConfig: FriendLink[] = [
 	  "weight": 10,
 	  "enabled": true
 	},
+	{
+		"title": "星空驿站 Starlight Station",
+		"imgurl": "https://baiyangmu.xyz/static/favicon-96x96.png",
+		"desc": "一座漂浮在深空中的小小驿站",
+		"siteurl": "https://baiyangmu.xyz",
+		"linkpage": "https://baiyangmu.xyz/links",
+		"tags": [
+			"Blog"
+		],
+		"weight": 10,
+		"enabled": true
+	},
+
+	
 ];
 
 // 获取启用的友链并进行排序
