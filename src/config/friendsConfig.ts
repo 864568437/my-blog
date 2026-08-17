@@ -763,6 +763,30 @@ export const friendsConfig: FriendLink[] = [
 	  "weight": 10,
 	  "enabled": true
 	},
+	{
+	  "title": "Rain",
+	  "imgurl": "https://rainzt.cn/zzty.png",
+	  "desc": "物物而不物于物，念念而不念于念",
+	  "siteurl": "https://rainzt.cn/",
+	  "linkpage": "https://rainzt.cn/",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
+	{
+	  "title": "临渊羡鱼",
+	  "imgurl": "https://imgbed.yufish.cn/file/1786706585612_avatar.png",
+	  "desc": "久有羡鱼意，不甘空望川. 躬身耕岁月，步步赴清澜",
+	  "siteurl": "https://x1anyu.cn/",
+	  "linkpage": "https://x1anyu.cn/friends/",
+	  "tags": [
+	    "Blog"
+	  ],
+	  "weight": 10,
+	  "enabled": true
+	},
 ];
 
 // 获取启用的友链并进行排序
