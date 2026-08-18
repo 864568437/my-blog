@@ -5,7 +5,7 @@ import { parseFriendsConfigFromTS } from "@/utils/parseFriendsConfig";
  * 友链数据 JSON 端点
  * 供 check-flink 仓库读取，自动维护友链列表
  *
- * 访问地址：https://fqzlr.com/friends.json
+ * 访问地址：https://blog.fqzlr.top/friends.json
  * 输出格式：与 check-flink 兼容的标准 JSON
  *
  * 数据源策略：

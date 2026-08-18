@@ -13,7 +13,7 @@ export const friendsPageConfig: FriendsPageConfig = {
 	siteInfo: {
 		name: "fqzlr",
 		desc: "躬身入局，心为主理，行有尺度，自持本心.",
-		url: "https://fqzlr.com/",
+		url: "https://blog.fqzlr.top/",
 		avatar: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
 		email: "",
 	},
@@ -48,8 +48,8 @@ export const friendsConfig: FriendLink[] = [
 		  "title": "番茄主理人",
 		  "imgurl": "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
 		  "desc": "躬身入局，心为主理，行有尺度，自持本心.",
-		  "siteurl": "https://fqzlr.com/",
-		  "linkpage": "https://fqzlr.com/friends/",
+		  "siteurl": "https://blog.fqzlr.top/",
+		  "linkpage": "https://blog.fqzlr.top/friends/",
 		  "tags": [
 		    "Blog"
 		  ],

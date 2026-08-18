@@ -141,8 +141,8 @@ export const friendsPageConfig: FriendsPageConfig = {
 	siteInfo: {
 		name: "fqzlr",
 		desc: "躬身入局，心为主理，行有尺度，自持本心.",
-		url: "https://fqzlr.com/",
-		avatar: "https://fqzlr.com/avatar.png",
+		url: "https://blog.fqzlr.top/",
+		avatar: "https://blog.fqzlr.top/avatar.png",
 		email: "",
 	},
 	notes: [

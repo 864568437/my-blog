@@ -42,61 +42,11 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 			],
 		},
 
-		// 网站
+		// 网站导航
 		{
-			name: "网站",
+			name: "网站导航",
 			url: "/projects/",
 			icon: "material-symbols:public",
-			children: [
-				{
-					name: "我的主页",
-					url: "https://home.fqzlr.com/",
-					icon: "material-symbols:home",
-					external: true,
-				},
-				{
-					name: "我的笔记",
-					url: "https://bj.fqzlr.com/",
-					icon: "material-symbols:menu-book",
-					external: true,
-				},
-				{
-					name: "友链检测",
-					url: "https://check.fqzlr.com/",
-					icon: "material-symbols:link",
-					external: true,
-				},
-				{
-					name: "网站统计",
-					url: "https://umami.fqzlr.com/share/kHCJG2ZUL1r6q5Js",
-					icon: "material-symbols:monitoring",
-					external: true,
-				},
-				// 网站导航
-				{
-					name: "网站导航",
-					url: "/projects/",
-					icon: "material-symbols:public",
-				},
-				{
-					name: "邮箱",
-					url: "https://fqzlr.edu.kg/inbox",
-					icon: "material-symbols:mail",
-					external: true,
-				},
-				{
-					name: "临时邮箱",
-					url: "https://email.fqzlr.com/",
-					icon: "material-symbols:alternate-email",
-					external: true,
-				},
-				{
-					name: "排行工具",
-					url: "https://ranktool.fqzlr.com",
-					icon: "material-symbols:leaderboard",
-					external: true,
-				},
-			],
 		},
 	];
 

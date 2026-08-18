@@ -13,7 +13,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "Fqzlr",
 
 	// 站点 URL
-	site_url: "https://fqzlr.com/",
+	site_url: "https://blog.fqzlr.top/",
 
 	// 站点描述
 	description:
