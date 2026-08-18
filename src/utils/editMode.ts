@@ -151,6 +151,15 @@ async function signJwt(appId: string, privateKeyPem: string): Promise<string> {
 	return `${signingInput}.${b64urlEncode(signature)}`;
 }
 
+/** 安全解析 JSON：先检查 resp.ok，失败时读取 text 错误信息后抛出 */
+async function safeJson<T>(resp: Response): Promise<T> {
+	if (!resp.ok) {
+		const text = await resp.text().catch(() => "");
+		throw new Error(`请求失败 (${resp.status}): ${text}`);
+	}
+	return resp.json();
+}
+
 async function rawProxy(
 	method: string,
 	apiPath: string,

@@ -27,7 +27,7 @@ let meteorMesh: THREE.InstancedMesh;
 let particleMesh: THREE.InstancedMesh;
 let terrainMaterial: THREE.ShaderMaterial;
 let animationId: number;
-let clock: THREE.Clock;
+let clock: THREE.Timer;
 let onResize: (() => void) | undefined;
 const backgroundTargetColor = new THREE.Color();
 
@@ -582,7 +582,7 @@ function init() {
 	particleMesh.frustumCulled = false;
 	scene.add(particleMesh);
 
-	clock = new THREE.Clock();
+	clock = new THREE.Timer();
 
 	audioAnalyzer.setEvents({
 		onRipple: addRipple,

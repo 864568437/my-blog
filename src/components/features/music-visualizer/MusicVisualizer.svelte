@@ -7,6 +7,8 @@ import ThreeScene from "./ThreeScene.svelte";
 import VisualizerControls from "./VisualizerControls.svelte";
 
 const audioAnalyzer = new AudioAnalyzer();
+// 使用 $state(false) 确保 SSR 与客户端初始状态一致，避免 hydration 不匹配
+// ThreeScene 的 onSceneReady 在其 onMount 中触发，此时 hydration 已完成
 let sceneReady = $state(false);
 let backgroundColor = $state(
 	musicPlayerConfig.visualizer?.background?.dark ?? "#0a0a15",

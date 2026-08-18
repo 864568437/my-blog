@@ -97,8 +97,9 @@ const heroBioText = Array.isArray(profileConfig.bio)
 	data-avatar-off={avatarOffUrl}
 	data-work-hours={JSON.stringify(workHours)}
 >
-	<img class="home-hero__video hidden md:block" src="/assets/images/home/home.webp" alt="" />
-	<img class="home-hero__video block md:hidden" src="/assets/images/home/18188682411036032.webp" alt="" />
+	<!-- LCP 优化：添加 fetchpriority="high" 优先加载首屏大图 -->
+	<img class="home-hero__video hidden md:block" src="/assets/images/home/home.webp" alt="" fetchpriority="high" />
+	<img class="home-hero__video block md:hidden" src="/assets/images/home/18188682411036032.webp" alt="" fetchpriority="high" />
 
 	<div class="home-hero__canvas-container" id="main-canvas">
 		<div class="home-hero__bracket home-hero__bracket--tl"></div>

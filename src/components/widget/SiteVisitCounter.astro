@@ -7,7 +7,7 @@ import { i18n } from "@/i18n/translation";
 <WidgetLayout name={i18n(I18nKey.pageViews) || "访问统计"} id="site-visit-counter">
   <div class="flex flex-col items-center py-3">
     <div class="flex items-baseline gap-1">
-      <span class="visit-count" id="site-visit-total" data-server="https://co.tsh520.cn">--</span>
+      <span class="visit-count" id="site-visit-total">--</span>
       <span class="visit-label">次</span>
     </div>
     <p class="visit-desc">站点总访问量</p>
@@ -41,20 +41,50 @@ import { i18n } from "@/i18n/translation";
     var countEl = document.getElementById('site-visit-total');
     if (!countEl) return;
 
-    var server = countEl.dataset.server || 'https://co.tsh520.cn';
+    var walineURL = 'https://waline.fqzlr.com';
 
     // 主要路径列表
     var paths = ['/', '/posts/', '/guestbook/', '/moments/', '/gallery/', '/bangumi/', '/projects/', '/friends/', '/changelog/'];
 
+    /** 带重试和超时的 fetch 封装 */
+    function fetchWithRetry(url, retries, timeout) {
+      retries = retries || 2;
+      timeout = timeout || 5000;
+      return new Promise(function(resolve, reject) {
+        var attempt = 0;
+        function doFetch() {
+          var controller = new AbortController();
+          var timer = setTimeout(function() { controller.abort(); }, timeout);
+          fetch(url, { signal: controller.signal })
+            .then(function(res) {
+              clearTimeout(timer);
+              resolve(res);
+            })
+            .catch(function(err) {
+              clearTimeout(timer);
+              attempt++;
+              if (attempt <= retries) {
+                setTimeout(doFetch, 500 * attempt);
+              } else {
+                reject(err);
+              }
+            });
+        }
+        doFetch();
+      });
+    }
+
     function fetchTotal() {
       var promises = paths.map(function(path) {
-        return fetch(server + '/api/article?path=' + encodeURIComponent(path))
-          .then(function(res) { return res.json(); })
+        return fetchWithRetry(walineURL + '/api/page?path=' + encodeURIComponent(path))
+          .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
           .then(function(data) {
-            if (data.data && Array.isArray(data.data) && data.data.length > 0) {
-              return Number(data.data[0].time) || 0;
-            }
-            return 0;
+            var arr = Array.isArray(data) ? data : (data && data.data ? data.data : []);
+            var item = arr && arr.length > 0 ? arr[0] : null;
+            return item && item.views != null ? Number(item.views) : 0;
           })
           .catch(function() { return 0; });
       });
