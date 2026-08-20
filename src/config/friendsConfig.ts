@@ -799,6 +799,42 @@ export const friendsConfig: FriendLink[] = [
 		"weight": 10,
 		"enabled": true
 	},
+	{
+        "title": "没吃饱的天镜镜",
+        "imgurl": "https://blogr2.8765777.xyz/assets/my/7590A261E0E39A642ABF4873E89EAFF9.jpg",
+        "desc": "诺贝尔奖关注者，文学奖读者",
+        "siteurl": "https://blog.8765777.xyz",
+        "linkpage": "https://blog.8765777.xyz/friends",
+        "tags": [
+            "Blog"
+        ],
+        "weight": 10,
+        "enabled": true
+    },
+    {
+        "title": "闪程 Blog",
+        "imgurl": "https://rustfsapi.rainyunrgs.cn/blog/avatar.jpg",
+        "desc": "分享技术与生活的小天地~.",
+        "siteurl": "https://blog.rainyunrgs.cn/",
+        "linkpage": "",
+        "tags": [
+            "Blog"
+        ],
+        "weight": 10,
+        "enabled": true
+    },
+    {
+        "title": "左沐の手册",
+        "imgurl": "https://tu.mstzuomu.space/file/头像/1786942479049_azumahead.jpg",
+        "desc": "热爱是拯救无趣人生的唯一途径",
+        "siteurl": "https://azuma.mstzuomu.space",
+        "linkpage": "https://azuma.mstzuomu.space/friends/",
+        "tags": [
+            "Blog"
+        ],
+        "weight": 10,
+        "enabled": true
+    },
 
 	
 ];
