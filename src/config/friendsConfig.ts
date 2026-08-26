@@ -835,6 +835,42 @@ export const friendsConfig: FriendLink[] = [
         "weight": 10,
         "enabled": true
     },
+    {
+        "title": "毛",
+        "imgurl": "https://img.huchao.vip/file/avatar/1782805912195_7cf1163ce5b4c2783fc89f56e11124c1.jpg",
+        "desc": "如果有不可能，那就去创造！",
+        "siteurl": "https://blog.huchao.vip/",
+        "linkpage": "https://blog.huchao.vip/friends/",
+        "tags": [
+            "Blog"
+        ],
+        "weight": 10,
+        "enabled": true
+    },
+    {
+        "title": "Xixmu",
+        "imgurl": "https://xixmu.top/_astro/head_ima.rsW3s28l_1KtIxl.avif",
+        "desc": "在记忆干枯前描绘。",
+        "siteurl": "https://xixmu.top",
+        "linkpage": "https://xixmu.top/friends/",
+        "tags": [
+            "Blog"
+        ],
+        "weight": 10,
+        "enabled": true
+    },
+    {
+        "title": "Snozze daily life",
+        "imgurl": "https://firefly-08r.pages.dev/assets/images/avatar.avif",
+        "desc": "记录生活，分享热爱 ✨",
+        "siteurl": "https://firefly-08r.pages.dev",
+        "linkpage": "https://firefly-08r.pages.dev/friends",
+        "tags": [
+            "Blog"
+        ],
+        "weight": 10,
+        "enabled": true
+    }
 
 	
 ];

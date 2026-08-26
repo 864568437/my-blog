@@ -19,6 +19,9 @@ export const siteConfig: SiteConfig = {
 	description:
 		"fqzlr的个人技术博客，专注NAS分享、AI实践、学习笔记与技术总结，与个人成长分享。",
 
+	// 项目仓库地址（时间线页面 commit 链接使用）
+	repoUrl: "https://github.com/fqzlr/fqzlr-bk",
+
 	// 站点关键词
 	keywords: [
 		"fqzlr",
@@ -188,7 +191,7 @@ export const siteConfig: SiteConfig = {
 		// 音乐页面开关
 		musicPage: true,
 		// 更新日志页面开关
-		changelog: true,
+		timeline: true,
 		// 日历页面开关
 		calendar: true,
 	},

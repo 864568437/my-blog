@@ -16,6 +16,9 @@ export type SiteConfig = {
 
 	lang: "en" | "zh_CN" | "zh_TW" | "ja" | "ru";
 
+	// 项目仓库地址，用于时间线页面生成 commit 链接
+	repoUrl?: string;
+
 	themeColor: {
 		hue: number;
 		fixed: boolean;
@@ -123,7 +126,7 @@ export type SiteConfig = {
 		anime: boolean; // 追番页面开关
 		gallery: boolean; // 相册页面开关
 		musicPage: boolean; // 音乐页面开关
-		changelog: boolean; // 更新日志页面开关
+		timeline: boolean; // 更新日志页面开关
 		calendar: boolean; // 日历页面开关
 	};
 
@@ -239,7 +242,7 @@ export enum LinkPreset {
 	Guestbook = 5,
 	Bangumi = 6,
 	MusicPage = 9,
-	Changelog = 10,
+	Timeline = 10,
 	Posts = 11,
 	Calendar = 12,
 	Fhome = 13,

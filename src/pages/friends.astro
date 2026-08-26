@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿---
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿---
 import { getEntry, render } from "astro:content";
 import Comment from "@components/comment/index.astro";
 import Markdown from "@components/common/Markdown.astro";
@@ -69,13 +69,6 @@ const siteInfoText = _si
         variant="stacked"
         breadcrumbs={[{ name: title, icon: "material-symbols:group" }]}
       >
-        {
-          description && (
-            <p class="friend-header-desc text-base text-neutral-600 dark:text-neutral-400 leading-relaxed w-full">
-              {description}
-            </p>
-          )
-        }
         {
           friendsPageConfig.applyLink && (
             <div class="friend-header-toolbar w-full flex justify-end">
@@ -634,6 +627,83 @@ const siteInfoText = _si
     })();
   </script>
 
+  <script>
+    /* ========== 悬停卡片浮出主页截图预览（跟随鼠标） ==========
+     * 数据源：Layout.astro 的 renderLinkStatus() 从 check-flink result.json 注入的
+     *         data-siteshot 属性（与卡片内嵌截图共用同一数据流，不新增依赖）。
+     * 仅精确指针设备启用；预览层 pointer-events:none 不阻塞卡片交互。
+     */
+    (function initFriendImagePreview() {
+      if (window.__friendImagePreviewReady) return;
+      window.__friendImagePreviewReady = true;
+
+      if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+      var preview = document.createElement("div");
+      preview.className = "friend-image-preview";
+      preview.setAttribute("aria-hidden", "true");
+      var previewImg = document.createElement("img");
+      previewImg.alt = "";
+      previewImg.decoding = "async";
+      preview.appendChild(previewImg);
+      document.body.appendChild(preview);
+
+      var GAP = 16;
+
+      function place(x, y) {
+        var rect = preview.getBoundingClientRect();
+        var vw = window.innerWidth;
+        var vh = window.innerHeight;
+        // 优先显示在鼠标右下方，空间不足时翻转到左侧/收进视口
+        var left = x + GAP;
+        var top = y + GAP;
+        if (left + rect.width > vw - 8) left = x - rect.width - GAP;
+        if (top + rect.height > vh - 8) top = Math.max(8, vh - rect.height - 8);
+        preview.style.left = left + "px";
+        preview.style.top = top + "px";
+      }
+
+      function show(card, x, y) {
+        var src = card.dataset.siteshot;
+        if (!src) return;
+        if (previewImg.getAttribute("src") !== src) previewImg.src = src;
+        preview.classList.add("is-visible");
+        place(x, y);
+      }
+
+      function hide() {
+        preview.classList.remove("is-visible");
+      }
+
+      document.addEventListener("mouseover", function (e) {
+        var target = e.target;
+        var card = target && target.closest ? target.closest("[data-siteshot]") : null;
+        if (card && card instanceof HTMLElement) {
+          show(card, e.clientX, e.clientY);
+        }
+      });
+
+      document.addEventListener("mouseout", function (e) {
+        var target = e.target;
+        var card = target && target.closest ? target.closest("[data-siteshot]") : null;
+        if (!card) return;
+        var to = e.relatedTarget;
+        // 卡片内部移动不隐藏
+        if (to && to.closest && to.closest("[data-siteshot]") === card) return;
+        hide();
+      });
+
+      document.addEventListener("mousemove", function (e) {
+        if (!preview.classList.contains("is-visible")) return;
+        place(e.clientX, e.clientY);
+      });
+
+      // 页面切换后清除残留预览
+      document.addEventListener("astro:page-load", hide);
+      document.addEventListener("astro:after-swap", hide);
+    })();
+  </script>
+
   <style>
     /* ============ 友链申请指南区域 ============ */
     .flink-guide-dot {
@@ -831,6 +901,45 @@ const siteInfoText = _si
       }
       .page-header-toolbar-slot {
         width: 100%;
+      }
+    }
+
+    /* ============ 悬停主页截图预览（body 级浮层，需 :global） ============ */
+    :global(.friend-image-preview) {
+      position: fixed;
+      z-index: 60;
+      max-width: min(28rem, 80vw);
+      max-height: min(24rem, 70vh);
+      padding: 0.5rem;
+      border: 2px solid var(--deep-text);
+      border-radius: var(--radius-large, 0.75rem);
+      background: var(--page-bg);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.92);
+      transition:
+        opacity 180ms ease,
+        transform 180ms ease;
+      /* 位置由脚本跟随鼠标设置 */
+    }
+
+    :global(.friend-image-preview.is-visible) {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    :global(.friend-image-preview img) {
+      display: block;
+      max-width: 100%;
+      max-height: calc(min(24rem, 70vh) - 1rem);
+      object-fit: contain;
+      border-radius: calc(var(--radius-large, 0.75rem) - 6px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :global(.friend-image-preview) {
+        transition: none;
       }
     }
   </style>

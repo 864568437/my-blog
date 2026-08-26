@@ -53,6 +53,11 @@
 @import './components/page-loader.css';
 @import './components/privacy-modal.css';
 @import './components/guestbook-chat.css';
+@import './components/about-chat-bubble.css';
+@import './components/about-profile-card.css';
+@import './components/about-social-links.css';
+@import './components/about-tech-stack.css';
+@import './components/about-timeline.css';
 
 /* --- 功能样式 --- */
 @import './features/content.css';

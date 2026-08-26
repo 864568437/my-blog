@@ -2,7 +2,7 @@
 import { getCollection } from "astro:content";
 import { announcementConfig, profileConfig } from "@/config";
 import { getEnabledMoments } from "@/config/momentsConfig";
-import { getEnabledChangelog } from "@/config/changelogConfig";
+import { getRecentCommits } from "@/utils/git-log";
 import { getPostUrlBySlug } from "@/utils/url-utils";
 
 // 收集统计
@@ -60,10 +60,8 @@ try {
 } catch {}
 
 try {
-	const changelog = getEnabledChangelog();
-	const count = changelog.filter(
-		(c) => new Date(c.date) >= threeDaysAgo,
-	).length;
+	// 最近三天内的 git 提交作为开发日志
+	const count = getRecentCommits(3).length;
 	if (count > 0) updateParts.push(`${count} 条日志`);
 } catch {}
 

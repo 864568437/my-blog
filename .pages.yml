@@ -677,13 +677,6 @@ content:
         format: code
         description: 说说页面封面、头像、名称、简介等配置
 
-      - name: changelog-config
-        label: 📝 更新日志
-        type: file
-        path: src/config/changelogConfig.ts
-        format: code
-        description: 网站更新日志记录
-
       - name: sponsor-config
         label: 💰 赞助配置
         type: file

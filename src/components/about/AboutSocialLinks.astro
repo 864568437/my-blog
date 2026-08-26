@@ -1,0 +1,64 @@
+---
+import Icon from "@/components/common/Icon.astro";
+
+const socialLinks = [
+	{
+		platform: "GitHub",
+		handle: "fqzlr",
+		note: "代码与项目",
+		href: "https://github.com/fqzlr",
+		icon: "simple-icons:github",
+		brand: "github",
+	},
+	{
+		platform: "B站",
+		handle: "番茄煮理人",
+		note: "关注一下，谢谢喵～",
+		href: "https://space.bilibili.com/2017273493",
+		icon: "simple-icons:bilibili",
+		brand: "bilibili",
+	},
+	{
+		platform: "QQ群",
+		handle: "加入群聊",
+		note: "吹水摸鱼都可以喵～",
+		href: "https://qm.qq.com/q/wrmF4FI9pu",
+		icon: "simple-icons:qq",
+		brand: "qq",
+	},
+	{
+		platform: "Email",
+		handle: "fqzlr@outlook.com",
+		note: "商务合作 / 交流都行喵～",
+		href: "mailto:fqzlr@outlook.com",
+		icon: "material-symbols:mail-outline",
+		brand: "email",
+	},
+];
+---
+
+<section class="about-social-links" aria-label="站长社交账号">
+	{socialLinks.map((link) => (
+		<a
+			class={`about-social-links__item about-social-links__item--${link.brand} no-styling`}
+			href={link.href}
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label={`${link.platform}：${link.handle}`}
+		>
+			<span class="about-social-links__icon" aria-hidden="true">
+				<Icon name={link.icon} />
+			</span>
+			<span class="about-social-links__content">
+				<span class="about-social-links__platform">{link.platform}</span>
+				<span class="about-social-links__handle">{link.handle}</span>
+				<span class="about-social-links__note">{link.note}</span>
+			</span>
+			<Icon
+				name="material-symbols:arrow-outward-rounded"
+				class="about-social-links__arrow"
+				aria-hidden="true"
+			/>
+		</a>
+	))}
+</section>

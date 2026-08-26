@@ -5,7 +5,7 @@
  */
 import { getCollection } from "astro:content";
 import { getEnabledMoments } from "@/config/momentsConfig";
-import { getEnabledChangelog } from "@/config/changelogConfig";
+import { getGitLog } from "@/utils/git-log";
 import { getPostUrlBySlug } from "@/utils/url-utils";
 
 interface RawItem {
@@ -97,13 +97,13 @@ try {
 	}
 } catch {}
 try {
-	const changelog = getEnabledChangelog();
-	for (const c of changelog)
+	// 最近 git 提交作为开发日志
+	for (const c of getGitLog(30))
 		allItems.push({
 			type: "changelog",
-			title: c.description,
+			title: c.subject,
 			date: new Date(c.date),
-			url: "/changelog/",
+			url: "/timeline/",
 		});
 } catch {}
 

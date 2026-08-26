@@ -109,8 +109,8 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 			icon: "material-symbols:movie",
 		});
 	}
-	if (siteConfig.pages.changelog) {
-		recordChildren.push(LinkPreset.Changelog);
+	if (siteConfig.pages.timeline) {
+		recordChildren.push(LinkPreset.Timeline);
 	}
 	if (siteConfig.pages.calendar) {
 		recordChildren.push(LinkPreset.Calendar);

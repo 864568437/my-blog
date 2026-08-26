@@ -12,11 +12,14 @@ let {
 	pageKey = "about",
 	pageName = "页面",
 	initialContent = "",
+	hideDisplay = false,
 }: {
 	filePath: string;
 	pageKey?: string;
 	pageName?: string;
 	initialContent?: string;
+	/** 页面内容由服务端 MDX 渲染（组件化内容），编辑器仅负责编辑模式下的文本编辑与预览 */
+	hideDisplay?: boolean;
 } = $props();
 
 let editMode = $state(false);
@@ -171,6 +174,16 @@ const renderedHtml = $derived.by(() => {
 		return content;
 	}
 });
+
+/* hideDisplay 模式：通知页面切换服务端 MDX 渲染与编辑器（避免双份内容同时显示） */
+$effect(() => {
+	if (!hideDisplay) return;
+	window.dispatchEvent(
+		new CustomEvent("edit:displayModeChange", {
+			detail: { pageKey, editing: editMode },
+		}),
+	);
+});
 </script>
 
 
@@ -244,9 +257,11 @@ const renderedHtml = $derived.by(() => {
 		</div>
 	</div>
 {:else}
-	<div class="md-content-display">
-		{@html renderedHtml}
-	</div>
+	{#if !hideDisplay}
+		<div class="md-content-display">
+			{@html renderedHtml}
+		</div>
+	{/if}
 {/if}
 
 <style>

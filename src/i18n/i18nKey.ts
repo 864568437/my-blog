@@ -1,14 +1,8 @@
 enum I18nKey {
 	home = "home",
-	changelog = "changelog",
-	changelogTitle = "changelogTitle",
-	changelogSubtitle = "changelogSubtitle",
-	changelogAll = "changelogAll",
-	changelogFeature = "changelogFeature",
-	changelogImprovement = "changelogImprovement",
-	changelogFix = "changelogFix",
-	changelogRemoval = "changelogRemoval",
-	changelogNoData = "changelogNoData",
+	timeline = "timeline",
+	timelineTitle = "timelineTitle",
+	timelineSubtitle = "timelineSubtitle",
 
 	categories = "categories",
 	categoryList = "categoryList",

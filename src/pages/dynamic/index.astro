@@ -182,17 +182,19 @@ const showCover = dynamicConfig.showCover !== false;
 		{/* 单条动态的 DOM 模板：DynamicFeed 通过 [data-dynamic-item-template]
 		    获取并 cloneNode(true) 后填充数据。建议保持模板节点结构稳定。 */}
 		<DynamicItemTemplate />
+
+		{/* Waline CSS（评论组件样式）+ 注入 Waline 配置到全局。
+		    必须放在 #swup-container（MainGridLayout 内部）中，否则 swup 导航到
+		    /dynamic/ 时脚本不会重新执行，window.__WALINE_CONFIG__ 丢失，
+		    导致点击评论显示「评论系统未配置」。 */}
+		{showInlineComments && (
+			<link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
+		)}
+		{walineConfig && (
+			<script define:vars={{ walineConfig }} is:inline>
+				window.__WALINE_CONFIG__ = walineConfig;
+			</script>
+		)}
 	</section>
 </MainGridLayout>
 
-{/* Waline CSS（评论组件样式） */}
-{showInlineComments && (
-	<link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
-)}
-
-{/* 注入 Waline 配置到全局，供 dynamic-inline-comments 自定义元素读取 */}
-{walineConfig && (
-	<script define:vars={{ walineConfig }} is:inline>
-		window.__WALINE_CONFIG__ = walineConfig;
-	</script>
-)}

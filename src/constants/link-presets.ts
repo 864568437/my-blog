@@ -43,9 +43,9 @@ export const LinkPresets: { [key in LinkPreset]: NavBarLink } = {
 		url: "/music/",
 		icon: "material-symbols:music-note",
 	},
-	[LinkPreset.Changelog]: {
-		name: i18n(I18nKey.changelog),
-		url: "/changelog/",
+	[LinkPreset.Timeline]: {
+		name: i18n(I18nKey.timeline),
+		url: "/timeline/",
 		icon: "material-symbols:history",
 	},
 	[LinkPreset.Posts]: {

@@ -1,0 +1,547 @@
+---
+/**
+ * Timeline — 博客日志：构建期读取框架仓库 git log 按月渲染时间线。
+ * 设计风格对齐 /archive/ 页面（MainGridLayout + PageHeader + 极简虚线时间轴）。
+ * CI（Vercel）上需要完整历史：scripts/ensure-git-history.mjs 在构建前加深克隆。
+ */
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+import PageHeader from "@/components/common/PageHeader.astro";
+import TimelineGraph from "@/components/controls/TimelineGraph.astro";
+import { siteConfig } from "@/config";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import { commitType, getGitLog, type GitCommit } from "@/utils/git-log";
+
+if (!siteConfig.pages.timeline) {
+	return Astro.redirect("/404/");
+}
+
+const commits = getGitLog(300);
+
+// 按月分组（YYYY-MM）
+const months = new Map<string, GitCommit[]>();
+for (const c of commits) {
+	const key = c.date.slice(0, 7);
+	if (!months.has(key)) months.set(key, []);
+	months.get(key)!.push(c);
+}
+
+const REPO_URL = siteConfig.repoUrl ?? "";
+
+const title = i18n(I18nKey.timelineTitle);
+const subtitle = i18n(I18nKey.timelineSubtitle);
+const monthsArr = [...months.entries()];
+---
+
+<MainGridLayout title={title} description={subtitle}>
+	<div class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32">
+		<div class="card-base z-10 px-4 py-6 md:px-9 relative w-full">
+			<div class="mb-8">
+				<PageHeader
+					title={title}
+					eyebrow="Timeline"
+					variant="stacked"
+					breadcrumbs={[{ name: title, icon: "material-symbols:history" }]}
+				>
+					<div class="tl-mode" data-tl-mode>
+						<button
+							type="button"
+							class="tl-cta"
+							data-tl-cta
+							aria-pressed="false"
+							aria-label="切换到图形显示"
+							title="切换显示模式"
+						>
+							<span class="tl-cta__label" data-tl-cta-label>时间线</span>
+							<svg class="tl-cta__arrow" viewBox="0 0 24 24" aria-hidden="true">
+								<path d="M4 12h15M13 5l7 7-7 7"></path>
+							</svg>
+						</button>
+					</div>
+				</PageHeader>
+			</div>
+
+			<div class="tl-view" data-tl-view="timeline">
+				<p class="tl-subtitle">博客开发日志 · 共 {commits.length} 次提交</p>
+
+				{commits.length === 0 && (
+					<p class="tl-empty">构建环境缺少 git 历史（CI 需 fetch-depth: 0）。</p>
+				)}
+
+				<div class="tl-panel">
+					{monthsArr.map(([month, list]) => (
+						<div class="tl-month">
+							<div class="tl-month-header">
+								<div class="tl-col">
+									<div class="tl-hline tl-month-hline"></div>
+									<div class="tl-node tl-month-node"></div>
+								</div>
+								<div class="tl-month-label">
+									<h2 class="tl-h2">{month.replace("-", " 年 ")} 月</h2>
+									<span class="tl-count">{list.length} 条</span>
+								</div>
+							</div>
+
+							<div class="tl-commits-area">
+								<ul class="tl-commit-list">
+									{list.map((c) => (
+										<li class="tl-commit-row" data-type={commitType(c.subject)}>
+											<div class="tl-col">
+												<div class="tl-hline tl-commit-hline"></div>
+												<div class="tl-node tl-commit-node"></div>
+											</div>
+											<span class="tl-date">{c.date}</span>
+											<span class="tl-commit-content">
+												<span class="tl-subject">{c.subject}</span>
+											</span>
+											<a
+												href={`${REPO_URL}/commit/${c.hash}`}
+												target="_blank"
+												rel="noopener noreferrer"
+												class="tl-hash"
+											>{c.hash}</a>
+										</li>
+									))}
+								</ul>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+
+			<div class="tl-view" data-tl-view="graph" hidden>
+				<TimelineGraph commits={commits} client:load />
+			</div>
+		</div>
+	</div>
+</MainGridLayout>
+
+<script>
+	// 时间线 / 图形 双模式切换（状态持久化，切换不重新取数）
+	const STORAGE_KEY = "fqzlr-timeline-mode";
+	const MODE_LABELS: Record<string, string> = {
+		timeline: "时间线",
+		graph: "图形",
+	};
+
+	function applyMode(mode: "timeline" | "graph", persist: boolean) {
+		const cta = document.querySelector<HTMLButtonElement>("[data-tl-cta]");
+		const label = document.querySelector<HTMLElement>("[data-tl-cta-label]");
+		const isGraph = mode === "graph";
+		if (cta) {
+			cta.classList.toggle("is-active", isGraph);
+			cta.setAttribute("aria-pressed", String(isGraph));
+			cta.setAttribute(
+				"aria-label",
+				`当前：${MODE_LABELS[mode]}，点击切换`,
+			);
+			cta.dataset.mode = mode;
+		}
+		if (label && label.textContent !== MODE_LABELS[mode]) {
+			// 文字切换时重触发淡入动画
+			label.textContent = MODE_LABELS[mode];
+			label.classList.remove("is-swap");
+			void label.offsetWidth; // 强制 reflow 以重启动画
+			label.classList.add("is-swap");
+		}
+		document.querySelectorAll<HTMLElement>("[data-tl-view]").forEach((view) => {
+			view.hidden = view.dataset.tlView !== mode;
+		});
+		if (persist) {
+			try {
+				localStorage.setItem(STORAGE_KEY, mode);
+			} catch {}
+		}
+		if (mode === "graph") {
+			document.dispatchEvent(new CustomEvent("timeline:show-graph"));
+		}
+	}
+
+	function initTimelineMode() {
+		let saved: string | null = null;
+		try {
+			saved = localStorage.getItem(STORAGE_KEY);
+		} catch {}
+		// 首次打开默认时间线；否则恢复上次选择
+		applyMode(saved === "graph" ? "graph" : "timeline", false);
+
+		const cta = document.querySelector<HTMLButtonElement>("[data-tl-cta]");
+		cta?.addEventListener("click", () => {
+			const current = (cta.dataset.mode ?? "timeline") as
+				| "timeline"
+				| "graph";
+			const next = current === "timeline" ? "graph" : "timeline";
+			cta.dataset.mode = next;
+			applyMode(next, true);
+		});
+	}
+
+	initTimelineMode();
+	document.addEventListener("astro:page-load", initTimelineMode);
+</script>
+
+<style>
+	/* ── 头部副标题 ── */
+	.tl-subtitle {
+		font-size: 0.875rem;
+		color: var(--content-meta);
+		margin: 0 0 2rem;
+	}
+
+	.tl-empty {
+		text-align: center;
+		color: var(--content-meta);
+		padding: 2.5rem 0;
+	}
+
+	/* ── 时间轴面板：令牌与 /archive/ 的 ArchivePanel 保持一致 ── */
+	.tl-panel {
+		--tw: 2rem;
+		--lc: var(--line-color);
+		--nh: var(--deep-text);
+		--lw: 2.5px;
+		position: relative;
+	}
+
+	.tl-month {
+		position: relative;
+		margin-bottom: 2rem;
+	}
+
+	.tl-month::before {
+		content: "";
+		position: absolute;
+		left: calc(var(--tw) / 2);
+		top: calc(var(--tw) / 2);
+		bottom: 1rem;
+		width: 0;
+		border-left: var(--lw) dashed var(--lc);
+		z-index: 0;
+	}
+
+	.tl-commits-area {
+		padding-left: var(--tw);
+	}
+
+	.tl-commit-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.tl-commit-row {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		min-height: 2.5rem;
+		transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.tl-commit-row:hover {
+		transform: translateX(0.375rem);
+	}
+
+	.tl-col {
+		position: relative;
+		width: var(--tw);
+		flex-shrink: 0;
+		align-self: stretch;
+	}
+
+	.tl-node {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		border-radius: 50%;
+		z-index: 2;
+		transition:
+			background-color 0.15s ease,
+			transform 0.15s ease;
+	}
+
+	.tl-month-node {
+		top: calc(50% - 0.25rem);
+		width: 0.5rem;
+		height: 0.5rem;
+		background: var(--nh);
+	}
+
+	.tl-commit-node {
+		top: calc(50% - 0.2rem);
+		width: 0.4rem;
+		height: 0.4rem;
+		background: var(--primary);
+	}
+
+	.tl-commit-row:hover .tl-commit-node {
+		transform: translateX(-50%) scale(1.6);
+	}
+
+	/* Conventional Commits 类型 → 节点配色（沿用原时间线语义） */
+	.tl-commit-row[data-type="fix"] .tl-commit-node {
+		background: oklch(0.7 0.18 75);
+	}
+
+	.tl-commit-row[data-type="docs"] .tl-commit-node,
+	.tl-commit-row[data-type="chore"] .tl-commit-node {
+		background: var(--content-meta);
+	}
+
+	.tl-hline {
+		position: absolute;
+		height: 0;
+		border-top: var(--lw) dashed var(--lc);
+		z-index: 1;
+	}
+
+	.tl-month-hline,
+	.tl-commit-hline {
+		top: 50%;
+		left: calc(-1 * var(--tw) / 2);
+		width: var(--tw);
+	}
+
+	.tl-month-header {
+		display: flex;
+		align-items: center;
+		min-height: var(--tw);
+	}
+
+	.tl-month-label {
+		display: flex;
+		align-items: baseline;
+		gap: 0.6rem;
+		padding-left: 0.5rem;
+		flex: 1;
+	}
+
+	.tl-h2 {
+		font-size: 1.05rem;
+		font-weight: 600;
+		color: var(--deep-text);
+		margin: 0;
+	}
+
+	.tl-count {
+		font-size: 0.75rem;
+		color: var(--content-meta);
+	}
+
+	/* ── 提交行 ── */
+	.tl-date {
+		font-size: 0.875rem;
+		color: var(--content-meta);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+		flex-shrink: 0;
+		width: 5.2rem;
+		text-align: right;
+	}
+
+	.tl-commit-content {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.tl-subject {
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: var(--deep-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		flex: 1;
+		min-width: 0;
+		transition: color 0.15s ease;
+		display: block;
+	}
+
+	.tl-commit-row:hover .tl-subject {
+		color: var(--primary);
+	}
+
+	.tl-hash {
+		flex-shrink: 0;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+			"Liberation Mono", "Courier New", monospace;
+		font-size: 0.75rem;
+		color: var(--content-meta);
+		text-decoration: none;
+		transition: color 0.15s ease;
+	}
+
+	.tl-hash:hover {
+		color: var(--primary);
+		text-decoration: underline;
+	}
+
+	/* ── 移动端（与 /archive/ 一致：隐藏时间轴线/节点，堆叠排版）── */
+	@media (max-width: 768px) {
+		.tl-panel {
+			--tw: 1.5rem;
+		}
+
+		.tl-commit-row {
+			align-items: flex-start;
+			gap: 0.5rem;
+			min-height: auto;
+			padding: 0.45rem 0 0.5rem;
+		}
+
+		.tl-date {
+			width: 4.6rem;
+			font-size: 0.78rem;
+			margin-top: 0.1rem;
+		}
+
+		.tl-commit-content {
+			flex: 1;
+			min-width: 0;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.2rem;
+		}
+
+		.tl-subject {
+			width: 100%;
+			font-size: 0.92rem;
+			white-space: normal;
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
+			line-clamp: 2;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			overflow-wrap: anywhere;
+		}
+
+		.tl-month::before {
+			content: none;
+		}
+
+		.tl-hline,
+		.tl-node,
+		.tl-col {
+			display: none;
+		}
+
+		.tl-commits-area {
+			padding-left: 0.5rem;
+		}
+	}
+
+	/* ── 模式切换按钮（uiverse brown-bobcat-65 风格，跟随主题）── */
+	.tl-mode {
+		display: inline-flex;
+	}
+
+	.tl-cta {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		padding: 11px 18px;
+		border: none;
+		background: none;
+		border-radius: 50px;
+		cursor: pointer;
+		font-family: inherit;
+		transition: all 0.2s ease;
+	}
+
+	.tl-cta::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		display: block;
+		width: 42px;
+		height: 100%;
+		border-radius: 50px;
+		background: var(--btn-plain-bg-hover);
+		transition: all 0.3s ease;
+	}
+
+	.tl-cta__label {
+		position: relative;
+		font-size: 0.875rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		color: var(--deep-text);
+		transition: color 0.2s ease;
+	}
+
+	.tl-cta__arrow {
+		position: relative;
+		width: 16px;
+		height: 16px;
+		margin-left: 8px;
+		fill: none;
+		stroke: var(--deep-text);
+		stroke-width: 2;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		transform: translateX(-4px);
+		transition: transform 0.3s ease;
+	}
+
+	.tl-cta:hover::before {
+		width: 100%;
+	}
+
+	.tl-cta:hover .tl-cta__arrow {
+		transform: translateX(0);
+	}
+
+	.tl-cta:active {
+		transform: scale(0.95);
+	}
+
+	/* 激活态：圆点全展开为主题主色，文字/箭头随主题反转 */
+	.tl-cta.is-active::before {
+		width: 100%;
+		background: var(--primary);
+	}
+
+	.tl-cta.is-active .tl-cta__label {
+		color: var(--page-bg);
+	}
+
+	.tl-cta.is-active .tl-cta__arrow {
+		stroke: var(--page-bg);
+		transform: translateX(0);
+	}
+
+	/* 文字切换动画：淡入 + 轻微上移 */
+	.tl-cta__label.is-swap {
+		animation: tl-label-swap 0.28s ease;
+	}
+
+	@keyframes tl-label-swap {
+		0% {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	@media (max-width: 480px) {
+		.tl-cta {
+			padding: 9px 14px;
+		}
+
+		.tl-cta::before {
+			width: 36px;
+		}
+
+		.tl-cta__label {
+			font-size: 0.8rem;
+		}
+	}
+</style>
