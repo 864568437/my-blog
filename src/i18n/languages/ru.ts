@@ -21,7 +21,6 @@ export const ru: Translation = {
 	[Key.all]: "Все",
 
 	[Key.tags]: "Теги",
-	[Key.categories]: "Категории",
 	[Key.recentPosts]: "Последние посты",
 	[Key.postList]: "Список постов",
 	[Key.tableOfContents]: "Содержание",
@@ -45,6 +44,7 @@ export const ru: Translation = {
 	[Key.musicCover]: "Обложка",
 	[Key.musicNoCover]: "Нет обложки",
 	[Key.musicAudioPlayer]: "Аудиоплеер",
+	[Key.musicFloatingLyrics]: "Плавающие тексты",
 
 	// Объявление
 	[Key.announcement]: "Объявление",
@@ -370,4 +370,44 @@ export const ru: Translation = {
 	// Bangumi API
 	[Key.bangumiFetchError]: "Ошибка загрузки данных",
 	[Key.bangumiFetchErrorDesc]: "Не удалось получить данные с Bangumi API. Проверьте настройки.",
+
+	// Timeline
+	[Key.timeline]: "Хронология",
+	[Key.timelineTitle]: "Хронология",
+	[Key.timelineSubtitle]: "Журнал разработки блога",
+
+	// Moments
+	[Key.moments]: "Динамика",
+	[Key.recentLife]: "Последние записи",
+	[Key.recentItems]: "Недавние обновления",
+
+	// Wallpaper
+	[Key.wallpaperFullscreenMode]: "Полноэкранные обои",
+	[Key.wallpaperSettings]: "Настройки обоев",
+	[Key.wallpaperTitle]: "Заголовок обоев главной",
+	[Key.wallpaperCarousel]: "Карусель обоев",
+	[Key.gradientTransition]: "Градиентный переход",
+	[Key.overlaySettings]: "Настройки оверлея",
+	[Key.overlayOpacity]: "Прозрачность обоев",
+	[Key.overlayBlur]: "Размытие фона",
+	[Key.overlayCardOpacity]: "Прозрачность карточек",
+	[Key.effectsSettings]: "Настройки эффектов",
+	[Key.sakuraEffect]: "Эффект сакуры",
+
+	// Calendar
+	[Key.calendar]: "Календарь",
+	[Key.calendarDescription]: "Записывайте важные моменты жизни",
+	[Key.calendarBackToToday]: "Вернуться к сегодня",
+	[Key.calendarMore]: "Подробнее",
+	[Key.calendarToday]: "Сегодня",
+	[Key.calendarLunar]: "Лунный",
+	[Key.calendarNoEvents]: "Нет событий",
+	[Key.calendarUpcoming]: "Скоро",
+	[Key.calendarNearestHoliday]: "Ближайшие праздники",
+	[Key.calendarNearestBirthday]: "Ближайшие дни рождения",
+	[Key.calendarNearestSchedule]: "Ближайшие события",
+	[Key.calendarHoliday]: "Праздник",
+	[Key.calendarBirthday]: "День рождения",
+	[Key.calendarSchedule]: "Событие",
+	[Key.calendarPost]: "Статья",
 };

@@ -47,6 +47,8 @@ const postsCollection = defineCollection({
 		licenseUrl: z.string().optional().default(""),
 		comment: z.boolean().optional().default(true),
 		order: z.number().optional().default(0),
+		password: z.string().optional(),
+		descriptionSource: z.string().optional().default(""),
 
 		/* For internal use */
 		prevTitle: z.string().default(""),
@@ -74,54 +76,74 @@ const specCollection = defineCollection({
 // 目录：src/content/life/
 // 包含：places(足迹), routines(日常规划) 等子目录
 // ============================================================================
+const lifeEntrySchema = z.object({
+	label: z.string().optional().default(""),
+	value: z.string().optional().default(""),
+	title: z.string().optional().default(""),
+	description: z.string().optional().default(""),
+	date: z.coerce.date().optional(),
+	createdAt: z.coerce.date().optional(),
+	completedAt: z.coerce.date().optional(),
+	content: z.string().optional().default(""),
+	status: z.enum(["done", "todo"]).optional(),
+
+	// Notebook
+	name: z.string().optional().default(""),
+	cover: z.string().optional().default(""),
+	summary: z.string().optional().default(""),
+	entries: z.number().optional().default(0),
+	updatedAt: z.union([z.string(), z.date()]).optional(),
+	tags: z.array(z.string()).optional().default([]),
+
+	// Plan
+	planName: z.string().optional().default(""),
+	targetDesc: z.string().optional().default(""),
+	dailyTarget: z.number().optional().default(1),
+	monthlyTarget: z.number().optional().default(20),
+	checkins: z.array(z.coerce.date()).optional().default([]),
+
+	// Place
+	province: z.string().optional().default(""),
+	city: z.string().optional().default(""),
+	experience: z.string().optional().default(""),
+	visitCount: z.number().optional().default(1),
+	lat: z.number().optional(),
+	lng: z.number().optional(),
+	url: z.string().optional().default(""),
+	urlLabel: z.string().optional().default(""),
+	photos: z.array(z.string()).optional().default([]),
+
+	// Legacy fields (keep compatibility with existing data)
+	waterCups: z.number().optional(),
+	meals: z
+		.array(z.object({ name: z.string(), value: z.string() }))
+		.optional()
+		.default([]),
+	streak: z.number().optional().default(0),
+	progress: z.number().min(0).max(100).optional().default(0),
+});
+
+// ============================================================================
+// 生活记录集合 - 足迹、规划、笔记本等生活相关内容
+// 目录：src/content/life/
+// 说明：places(足迹)、routines(日常规划)、notebooks(笔记本) 挂载在同一目录下，
+//       并通过命名集合分别暴露，便于组件按需读取。
+// ============================================================================
 const lifeCollection = defineCollection({
-	loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/life" }),
-	schema: z.object({
-		label: z.string().optional().default(""),
-		value: z.string().optional().default(""),
-		title: z.string().optional().default(""),
-		description: z.string().optional().default(""),
-		date: z.coerce.date().optional(),
-		createdAt: z.coerce.date().optional(),
-		completedAt: z.coerce.date().optional(),
-		content: z.string().optional().default(""),
-		status: z.enum(["done", "todo"]).optional(),
+	loader: glob({ pattern: "**/*.{md,mdx,json}", base: "./src/content/life" }),
+	schema: lifeEntrySchema,
+});
 
-		// Notebook
-		name: z.string().optional().default(""),
-		cover: z.string().optional().default(""),
-		summary: z.string().optional().default(""),
-		entries: z.number().optional().default(0),
-		updatedAt: z.union([z.string(), z.date()]).optional(),
-		tags: z.array(z.string()).optional().default([]),
+// notebooks 集合：src/content/life/notebooks/（`_index.json` 定义笔记本，其余 .md 为条目）
+const notebooksCollection = defineCollection({
+	loader: glob({ pattern: "**/*.{md,mdx,json}", base: "./src/content/life/notebooks" }),
+	schema: lifeEntrySchema,
+});
 
-		// Plan
-		planName: z.string().optional().default(""),
-		targetDesc: z.string().optional().default(""),
-		dailyTarget: z.number().optional().default(1),
-		monthlyTarget: z.number().optional().default(20),
-		checkins: z.array(z.coerce.date()).optional().default([]),
-
-		// Place
-		province: z.string().optional().default(""),
-		city: z.string().optional().default(""),
-		experience: z.string().optional().default(""),
-		visitCount: z.number().optional().default(1),
-		lat: z.number().optional(),
-		lng: z.number().optional(),
-		url: z.string().optional().default(""),
-		urlLabel: z.string().optional().default(""),
-		photos: z.array(z.string()).optional().default([]),
-
-		// Legacy fields (keep compatibility with existing data)
-		waterCups: z.number().optional(),
-		meals: z
-			.array(z.object({ name: z.string(), value: z.string() }))
-			.optional()
-			.default([]),
-		streak: z.number().optional().default(0),
-		progress: z.number().min(0).max(100).optional().default(0),
-	}),
+// routines 集合：src/content/life/routines/
+const routinesCollection = defineCollection({
+	loader: glob({ pattern: "**/*.{md,mdx,json}", base: "./src/content/life/routines" }),
+	schema: lifeEntrySchema,
 });
 
 // ============================================================================
@@ -208,6 +230,7 @@ const bangumiCollection = defineCollection({
 		author: z.string().optional().default(""),
 		cover: z.string().optional().default(""),
 		rating: z.number().optional(),
+		link: z.string().optional(),
 	}),
 });
 
@@ -238,6 +261,8 @@ export const collections = {
 	posts: postsCollection,
 	spec: specCollection,
 	life: lifeCollection,
+	notebooks: notebooksCollection,
+	routines: routinesCollection,
 	ziyuan: ziyuanCollection,
 	danmu: danmuCollection,
 	bangumi: bangumiCollection,

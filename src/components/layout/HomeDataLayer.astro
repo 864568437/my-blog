@@ -205,8 +205,8 @@ const skillItems = normalizeSkillItems({ items: skillsConfig.items });
 
 		const fetchStats = async () => {
 			try {
-				if (window.oddmisc?.getSiteStats) {
-					const stats = await window.oddmisc.getSiteStats();
+				if ((window as any).oddmisc?.getSiteStats) {
+					const stats = await (window as any).oddmisc.getSiteStats();
 					render({ visitors: stats.visitors ?? 0, pageviews: stats.pageviews ?? 0 });
 				} else {
 					fallback();
@@ -217,7 +217,7 @@ const skillItems = normalizeSkillItems({ items: skillsConfig.items });
 			}
 		};
 
-		if (window.oddmisc) {
+		if ((window as any).oddmisc) {
 			fetchStats();
 		} else {
 			window.addEventListener("oddmisc-ready", () => fetchStats(), { once: true });

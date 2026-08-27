@@ -21,8 +21,7 @@ export const en: Translation = {
 	[Key.all]: "All",
 
 	[Key.tags]: "Tags",
-	[Key.categories]: "Categories",
-	[Key.recentPosts]: "Recent Posts",
+	[Key.recentPosts]: "Latest Posts",
 	[Key.postList]: "Post List",
 	[Key.tableOfContents]: "Table of Contents",
 	[Key.tocEmpty]: "No table of contents",
@@ -45,6 +44,7 @@ export const en: Translation = {
 	[Key.musicCover]: "Cover",
 	[Key.musicNoCover]: "No cover available",
 	[Key.musicAudioPlayer]: "Audio Player",
+	[Key.musicFloatingLyrics]: "Floating Lyrics",
 
 	// Announcement
 	[Key.announcement]: "Announcement",
@@ -371,4 +371,39 @@ export const en: Translation = {
 	[Key.displayTabTheme]: "Theme",
 	[Key.displayTabWallpaper]: "Wallpaper",
 	[Key.displayTabLayout]: "Layout",
+
+	// Timeline
+	[Key.timeline]: "Timeline",
+	[Key.timelineTitle]: "Timeline",
+	[Key.timelineSubtitle]: "Blog development log",
+
+	// Wallpaper
+	[Key.wallpaperFullscreenMode]: "Fullscreen Wallpaper",
+	[Key.wallpaperSettings]: "Wallpaper Settings",
+	[Key.wallpaperTitle]: "Homepage Wallpaper Title",
+	[Key.wallpaperCarousel]: "Wallpaper Carousel",
+	[Key.gradientTransition]: "Gradient Transition",
+	[Key.overlaySettings]: "Overlay Settings",
+	[Key.overlayOpacity]: "Wallpaper Opacity",
+	[Key.overlayBlur]: "Background Blur",
+	[Key.overlayCardOpacity]: "Card Opacity",
+	[Key.effectsSettings]: "Effects Settings",
+	[Key.sakuraEffect]: "Sakura Effect",
+
+	// Calendar
+	[Key.calendar]: "Calendar",
+	[Key.calendarDescription]: "Record important moments in life",
+	[Key.calendarBackToToday]: "Back to Today",
+	[Key.calendarMore]: "More",
+	[Key.calendarToday]: "Today",
+	[Key.calendarLunar]: "Lunar",
+	[Key.calendarNoEvents]: "No events",
+	[Key.calendarUpcoming]: "Upcoming",
+	[Key.calendarNearestHoliday]: "Upcoming Holidays",
+	[Key.calendarNearestBirthday]: "Upcoming Birthdays",
+	[Key.calendarNearestSchedule]: "Upcoming Schedules",
+	[Key.calendarHoliday]: "Holiday",
+	[Key.calendarBirthday]: "Birthday",
+	[Key.calendarSchedule]: "Schedule",
+	[Key.calendarPost]: "Post",
 };

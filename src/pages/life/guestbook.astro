@@ -22,7 +22,7 @@ const isCommentEnabled = commentConfig?.type && commentConfig.type !== "none";
 const danmuEntries = await getCollection("danmu");
 const danmuComments = danmuEntries.map((entry) => ({
 	nickname: entry.data.nickname,
-	content: entry.body.trim(),
+	content: (entry.body ?? "").trim(),
 	time: entry.data.time,
 }));
 ---

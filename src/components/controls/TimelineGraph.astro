@@ -345,16 +345,18 @@ function summarizeModules(modules: string[]): string {
 				const fy = fr.top - rr.top + fr.height / 2;
 				const ty = tr.top - rr.top + tr.height / 2;
 				let d: string;
+				let x1: number;
+				let x2: number;
 				if (r % 2 === 0) {
 					// 左→右行：从右下出，绕右侧回环到下一行右上
-					const x1 = fr.right - rr.left + 8;
-					const x2 = tr.right - rr.left + 8;
+					x1 = fr.right - rr.left + 8;
+					x2 = tr.right - rr.left + 8;
 					const out = Math.max(x1, x2) + 18;
 					d = `M ${x1} ${fy} C ${out} ${fy} ${out} ${ty} ${x2} ${ty}`;
 				} else {
 					// 右→左行：从左下出，绕左侧回环到下一行左上
-					const x1 = fr.left - rr.left - 8;
-					const x2 = tr.left - rr.left - 8;
+					x1 = fr.left - rr.left - 8;
+					x2 = tr.left - rr.left - 8;
 					const out = Math.min(x1, x2) - 18;
 					d = `M ${x1} ${fy} C ${out} ${fy} ${out} ${ty} ${x2} ${ty}`;
 				}

@@ -21,7 +21,6 @@ export const ja: Translation = {
 	[Key.all]: "すべて",
 
 	[Key.tags]: "タグ",
-	[Key.categories]: "カテゴリ",
 	[Key.recentPosts]: "最近の投稿",
 	[Key.postList]: "投稿リスト",
 	[Key.tableOfContents]: "目次",
@@ -45,6 +44,7 @@ export const ja: Translation = {
 	[Key.musicCover]: "カバー",
 	[Key.musicNoCover]: "カバーなし",
 	[Key.musicAudioPlayer]: "オーディオプレーヤー",
+	[Key.musicFloatingLyrics]: "浮遊歌詞",
 
 	// お知らせ
 	[Key.announcement]: "お知らせ",
@@ -368,4 +368,44 @@ export const ja: Translation = {
 	[Key.displayTabTheme]: "テーマ",
 	[Key.displayTabWallpaper]: "壁紙",
 	[Key.displayTabLayout]: "レイアウト",
+
+	// Timeline
+	[Key.timeline]: "更新履歴",
+	[Key.timelineTitle]: "更新履歴",
+	[Key.timelineSubtitle]: "ブログ開発ログ",
+
+	// Moments
+	[Key.moments]: "ダイナミック",
+	[Key.recentLife]: "最新記録",
+	[Key.recentItems]: "最近の更新",
+
+	// Wallpaper
+	[Key.wallpaperFullscreenMode]: "全画面壁紙",
+	[Key.wallpaperSettings]: "壁紙設定",
+	[Key.wallpaperTitle]: "ホーム壁紙タイトル",
+	[Key.wallpaperCarousel]: "壁紙カルーセル",
+	[Key.gradientTransition]: "グラデーション遷移",
+	[Key.overlaySettings]: "オーバーレイ設定",
+	[Key.overlayOpacity]: "壁紙の透明度",
+	[Key.overlayBlur]: "背景のぼかし度",
+	[Key.overlayCardOpacity]: "カードの透明度",
+	[Key.effectsSettings]: "エフェクト設定",
+	[Key.sakuraEffect]: "桜エフェクト",
+
+	// Calendar
+	[Key.calendar]: "カレンダー",
+	[Key.calendarDescription]: "生活の大切な瞬間を記録",
+	[Key.calendarBackToToday]: "今日に戻る",
+	[Key.calendarMore]: "もっと",
+	[Key.calendarToday]: "今日",
+	[Key.calendarLunar]: "旧暦",
+	[Key.calendarNoEvents]: "イベントなし",
+	[Key.calendarUpcoming]: "間近",
+	[Key.calendarNearestHoliday]: "近くの祝日",
+	[Key.calendarNearestBirthday]: "近くの誕生日",
+	[Key.calendarNearestSchedule]: "近くの予定",
+	[Key.calendarHoliday]: "祝日",
+	[Key.calendarBirthday]: "誕生日",
+	[Key.calendarSchedule]: "予定",
+	[Key.calendarPost]: "記事",
 };

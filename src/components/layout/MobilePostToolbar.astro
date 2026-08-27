@@ -32,7 +32,7 @@ const { slug = "" } = Astro.props;
       </button>
     </div>
     <div class="mpt-drawer-body">
-      <PostDirectoryList currentSlug={slug} />
+      <PostDirectoryList currentPostId={slug} />
     </div>
   </div>
 </div>
@@ -240,7 +240,7 @@ const { slug = "" } = Astro.props;
 
 <script>
   import('../../utils/tocUtils.ts').then(function(mod) {
-    window.__mptTocReady = true;
+    (window as any).__mptTocReady = true;
     var postsBtn = document.getElementById('mpt-posts-btn');
     var postsDrawer = document.getElementById('mpt-posts-drawer');
     var postsBg = document.getElementById('mpt-posts-bg');

@@ -28,11 +28,11 @@ export function isProxyAppIdAvailable(): boolean {
 	return proxyAppIdAvailable;
 }
 
-function strToBuf(str: string): ArrayBuffer {
+function strToBuf(str: string): Uint8Array<ArrayBuffer> {
 	return new TextEncoder().encode(str);
 }
 
-function b64urlEncode(buf: ArrayBuffer): string {
+function b64urlEncode(buf: ArrayBuffer | Uint8Array): string {
 	const bytes = new Uint8Array(buf);
 	let binary = "";
 	for (let i = 0; i < bytes.byteLength; i++) {
@@ -503,7 +503,8 @@ function repoPath(config: RepoConfig, path: string): string {
 /** 动态解析目标分支：优先使用部署分支，回退到配置分支 */
 function resolveBranch(config: RepoConfig): string {
 	return (
-		(typeof window !== "undefined" && window.__DEPLOY_BRANCH__) || config.branch
+		(typeof window !== "undefined" && (window as any).__DEPLOY_BRANCH__) ||
+			config.branch
 	);
 }
 
@@ -629,7 +630,7 @@ export async function uploadImageToRepo(
 ): Promise<string | null> {
 	try {
 		const existing = await getRepoFile(imagePath, config);
-		let resp;
+		let resp: Response;
 		if (existing) {
 			resp = await proxyRequest("PUT", repoPath(config, imagePath), {
 				message,

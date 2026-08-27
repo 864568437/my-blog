@@ -23,6 +23,7 @@ interface Props {
 	formats?: ImageFormat[];
 	loading?: "lazy" | "eager";
 	apiUrls?: string[];
+	fetchpriority?: "auto" | "low" | "high";
 }
 
 const {
@@ -336,7 +337,7 @@ const showLoading = coverImageConfig.randomCoverImage.showLoading ?? true;
 				// 服务端未预选时，基于日期种子选择（同一天内刷新不换图）
 				const now = new Date();
 				const dateSeed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
-				const containerId = container.getAttribute('id') || container.dataset.index || '0';
+				const containerId = container.getAttribute('id') || (container as HTMLElement).dataset.index || '0';
 				const uniqueSeed = `${dateSeed}-${containerId}`;
 				const hash = getSeedHash(uniqueSeed);
 				currentApiIndex = hash % apiUrls.length;

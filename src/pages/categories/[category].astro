@@ -32,11 +32,19 @@ type PostEntry = CollectionEntry<"posts">;
 
 export const getStaticPaths = (async () => {
 	const categories = await getCategoryList();
-	const allPosts = await getCollection<PostEntry>("posts", ({ data }) => {
+	const allPosts = await getCollection<"posts">("posts", ({ data }) => {
 		return import.meta.env.PROD ? data.draft !== true : true;
 	});
 
-	const paths = [];
+	const paths: {
+		params: { category: string };
+		props: {
+			categoryName: string;
+			posts: PostEntry[];
+			totalPosts: number;
+			tags: { name: string; count: number }[];
+		};
+	}[] = [];
 
 	for (const category of categories) {
 		const categoryPosts = allPosts.filter((post) => {

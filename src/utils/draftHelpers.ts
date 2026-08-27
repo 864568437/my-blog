@@ -93,7 +93,7 @@ export function setupRepoDrafts(ctx: RepoDraftContext) {
 		isEdit: boolean,
 	): Promise<boolean> {
 		const branch =
-			typeof window !== "undefined" ? window.__DEPLOY_BRANCH__ : undefined;
+			typeof window !== "undefined" ? (window as any).__DEPLOY_BRANCH__ : undefined;
 		const commitMsg = ctx.getCommitMsg
 			? ctx.getCommitMsg(isEdit)
 			: isEdit

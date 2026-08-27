@@ -5,8 +5,8 @@ import type { CatalogGroup, PostForList } from "@/utils/content-utils";
 import { getPostUrlBySlug } from "@/utils/url-utils";
 
 interface Props {
-	groups: CatalogGroup[];
-	currentPostId: string;
+	groups?: CatalogGroup[];
+	currentPostId?: string;
 	class?: string;
 }
 

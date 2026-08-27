@@ -4,7 +4,7 @@ import { getCollection } from "astro:content";
 const danmuEntries = await getCollection("danmu");
 const comments = danmuEntries.map((entry) => ({
 	nickname: entry.data.nickname,
-	content: entry.body.trim(),
+	content: (entry.body ?? "").trim(),
 	time: entry.data.time,
 }));
 ---

@@ -86,7 +86,7 @@ export async function getArchiveList(): Promise<ArchiveItem[]> {
 			return import.meta.env.PROD ? data.draft !== true : true;
 		});
 		postItems.push(
-			...posts.map((post) => ({
+			...posts.map<ArchiveItem>((post) => ({
 				id: post.id,
 				type: "post",
 				data: {
@@ -104,7 +104,7 @@ export async function getArchiveList(): Promise<ArchiveItem[]> {
 	if (archiveConfig.moments) {
 		const moments = getEnabledMoments();
 		momentItems.push(
-			...moments.map((moment) => {
+			...moments.map<ArchiveItem>((moment) => {
 				let title = moment.body || "";
 				title = title.replace(/[#*`]/g, "").trim();
 				if (title.length > 50) title = `${title.substring(0, 50)}...`;
@@ -127,7 +127,7 @@ export async function getArchiveList(): Promise<ArchiveItem[]> {
 	if (archiveConfig.bangumi) {
 		const bangumi = await getCollection("bangumi");
 		bangumiItems.push(
-			...bangumi.map((b) => {
+			...bangumi.map<ArchiveItem>((b) => {
 				let link = b.data.link || "";
 				if (!link) {
 					const slug = b.id

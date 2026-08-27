@@ -668,7 +668,7 @@ const siteLang = lang.replace("_", "-");
     if (cached) {
       cards.forEach((card) => {
         const href = card.getAttribute("href") || "";
-        const statusEl = card.querySelector(".friend-status");
+        const statusEl = card.querySelector<HTMLElement>(".friend-status");
         if (!statusEl) return;
         const info = pickFriendStatus(href, cached);
         if (info) {
@@ -686,7 +686,7 @@ const siteLang = lang.replace("_", "-");
       writeCheckFlinkCache(data);
       cards.forEach((card) => {
         const href = card.getAttribute("href") || "";
-        const statusEl = card.querySelector(".friend-status");
+        const statusEl = card.querySelector<HTMLElement>(".friend-status");
         if (!statusEl) return;
         const info = pickFriendStatus(href, data);
         if (info) {
@@ -834,7 +834,7 @@ function disableAnimation() {
 
   // Capture 阶段全局 click 监听：点击音乐链接时立即隐藏侧边栏并切换暗色主题（比 Swup link:click 更早）
   document.addEventListener("click", function(e) {
-    var link = e.target && (e.target.closest ? e.target.closest('a[href]') : null);
+    var link = e.target instanceof Element ? e.target.closest('a[href]') : null;
     if (!link) return;
     var href = link.getAttribute("href") || "";
     if (href === "/music/" || href === "/music") {
@@ -1074,7 +1074,7 @@ function disableAnimation() {
       // Destroy any leftover lightbox DOM to prevent cross-page image bleed
       var allLbs = document.querySelectorAll('#photo-lightbox');
       allLbs.forEach(function(lb) {
-        var img = lb.querySelector('#lightbox-image, .lightbox-img');
+        var img = lb.querySelector<HTMLImageElement>('#lightbox-image, .lightbox-img');
         if (img) { img.removeAttribute('src'); img.src = ''; }
         if (lb.parentNode) lb.parentNode.removeChild(lb);
       });

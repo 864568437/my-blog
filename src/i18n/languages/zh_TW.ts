@@ -21,7 +21,6 @@ export const zh_TW: Translation = {
 	[Key.all]: "全部",
 
 	[Key.tags]: "標籤",
-	[Key.categories]: "分類",
 	[Key.recentPosts]: "最新文章",
 	[Key.postList]: "文章列表",
 	[Key.tableOfContents]: "目錄",
@@ -45,6 +44,7 @@ export const zh_TW: Translation = {
 	[Key.musicCover]: "封面",
 	[Key.musicNoCover]: "暫無封面",
 	[Key.musicAudioPlayer]: "音頻播放器",
+	[Key.musicFloatingLyrics]: "浮動歌詞",
 
 	// 公告欄
 	[Key.announcement]: "公告",
@@ -362,4 +362,44 @@ export const zh_TW: Translation = {
 	[Key.displayTabTheme]: "主題",
 	[Key.displayTabWallpaper]: "壁紙",
 	[Key.displayTabLayout]: "佈局",
+
+	// Timeline
+	[Key.timeline]: "更新日誌",
+	[Key.timelineTitle]: "更新日誌",
+	[Key.timelineSubtitle]: "部落格開發日誌",
+
+	// Moments
+	[Key.moments]: "動態",
+	[Key.recentLife]: "最新紀錄",
+	[Key.recentItems]: "最近更新",
+
+	// Wallpaper
+	[Key.wallpaperFullscreenMode]: "全螢幕桌布",
+	[Key.wallpaperSettings]: "桌布設定",
+	[Key.wallpaperTitle]: "首頁桌布標題",
+	[Key.wallpaperCarousel]: "桌布輪播",
+	[Key.gradientTransition]: "漸變過渡",
+	[Key.overlaySettings]: "透明設定",
+	[Key.overlayOpacity]: "桌布透明度",
+	[Key.overlayBlur]: "背景模糊度",
+	[Key.overlayCardOpacity]: "卡片透明度",
+	[Key.effectsSettings]: "特效設定",
+	[Key.sakuraEffect]: "櫻花特效",
+
+	// Calendar
+	[Key.calendar]: "日曆",
+	[Key.calendarDescription]: "記錄生活中的重要時刻",
+	[Key.calendarBackToToday]: "回到今天",
+	[Key.calendarMore]: "更多",
+	[Key.calendarToday]: "今天",
+	[Key.calendarLunar]: "農曆",
+	[Key.calendarNoEvents]: "暫無事件",
+	[Key.calendarUpcoming]: "即將到來",
+	[Key.calendarNearestHoliday]: "近期節日",
+	[Key.calendarNearestBirthday]: "近期生日",
+	[Key.calendarNearestSchedule]: "近期安排",
+	[Key.calendarHoliday]: "節日",
+	[Key.calendarBirthday]: "生日",
+	[Key.calendarSchedule]: "安排",
+	[Key.calendarPost]: "文章",
 };

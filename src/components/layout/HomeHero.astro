@@ -714,7 +714,6 @@ const heroBioText = Array.isArray(profileConfig.bio)
 		const vfx = VFX.init({
 			pixelRatio: Math.min(window.devicePixelRatio, 1.5),
 			wrapper: heroEl || undefined,
-			fixedCanvas: false,
 		});
 		if (!vfx) return;
 		vfxInstance = vfx;

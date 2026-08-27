@@ -380,9 +380,10 @@ const siteInfoText = _si
         try { return new URL(url).host.replace(/^www\./, ""); } catch { return ""; }
       }
       function escapeHtml(s) {
-        return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({
+        const map: Record<string, string> = {
           "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-        }[c]));
+        };
+        return String(s == null ? "" : s).replace(/[&<>"']/g, (c: string) => map[c]);
       }
       // 头像三级容错链：博主提供 → dicebear → 内联 SVG（永远不失败）
       function dicebearUrl(name) {
@@ -391,7 +392,7 @@ const siteInfoText = _si
       }
       function inlineSvgUrl(name) {
         const text = (name || "?").trim().slice(0, 1).toUpperCase() || "?";
-        const hash = Array.from(text).reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 0);
+        const hash = Array.from(text).reduce<number>((acc, ch) => (acc * 31 + (ch as string).charCodeAt(0)) >>> 0, 0);
         const hue = hash % 360;
         const bg = "hsl(" + hue + ", 55%, 55%)";
         const svg =
@@ -420,7 +421,7 @@ const siteInfoText = _si
         if (badge) badge.textContent = items.length + " sites";
         body.innerHTML = items.map((it) => {
           const host = hostOf(it.link);
-          const avatar = pickAvatar(it.link, it.avatar, host);
+          const avatar = pickAvatar(it.link, it.avatar, host, it.name);
           return (
             '<a class="fail-card" role="listitem" href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener noreferrer" title="' + escapeHtml(it.name) + '">' +
               '<img class="fail-card-avatar" loading="lazy" decoding="async" src="' + escapeHtml(avatar) + '" alt="' + escapeHtml(it.name) + '" onerror="this.classList.add(\'is-error\');this.onerror=null;this.src=\'' + escapeHtml(faviconUrl(host)) + '\'" />' +
@@ -477,15 +478,15 @@ const siteInfoText = _si
         }
 
         // 2) 总友链数据（来自 SSR 注入）
-        const friendList = Array.isArray(window.__FRIEND_LIST__) ? window.__FRIEND_LIST__ : [];
+        const friendList = Array.isArray((window as any).__FRIEND_LIST__) ? (window as any).__FRIEND_LIST__ : [];
         const friendByLink = new Map();
         for (const f of friendList) {
           if (f && f.link) friendByLink.set(normalizeUrl(f.link), f);
         }
 
         // 3) 遍历正常区 .friend-card：分类
-        const failList = [];   // 失效暂留
-        const tombList = [];   // 友链墓碑
+        const failList: any[] = [];   // 失效暂留
+        const tombList: any[] = [];   // 友链墓碑
         const grid = document.getElementById("friends-grid");
         if (grid) {
           const cards = grid.querySelectorAll(".friend-card[data-friend-id]");
@@ -495,16 +496,16 @@ const siteInfoText = _si
             const friend = friendByLink.get(normalizeUrl(link)) || { name: link, link };
             if (inRange(fc, FAIL_WINDOW)) {
               // 失效暂留：从正常区隐藏 + 加入 failList
-              cardEl.style.display = "none";
+              (cardEl as HTMLElement).style.display = "none";
               failList.push({ ...friend, link, fail_count: fc });
             } else if (inRange(fc, TOMBSTONE)) {
               // 友链墓碑：从正常区隐藏 + 加入 tombList
-              cardEl.style.display = "none";
+              (cardEl as HTMLElement).style.display = "none";
               tombList.push({ ...friend, link, fail_count: fc });
             } else {
               // fail_count === 0：保留显示（正常友链）
               // 可选：更新 .friend-status 徽章
-              cardEl.style.display = "";
+              (cardEl as HTMLElement).style.display = "";
             }
           });
         }
@@ -578,7 +579,7 @@ const siteInfoText = _si
             // 更新 <a> 链接
             var anchor = card.tagName === "A" ? card : card.querySelector("a");
             if (anchor && latest.link) {
-              anchor.href = latest.link;
+              (anchor as HTMLAnchorElement).href = latest.link;
             }
 
             // 更新头像
@@ -602,7 +603,7 @@ const siteInfoText = _si
 
           // 更新 window.__FRIEND_LIST__（供失效分区脚本使用）
           if (Array.isArray(data.link_list)) {
-            window.__FRIEND_LIST__ = data.link_list.map(function (f) {
+            (window as any).__FRIEND_LIST__ = data.link_list.map(function (f) {
               return {
                 name: f.name,
                 link: f.link,
@@ -634,8 +635,8 @@ const siteInfoText = _si
      * 仅精确指针设备启用；预览层 pointer-events:none 不阻塞卡片交互。
      */
     (function initFriendImagePreview() {
-      if (window.__friendImagePreviewReady) return;
-      window.__friendImagePreviewReady = true;
+      if ((window as any).__friendImagePreviewReady) return;
+      (window as any).__friendImagePreviewReady = true;
 
       if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
@@ -677,7 +678,7 @@ const siteInfoText = _si
 
       document.addEventListener("mouseover", function (e) {
         var target = e.target;
-        var card = target && target.closest ? target.closest("[data-siteshot]") : null;
+        var card = target instanceof Element ? target.closest("[data-siteshot]") : null;
         if (card && card instanceof HTMLElement) {
           show(card, e.clientX, e.clientY);
         }
@@ -685,11 +686,11 @@ const siteInfoText = _si
 
       document.addEventListener("mouseout", function (e) {
         var target = e.target;
-        var card = target && target.closest ? target.closest("[data-siteshot]") : null;
+        var card = target instanceof Element ? target.closest("[data-siteshot]") : null;
         if (!card) return;
         var to = e.relatedTarget;
         // 卡片内部移动不隐藏
-        if (to && to.closest && to.closest("[data-siteshot]") === card) return;
+        if (to instanceof Element && to.closest("[data-siteshot]") === card) return;
         hide();
       });
 

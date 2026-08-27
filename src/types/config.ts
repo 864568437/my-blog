@@ -3,6 +3,7 @@ import type {
 	LIGHT_MODE,
 	SYSTEM_MODE,
 	WALLPAPER_BANNER,
+	WALLPAPER_FULLSCREEN,
 	WALLPAPER_NONE,
 	WALLPAPER_OVERLAY,
 } from "../constants/constants";
@@ -254,6 +255,7 @@ export type NavBarLink = {
 	url: string;
 	external?: boolean;
 	icon?: string; // 菜单项图标
+	action?: string; // 动作标识：存在时渲染为按钮（如主题切换等），非普通链接
 	children?: (NavBarLink | LinkPreset)[]; // 支持子菜单，可以是NavBarLink或LinkPreset
 };
 
@@ -514,10 +516,12 @@ export type WidgetComponentType =
 	| "recentItems"
 	| "lifeStats"
 	| "siteHeatmap"
-	| "quoteOfTheDay";
+	| "quoteOfTheDay"
+	| "siteVisitCounter";
 
 // 恋爱计时小组件配置
 export type RelationshipConfig = {
+	enable: boolean; // 是否启用恋爱计时组件
 	startDate: string; // 格式: "YYYY-MM-DD"
 	name1: string;
 	name2: string;
@@ -652,7 +656,7 @@ export type Live2DModelConfig = {
 };
 
 export type BackgroundWallpaperConfig = {
-	mode: "banner" | "overlay" | "none"; // 壁纸模式：banner横幅模式、overlay全屏透明覆盖模式或none纯色背景
+	mode: "banner" | "fullscreen" | "overlay" | "none"; // 壁纸模式：banner横幅模式、fullscreen全屏模式、overlay全屏透明覆盖模式或none纯色背景
 	switchable?: boolean; // 是否允许用户通过导航栏切换壁纸模式，默认true
 	src:
 		| string
@@ -796,6 +800,7 @@ export type FriendLink = {
 	tags?: string[]; // 标签数组
 	weight: number; // 权重，数字越大排序越靠前
 	enabled: boolean; // 是否启用
+	siteshot?: string; // 网站截图 URL（可选）
 };
 
 export type FriendsPageConfig = {
@@ -965,6 +970,7 @@ export type SponsorMethod = {
 // 赞助者列表项
 export type SponsorItem = {
 	name: string; // 赞助者名称，如果想显示匿名，可以直接设置为"匿名"或使用 i18n
+	avatar?: string; // 赞助者头像（可选）
 	amount?: string; // 赞助金额（可选）
 	date?: string; // 赞助日期（可选，ISO 格式）
 	message?: string; // 留言（可选）
