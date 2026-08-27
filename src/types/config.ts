@@ -801,6 +801,7 @@ export type FriendLink = {
 	weight: number; // 权重，数字越大排序越靠前
 	enabled: boolean; // 是否启用
 	siteshot?: string; // 网站截图 URL（可选）
+	recommended?: boolean; // 是否为推荐友链（true 时评论显示「推荐友链」徽章，false/缺省则不显示）
 };
 
 export type FriendsPageConfig = {

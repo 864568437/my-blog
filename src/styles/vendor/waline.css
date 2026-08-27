@@ -55,3 +55,229 @@ html.dark {
 #waline .wl-template-string {
   color: var(--waline-code-color) !important;
 }
+
+/* ==========================================================================
+   推荐友链角色样式（对齐 Aemeath 博客视觉）
+   通过 WalineRoleBadge.astro 注入 data-waline-role="recommended" 后生效
+   ========================================================================== */
+
+/* 推荐友链角色变量默认值（Aemeath 配色） */
+:root {
+  --waline-role-accent: #f4bb2e;
+  --waline-role-soft: #fff0a2;
+  --waline-role-ink: #956100;
+  --waline-role-wash: 48%;
+  --waline-role-outline: 30%;
+  --waline-role-sweep-duration: 4.1s;
+  --waline-role-sweep-soft: color-mix(in oklab, var(--waline-role-accent) 22%, transparent);
+  --waline-role-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M60 14c4 0 7 3 9 7l10 21 24 4c4 1 7 3 8 7 1 3 0 7-3 10L90 80l4 24c1 4-1 8-4 10-3 2-7 2-11 0L60 102l-19 12c-4 2-8 2-11 0-3-2-5-6-4-10l4-24-18-17c-3-3-4-7-3-10 1-4 4-6 8-7l24-4 10-21c2-4 5-7 9-7Z' stroke-width='4'/%3E%3Cpath d='m23 26 2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6Zm79 65 1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5 1.5-4Z' stroke-width='2.5'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 有角色评论的卡片：辅助布局 */
+#waline .wl-card-item[data-waline-role] > .wl-card {
+  min-width: 0;
+}
+
+/* 用户名（.wl-nick）：渐变药丸 + 高光扫动 + 文字发光（核心对齐 Aemeath 视觉）
+   使用 !important 强制覆盖 Waline v3 默认样式（其 stylesheet 后于 waline.css 加载） */
+#waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-nick,
+#waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-nick:link,
+#waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-nick:visited {
+  position: relative !important;
+  display: inline-block !important;
+  max-width: min(100%, 18rem) !important;
+  padding: 0.12rem 0.42rem !important;
+  border: 1px solid color-mix(in oklab, var(--waline-role-accent) 48%, transparent) !important;
+  border-radius: 0.56rem !important;
+  background-color: color-mix(in oklab, var(--waline-role-soft) 78%, white) !important;
+  background-image: linear-gradient(
+    112deg,
+    transparent 0%,
+    var(--waline-role-sweep-soft) 37%,
+    color-mix(in oklab, white 90%, transparent) 50%,
+    var(--waline-role-sweep-soft) 63%,
+    transparent 100%
+  ) !important;
+  background-size: 220% 100% !important;
+  background-position: 130% 0 !important;
+  color: var(--waline-role-ink) !important;
+  text-decoration: none !important;
+  text-shadow: 0 0 0.42rem color-mix(in oklab, var(--waline-role-accent) 38%, transparent) !important;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, white 38%, transparent),
+    0 0 0.6rem color-mix(in oklab, var(--waline-role-accent) 20%, transparent) !important;
+  animation: waline-role-chip-sweep var(--waline-role-sweep-duration) cubic-bezier(0.42, 0, 0.22, 1) infinite !important;
+  will-change: background-position !important;
+}
+
+#waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-nick:hover {
+  color: var(--waline-role-ink) !important;
+  text-decoration: none !important;
+}
+
+/* 有角色评论的内容块：柔和底色 + 内描边（推荐友链生效时为黄色） */
+#waline .wl-card-item[data-waline-role] > .wl-card > .wl-content {
+  position: relative;
+  box-sizing: border-box;
+  margin-block: 0.42rem 0.72rem;
+  padding: 0.62rem 0.76rem 0.68rem;
+  border-radius: 0.75rem;
+  background: color-mix(
+    in oklab,
+    var(--waline-role-soft) var(--waline-role-wash),
+    transparent
+  );
+  box-shadow: inset 0 0 0 1px color-mix(
+    in oklab,
+    var(--waline-role-accent) var(--waline-role-outline),
+    transparent
+  );
+}
+
+/* 头像环形描边（与角色色一致） */
+#waline .wl-card-item[data-waline-role] > .wl-user > .wl-user-avatar {
+  box-sizing: border-box;
+  object-fit: cover;
+  object-position: center;
+  border: 2px solid color-mix(in oklab, var(--waline-role-accent) 72%, white);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, var(--waline-role-accent) 15%, transparent),
+    0 0.22rem 0.55rem color-mix(in oklab, var(--waline-role-accent) 18%, transparent);
+}
+
+/* 徽章：高光扫动 + 圆角胶囊 */
+#waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.24rem;
+  min-height: 1.05rem;
+  margin: 0 0.42rem 0 0;
+  padding: 0.07rem 0.42rem;
+  border: 1px solid color-mix(in oklab, var(--waline-role-accent) 52%, transparent);
+  border-radius: 999px;
+  background-color: color-mix(in oklab, var(--waline-role-soft) 78%, white);
+  background-image: linear-gradient(
+    112deg,
+    transparent 0%,
+    color-mix(in oklab, var(--waline-role-accent) 22%, transparent) 37%,
+    color-mix(in oklab, white 94%, transparent) 50%,
+    color-mix(in oklab, var(--waline-role-accent) 22%, transparent) 63%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  background-position: 130% 0;
+  color: var(--waline-role-ink);
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, white 42%, transparent),
+    0 0 0.52rem color-mix(in oklab, var(--waline-role-accent) 24%, transparent);
+  animation: waline-role-chip-sweep var(--waline-role-sweep-duration) cubic-bezier(0.42, 0, 0.22, 1) infinite;
+  will-change: background-position;
+}
+
+#waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-role-badge::before {
+  display: inline-block;
+  width: 0.72rem;
+  height: 0.72rem;
+  content: "";
+  background: currentColor;
+  -webkit-mask-image: var(--waline-role-symbol);
+  mask-image: var(--waline-role-symbol);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+/* 高光扫动关键帧 */
+@keyframes waline-role-chip-sweep {
+  0%, 100% {
+    background-position: 130% 0;
+  }
+  48%, 68% {
+    background-position: -34% 0;
+  }
+}
+
+/* 站长（owner）色板：紫色（与 Aemeath AI 角色一致；用户视觉偏好） */
+#waline .wl-card-item[data-waline-role="owner"] {
+  --waline-role-accent: #8d7cff !important;
+  --waline-role-soft: #ebe8ff !important;
+  --waline-role-ink: #5c49c7 !important;
+  --waline-role-wash: 27% !important;
+  --waline-role-outline: 24% !important;
+  --waline-role-sweep-duration: 4.6s !important;
+  --waline-role-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M60 17c4 20 12 28 32 32-20 4-28 12-32 32-4-20-12-28-32-32 20-4 28-12 32-32Z' stroke-width='4.5'/%3E%3Ccircle cx='60' cy='49' r='10' stroke-width='3.5'/%3E%3Cpath d='M25 78c2 10 6 14 16 16-10 2-14 6-16 16-2-10-6-14-16-16 10-2 14-6 16-16Zm73-61c1.5 7 4.5 10 12 12-7.5 1.5-10.5 4.5-12 12-1.5-7.5-4.5-10.5-12-12 7.5-2 10.5-5 12-12Z' stroke-width='3'/%3E%3Cpath d='M48 95h24M52 105h16' stroke-width='4'/%3E%3C/g%3E%3C/svg%3E") !important;
+}
+
+/* 站长头像上的管理员图标填充为角色色 */
+#waline .wl-card-item[data-waline-role="owner"] > .wl-user > .administrator-icon path {
+  fill: var(--waline-role-accent) !important;
+}
+
+/* 隐藏 Waline 原生的「主理人」/「本站主理人」标签，避免与自定义徽章重复显示 */
+#waline [data-waline-native-owner-label] {
+  display: none !important;
+}
+
+/* 推荐友链：黄色色板（强制覆盖 Waline 默认变量） */
+#waline .wl-card-item[data-waline-role="recommended"] {
+  --waline-role-accent: #f4bb2e !important;
+  --waline-role-soft: #fff0a2 !important;
+  --waline-role-ink: #956100 !important;
+  --waline-role-wash: 48% !important;
+  --waline-role-outline: 30% !important;
+  --waline-role-sweep-duration: 4.1s !important;
+}
+
+/* 暗色模式：站长/友链紫金调适配 */
+html.dark #waline .wl-card-item[data-waline-role="owner"] {
+  --waline-role-ink: #c4b8ff !important;
+  --waline-role-wash: 18% !important;
+  --waline-role-outline: 22% !important;
+}
+
+html.dark #waline .wl-card-item[data-waline-role="recommended"] {
+  --waline-role-ink: #f3d17c !important;
+  --waline-role-wash: 22% !important;
+  --waline-role-outline: 25% !important;
+}
+
+/* 减少动效偏好：停用扫光 */
+@media (prefers-reduced-motion: reduce) {
+  #waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-nick,
+  #waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-role-badge {
+    animation: none;
+    background-position: 50% 0;
+  }
+}
+
+/* 移动端：徽章 + 内容块 + 用户名紧凑 */
+@media (max-width: 580px) {
+  #waline .wl-card-item[data-waline-role] > .wl-card > .wl-content {
+    margin-block: 0.34rem 0.62rem;
+    padding: 0.5rem 0.58rem 0.56rem;
+    border-radius: 0.65rem;
+  }
+  #waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-nick {
+    padding: 0.08rem 0.34rem;
+    border-radius: 0.5rem;
+  }
+  #waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-role-badge {
+    gap: 0.18rem;
+    padding-inline: 0.34rem;
+    font-size: 0.58rem;
+  }
+  #waline .wl-card-item[data-waline-role] > .wl-card > .wl-head > .wl-role-badge::before {
+    width: 0.64rem;
+    height: 0.64rem;
+  }
+}

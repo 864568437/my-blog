@@ -1,0 +1,289 @@
+--- 
+/**
+ * Waline 角色装饰层（对齐 Aemeath 博客）
+ * - recommended：评论者 URL 命中 friendsConfig 中 recommended:true 友链 → 黄色「推荐友链」
+ * - owner：评论带管理员图标且 URL 命中本站 site_url 或原生「本站主理人」标签 → 蓝色「本站主理人」
+ * 通过 data-waline-role 驱动 waline.css 中的角色色板与样式
+ */
+interface Props {
+	rootSelector?: string;
+}
+
+const { rootSelector = "#waline" } = Astro.props;
+---
+
+<Fragment />
+
+<script define:vars={{ rootSelector }}>
+	(function () {
+		const roleLabels = {
+			owner: { label: "本站主理人", title: "本站站长评论" },
+			recommended: { label: "推荐友链", title: "本站已识别的推荐友链评论" },
+		};
+
+		// URL 规范化：去协议、去 www、统一 path 形态，便于与 friendsConfig siteurl 匹配
+		const normalizeSiteUrl = (value) => {
+			if (!value || typeof value !== "string") return "";
+			let input = value.trim();
+			if (!input) return "";
+			if (input.startsWith("//")) {
+				input = "https:" + input;
+			} else if (!/^[a-z][a-z\d+.-]*:\/\//iu.test(input)) {
+				input = "https://" + input;
+			}
+			try {
+				const parsed = new URL(input);
+				if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "";
+				const hostname = parsed.hostname
+					.toLowerCase()
+					.replace(/\.$/u, "")
+					.replace(/^www\./u, "");
+				if (!hostname) return "";
+				const isDefaultPort =
+					(parsed.protocol === "http:" && parsed.port === "80") ||
+					(parsed.protocol === "https:" && parsed.port === "443");
+				const port = parsed.port && !isDefaultPort ? ":" + parsed.port : "";
+				const pathname = parsed.pathname
+					.replace(/\/{2,}/gu, "/")
+					.replace(/\/+$/u, "")
+					.toLowerCase();
+				return hostname + port + pathname;
+			} catch {
+				return "";
+			}
+		};
+
+		const getRecommendedSiteUrls = (root) => {
+			try {
+				const values = JSON.parse(root.dataset.walineRecommendedLinks || "[]");
+				return Array.isArray(values)
+					? values.filter((v) => typeof v === "string")
+					: [];
+			} catch (error) {
+				console.error("[WalineRoleBadge] 推荐友链 URL 解析失败", error);
+				return [];
+			}
+		};
+
+		const getNickUrl = (nick) => {
+			if (!nick) return "";
+			if (nick instanceof HTMLAnchorElement) {
+				return normalizeSiteUrl(nick.getAttribute("href") || nick.href || "");
+			}
+			return "";
+		};
+
+		const syncRoleBadge = (head, nick, role) => {
+			if (!head) return;
+			const customBadges = Array.from(
+				head.querySelectorAll('[data-waline-role-badge]')
+			);
+			if (!nick || !role) {
+				customBadges.forEach((badge) => badge.remove());
+				return;
+			}
+			const badge = customBadges.shift() || document.createElement("span");
+			customBadges.forEach((extraBadge) => extraBadge.remove());
+			const { label, title } = roleLabels[role] || {};
+			if (!label) return;
+			badge.className = "wl-badge wl-role-badge";
+			badge.dataset.walineRoleBadge = role;
+			if (badge.textContent !== label) badge.textContent = label;
+			badge.title = title || "";
+			if (!badge.isConnected || badge.parentElement !== head) {
+				nick.insertAdjacentElement("afterend", badge);
+			}
+		};
+
+		// 检测 head 内是否有原生「主理人」/「本站主理人」标签（兼容默认与本地化文案）
+		const hasOwnerLabel = (head) => {
+			if (!head) return false;
+			return Array.from(
+				head.querySelectorAll(":scope > .wl-badge:not(.wl-role-badge)")
+			).some((badge) => {
+				const text = badge.textContent?.trim() || "";
+				return text === "本站主理人" || text === "主理人";
+			});
+		};
+
+		// 收集 role 为 owner 的评论，给原生主理人标签打标记以便 CSS 隐藏并避免重复
+		const syncNativeOwnerLabel = (head, role, nativeBadges) => {
+			if (!head) return;
+			nativeBadges.forEach((badge) => {
+				const text = badge.textContent?.trim() || "";
+				if (role === "owner" && (text === "本站主理人" || text === "主理人")) {
+					badge.dataset.walineNativeOwnerLabel = "true";
+				} else {
+					delete badge.dataset.walineNativeOwnerLabel;
+				}
+			});
+		};
+
+		let frameId = null;
+		let observer = null;
+		let eventController = null;
+		let activeRoot = null;
+		let recommendedSet = new Set();
+		let ownSiteUrl = "";
+		let ownerNicknames = new Set();
+
+		const decorate = () => {
+			frameId = null;
+			if (!activeRoot || !activeRoot.isConnected) return;
+
+			const items = activeRoot.querySelectorAll(".wl-card-item");
+			items.forEach((item) => {
+				const head = item.querySelector(":scope > .wl-card > .wl-head");
+				if (!head) return;
+				const nick = head.querySelector(":scope > .wl-nick");
+				const nativeBadges = Array.from(
+					head.querySelectorAll(":scope > .wl-badge:not(.wl-role-badge)")
+				);
+				const nickUrl = getNickUrl(nick);
+				const nickText = (nick?.textContent || "").trim();
+				const nickTextLower = nickText.toLowerCase();
+
+				// 站长识别（三个独立信号，满足任一即视为 owner）：
+				// 1) 评论者 URL === ownSiteUrl（如 https://blog.fqzlr.top/）
+				// 2) 原生 head 内存在「主理人」/「本站主理人」徽章（即使取消也会尝试兜底匹配）
+				// 3) 昵称匹配 ownerNicknames（大小写不敏感）
+				const isOwnerByUrl = Boolean(ownSiteUrl && nickUrl === ownSiteUrl);
+				const isOwnerByLabel = hasOwnerLabel(head);
+				const isOwnerByNick = Array.from(ownerNicknames).some(
+					(name) => name && name.toLowerCase() === nickTextLower
+				);
+				const hasOwnerSignal = isOwnerByUrl || isOwnerByLabel || isOwnerByNick;
+
+				let role = null;
+				if (hasOwnerSignal) {
+					role = "owner";
+				} else if (nickUrl && recommendedSet.has(nickUrl)) {
+					role = "recommended";
+				}
+
+				// 调试日志：仅对前 3 条评论输出 owner 信号判断详情，便于排查
+				if (items.length > 0 && !decorate._logged) {
+					console.debug("[WalineRoleBadge]", {
+						nickText,
+						nickUrl,
+						ownSiteUrl,
+						ownerNicknames: Array.from(ownerNicknames),
+						isOwnerByUrl,
+						isOwnerByLabel,
+						isOwnerByNick,
+						role,
+					});
+				}
+				decorate._logged = true;
+
+				if (role) {
+					item.dataset.walineRole = role;
+				} else {
+					delete item.dataset.walineRole;
+				}
+				syncRoleBadge(head, nick, role);
+				syncNativeOwnerLabel(head, role, nativeBadges);
+			});
+		};
+
+		const schedule = () => {
+			if (frameId !== null) return;
+			frameId = requestAnimationFrame(decorate);
+		};
+
+		const teardown = () => {
+			if (frameId !== null) {
+				cancelAnimationFrame(frameId);
+				frameId = null;
+			}
+			if (observer) {
+				observer.disconnect();
+				observer = null;
+			}
+			if (eventController) {
+				eventController.abort();
+				eventController = null;
+			}
+			if (activeRoot) {
+				activeRoot.querySelectorAll(".wl-card-item").forEach((item) => {
+					delete item.dataset.walineRole;
+					item
+						.querySelectorAll('[data-waline-role-badge]')
+						.forEach((badge) => badge.remove());
+				});
+			}
+			activeRoot = null;
+			recommendedSet = new Set();
+			ownSiteUrl = "";
+			ownerNicknames = new Set();
+		};
+
+		const getOwnerNicknames = (root) => {
+			try {
+				const values = JSON.parse(root.dataset.walineOwnerNicknames || "[]");
+				return Array.isArray(values)
+					? values.filter((v) => typeof v === "string" && v.trim())
+					: [];
+			} catch (error) {
+				console.error("[WalineRoleBadge] 站长昵称列表解析失败", error);
+				return [];
+			}
+		};
+
+		const init = () => {
+			const root = document.querySelector(rootSelector);
+			if (!root || root === activeRoot) return;
+
+			teardown();
+			activeRoot = root;
+			recommendedSet = new Set(
+				getRecommendedSiteUrls(root)
+					.map(normalizeSiteUrl)
+					.filter(Boolean)
+			);
+			ownSiteUrl = normalizeSiteUrl(root.dataset.walineSiteUrl || "");
+			ownerNicknames = new Set(
+				getOwnerNicknames(root).map((s) => s.trim())
+			);
+
+			eventController = new AbortController();
+			observer = new MutationObserver(schedule);
+			observer.observe(root, { childList: true, subtree: true });
+			schedule();
+		};
+
+		const scheduleInit = () => {
+			requestAnimationFrame(() => {
+				if (document.querySelector(rootSelector)) {
+					init();
+				} else {
+					teardown();
+				}
+			});
+		};
+
+		// 首次挂载
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", scheduleInit, { once: true });
+		} else {
+			scheduleInit();
+		}
+
+		// Astro 页面切换
+		document.addEventListener("astro:page-load", scheduleInit);
+		// Swup 页面切换
+		document.addEventListener("swup:contentReplaced", scheduleInit);
+		document.addEventListener("swup:page:view", scheduleInit);
+
+		// 兜底：监听 swup 容器变化（与 Aemeath 一致）
+		const observeSwupContainer = () => {
+			const container = document.querySelector("#swup-container");
+			if (!container) return;
+			new MutationObserver(scheduleInit).observe(container, {
+				childList: true,
+				subtree: true,
+			});
+		};
+		observeSwupContainer();
+	})();
+</script>

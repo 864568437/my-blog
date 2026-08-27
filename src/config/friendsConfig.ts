@@ -66,7 +66,8 @@ export const friendsConfig: FriendLink[] = [
 		    "Blog"
 		  ],
 		  "weight": 10,
-		  "enabled": true
+		  "enabled": true,
+		  "recommended": true
 		},
 		{
 		  "title": "团子和蛋糕",
@@ -78,7 +79,8 @@ export const friendsConfig: FriendLink[] = [
 		    "Blog"
 		  ],
 		  "weight": 10,
-		  "enabled": true
+		  "enabled": true,
+		  "recommended": true,
 		},
 		{
 		  "title": "Olinl Blog",
@@ -90,7 +92,8 @@ export const friendsConfig: FriendLink[] = [
 		    "Blog"
 		  ],
 		  "weight": 10,
-		  "enabled": true
+		  "enabled": true,
+		  "recommended": true
 		},
 		{
 		  "title": "夏夜流萤",
@@ -102,19 +105,23 @@ export const friendsConfig: FriendLink[] = [
 		    "Blog"
 		  ],
 		  "weight": 10,
-		  "enabled": true
+		  "enabled": true,
+		  "recommended": true
 		},
 		{
-		  "title": "椰汁の主页",
-		  "imgurl": "https://free.picui.cn/free/2026/03/23/69c12fe83f7a4.jpg",
-		  "desc": "关关难过关关过,前路漫漫亦灿灿.",
-		  "siteurl": "https://home.132614.xyz/",
-		  "linkpage": "https://home.132614.xyz/",
+		  "title": "朝朝听雨",
+		  "imgurl": "https://rainzt.cn/zzty.png",
+		  "desc": "物物而不物于物，念念而不念于念",
+		  "siteurl": "http://rainzt.cn",
+		  "linkpage": "https://rainzt.cn/friends/",
 		  "tags": [
 		    "Blog"
 		  ],
 		  "weight": 10,
-		  "enabled": true
+		  "enabled": true,
+		  "rss": "https://rainzt.cn/rss.xml",
+		  "siteshot": "https://rainzt.cn/index.png",
+		  "recommended": true
 		},
 		{
 		  "title": "UpXuu",
@@ -122,6 +129,19 @@ export const friendsConfig: FriendLink[] = [
 		  "desc": "逐光而上！",
 		  "siteurl": "https://upxuu.com/",
 		  "linkpage": "https://upxuu.com/friends/",
+		  "tags": [
+		    "Blog"
+		  ],
+		  "weight": 10,
+		  "enabled": true,
+		  "recommended": true
+		},
+		{
+		  "title": "椰汁の主页",
+		  "imgurl": "https://free.picui.cn/free/2026/03/23/69c12fe83f7a4.jpg",
+		  "desc": "关关难过关关过,前路漫漫亦灿灿.",
+		  "siteurl": "https://home.132614.xyz/",
+		  "linkpage": "https://home.132614.xyz/",
 		  "tags": [
 		    "Blog"
 		  ],

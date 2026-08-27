@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿---
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿---
 import { getEntry, render } from "astro:content";
 import Comment from "@components/comment/index.astro";
 import Markdown from "@components/common/Markdown.astro";
@@ -7,6 +7,8 @@ import FriendCard from "@components/features/FriendCard.astro";
 import FriendRulesModal from "@components/features/FriendRulesModal.astro";
 import FriendFailWindow from "@components/features/FriendFailWindow.astro";
 import FriendFailTombstone from "@components/features/FriendFailTombstone.astro";
+import FriendsMagicLink from "@components/features/FriendsMagicLink.astro";
+import FriendsMagicPortal from "@components/features/FriendsMagicPortal.astro";
 import { friendsPageConfig, getEnabledFriends, commentConfig } from "@/config";
 import FriendsEditor from "@/components/edit/FriendsEditor.svelte";
 import I18nKey from "@i18n/i18nKey";
@@ -24,6 +26,24 @@ const { Content } = await render(friendsPost);
 
 // 从 friendsConfig.ts 读取友链数据
 const items = getEnabledFriends();
+
+// 用于判断「站长」卡：当前站点的 siteurl（去 www、去尾斜杠）
+const ownSiteUrl = (() => {
+  const raw = friendsPageConfig?.siteInfo?.url || "";
+  return raw
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/+$/, "")
+    .toLowerCase();
+})();
+const normalizeFriendUrl = (url: string) =>
+  (url || "")
+    .trim()
+    .replace(/^https?:\/\//i, "")
+    .replace(/^www\./i, "")
+    .replace(/\/+$/, "")
+    .toLowerCase();
 
 // 生成 inline JSON（完整字段），供失效分区客户端脚本按 fail_count 分组渲染
 const friendListForInline = JSON.stringify(
@@ -70,19 +90,36 @@ const siteInfoText = _si
         breadcrumbs={[{ name: title, icon: "material-symbols:group" }]}
       >
         {
-          friendsPageConfig.applyLink && (
-            <div class="friend-header-toolbar w-full flex justify-end">
-              <button
-                data-open-friend-rules
-                class="edit-main-btn-style rounded-lg border border-neutral-900 dark:border-neutral-100 text-neutral-900 dark:text-neutral-100 hover:bg-neutral-900 hover:text-neutral-100 dark:hover:bg-neutral-100 dark:hover:text-neutral-900 transition-colors duration-200 font-medium flex items-center gap-1.5 cursor-pointer"
-                style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.9);background:transparent;color:rgba(0,0,0,0.9);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;line-height:1;height:32px;box-sizing:border-box;"
-              >
-                <Icon name="material-symbols:help-outline-rounded" class="text-base" />
-                如何申请友链
-              </button>
-            </div>
-          )
+          /* 页头右侧：如何申请友链（左） + 视图切换神奇按钮（右，原申请按钮位置） */
         }
+        <div class="friend-header-toolbar w-full flex justify-end items-center gap-2.5">
+          {friendsPageConfig.applyLink && (
+            <button
+              data-open-friend-rules
+              class="friend-toolbar-pill"
+            >
+              <Icon name="material-symbols:help-outline-rounded" class="text-base" />
+              如何申请友链
+            </button>
+          )}
+          <!-- 视图切换按钮：与申请友链按钮同族药丸样式 -->
+          <button
+            type="button"
+            id="friend-view-toggle"
+            data-expanded="false"
+            aria-controls="friends-grid"
+            aria-expanded="false"
+            class="friend-toolbar-pill friend-view-toggle"
+          >
+            <span data-view-toggle-label>简洁视图</span>
+            <Icon
+              name="material-symbols:expand-more-rounded"
+              class="text-base transition-transform duration-200"
+            />
+          </button>
+          <!-- 神奇按钮（复刻 Aemeath）：原「如何申请友链」位置（最右），打开友链漫游舱 -->
+          <FriendsMagicLink />
+        </div>
       </PageHeader>
 
       <!-- 友链编辑器 -->
@@ -112,11 +149,14 @@ const siteInfoText = _si
         )
       }
 
-      <!-- 友链网格 -->
-      <div class="friends-grid" id="friends-grid">
+      <!-- 友链网格（data-view 由视图切换脚本控制：screenshot / compact） -->
+      <div class="friends-grid" id="friends-grid" data-view="screenshot">
         <div class="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 my-4">
         {
-          items.map((item) => (
+          items.map((item) => {
+            const isOwn = Boolean(ownSiteUrl) && normalizeFriendUrl(item.siteurl) === ownSiteUrl;
+            const isRecommended = !isOwn && item.recommended === true;
+            return (
             <div class="friend-card" data-friend-id={item.siteurl} data-tags={item.tags?.join(",")}>
               <FriendCard
                 title={item.title}
@@ -125,9 +165,12 @@ const siteInfoText = _si
                 desc={item.desc}
                 tags={item.tags}
                 siteshot={item.siteshot || ""}
+                isOwn={isOwn}
+                isRecommended={isRecommended}
               />
             </div>
-          ))
+            );
+          })
         }
         </div>
       </div>
@@ -205,6 +248,9 @@ const siteInfoText = _si
 
   <!-- 友链申请指南弹窗 -->
   <FriendRulesModal applyLink={friendsPageConfig.applyLink} commentEnabled={isCommentEnabled} />
+
+  <!-- 友链漫游舱（神奇按钮打开，three.js 全屏隧道） -->
+  <FriendsMagicPortal items={items} />
 
   <script slot="head" is:inline>
     if (!customElements.get("friend-filter")) {
@@ -725,6 +771,84 @@ const siteInfoText = _si
     })();
   </script>
 
+  <script>
+    /* ========== 友链视图切换：截图视图（默认）/ 简洁视图（Aemeath 紧凑卡片） ==========
+     * 切换 #friends-grid 的 data-view 属性，样式由上方 <style> 中的
+     * #friends-grid[data-view="compact"] 规则承担。
+     * 选择持久化到 localStorage；IIFE + ready 标记防止 Swup 重复绑定。 */
+    (function initFriendViewToggle() {
+      if ((window as any).__friendViewToggleReady) {
+        // Swup 页面重新进入：重新应用一次持久化视图并绑定新 DOM
+        applySavedView();
+      }
+      (window as any).__friendViewToggleReady = true;
+
+      var STORAGE_KEY = "friends-view-mode";
+
+      function getGrid() {
+        return document.getElementById("friends-grid");
+      }
+      function getBtn() {
+        return document.getElementById("friend-view-toggle");
+      }
+
+      function applyView(mode) {
+        var grid = getGrid();
+        var btn = getBtn();
+        if (!grid) return;
+        var compact = mode === "compact";
+        grid.setAttribute("data-view", compact ? "compact" : "screenshot");
+        if (btn) {
+          btn.setAttribute("data-expanded", String(compact));
+          btn.setAttribute("aria-expanded", String(compact));
+          var label = btn.querySelector("[data-view-toggle-label]");
+          // 按钮文案显示"将切换到的视图"
+          if (label) label.textContent = compact ? "截图视图" : "简洁视图";
+        }
+      }
+
+      function getSavedView() {
+        try {
+          return localStorage.getItem(STORAGE_KEY) === "compact"
+            ? "compact"
+            : "screenshot";
+        } catch (_) {
+          return "screenshot";
+        }
+      }
+
+      function applySavedView() {
+        applyView(getSavedView());
+      }
+
+      if (!(window as any).__friendViewToggleBound) {
+        (window as any).__friendViewToggleBound = true;
+        document.addEventListener("click", function (e) {
+          var target = e.target instanceof Element ? e.target : null;
+          if (!target) return;
+          var btn = target.closest("#friend-view-toggle");
+          if (!btn) return;
+          var next =
+            getGrid()?.getAttribute("data-view") === "compact"
+              ? "screenshot"
+              : "compact";
+          applyView(next);
+          try {
+            localStorage.setItem(STORAGE_KEY, next);
+          } catch (_) { /* ignore */ }
+        });
+        // 首次进入 / Swup 页面加载完成后应用持久化视图
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", applySavedView, { once: true });
+        } else {
+          applySavedView();
+        }
+        document.addEventListener("astro:page-load", applySavedView);
+        document.addEventListener("astro:after-swap", applySavedView);
+      }
+    })();
+  </script>
+
   <style>
     /* ============ 友链申请指南区域 ============ */
     .flink-guide-dot {
@@ -929,6 +1053,136 @@ const siteInfoText = _si
       .page-header-toolbar-slot {
         width: 100%;
       }
+    }
+
+    /* ============ 页头工具栏共用药丸按钮（如何申请友链 / 视图切换） ============ */
+    .friend-toolbar-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      min-height: 2rem;
+      padding: 0.35rem 0.7rem;
+      border: 1px solid color-mix(in srgb, var(--primary) 22%, var(--line-divider));
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--primary) 8%, var(--card-bg));
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 650;
+      line-height: 1;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+    }
+    .friend-toolbar-pill:hover {
+      border-color: color-mix(in srgb, var(--primary) 42%, var(--line-divider));
+      background: color-mix(in srgb, var(--primary) 14%, var(--card-bg));
+    }
+    .friend-toolbar-pill:focus-visible {
+      outline: 2px solid color-mix(in srgb, var(--primary) 68%, transparent);
+      outline-offset: 2px;
+    }
+    .friend-toolbar-pill:active {
+      transform: scale(0.96);
+    }
+    .friend-toolbar-pill :global(svg) {
+      flex: 0 0 auto;
+    }
+    /* 视图切换按钮专属：箭头旋转 */
+    .friend-view-toggle :global(svg) {
+      transition: transform 200ms ease;
+    }
+    .friend-view-toggle[data-expanded="true"] :global(svg) {
+      transform: rotate(180deg);
+    }
+
+    /* ============ 简洁视图（复刻 Aemeath 紧凑卡片：头像 + 标题 + 描述 + 标签，隐藏卡内截图） ============
+     * 注意：卡片内部元素由 FriendCard.astro 渲染， Astro scoped 样式匹配不到，
+     * 必须用 :global() 包裹，否则切换按钮不生效。
+     * 鼠标悬浮截图由全局 mouse-follow 预览（friend-image-preview）承担，两种视图都生效 */
+    #friends-grid[data-view="compact"] :global(.friend-card-screenshot) {
+      display: none;
+    }
+    /* 卡片 = 信息区：补全四边框 + 圆角（截图视图下边框由截图区/信息区分段拼出） */
+    #friends-grid[data-view="compact"] :global(.friend-card-info) {
+      width: 100%;
+      align-items: center;
+      min-height: 0;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--card-border, oklch(85% 0 0 / 0.92));
+      border-radius: 16px;
+    }
+    #friends-grid[data-view="compact"] :global(.friend-card-link:hover .friend-card-info) {
+      border-color: var(--card-border-hover, rgba(15, 23, 42, 0.16));
+    }
+    /* 头像：方形圆角、不上移（Aemeath w-16 rounded-xl） */
+    #friends-grid[data-view="compact"] :global(.friend-card-avatar-wrap) {
+      width: 3.5rem;
+      height: 3.5rem;
+      margin: 0;
+    }
+    #friends-grid[data-view="compact"] :global(.friend-card-avatar) {
+      border-radius: 0.75rem;
+    }
+    /* 文字列：单行描述 + 显示标签 */
+    #friends-grid[data-view="compact"] :global(.friend-card-text) {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    #friends-grid[data-view="compact"] :global(.friend-card-desc) {
+      display: block;
+      min-height: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+    }
+    #friends-grid[data-view="compact"] :global(.friend-card-tags) {
+      display: flex;
+    }
+    /* hover 上浮 + 置顶（让特效/预览不被相邻卡片压住） */
+    #friends-grid[data-view="compact"] :global(.friend-card:hover) {
+      z-index: 60;
+    }
+    /* 紧凑卡内装饰元素适度缩小 */
+    #friends-grid[data-view="compact"] :global(.friend-card-recommended-star),
+    #friends-grid[data-view="compact"] :global(.friend-card-own-deco) {
+      width: 3.4rem;
+      height: 3.2rem;
+    }
+    /* 状态徽章：紧凑卡更矮小，徽章同步缩小避免视觉过大 */
+    #friends-grid[data-view="compact"] :global(.friend-status) {
+      top: 0.375rem;
+      right: 0.375rem;
+      gap: 0.2rem;
+      padding: 0.1rem 0.35rem 0.1rem 0.3rem;
+      font-size: 0.5625rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+    #friends-grid[data-view="compact"] :global(.friend-status::before) {
+      width: 4px;
+      height: 4px;
+    }
+    /* 紧凑模式下保持站长/推荐卡色调（ID 优先级与上方基础规则相同，靠源顺序取胜） */
+    #friends-grid[data-view="compact"] :global(.friend-card-link--own .friend-card-info) {
+      border-color: color-mix(in srgb, #8d7cff 38%, var(--card-border, oklch(85% 0 0 / 0.92)));
+      background: color-mix(in srgb, #ebe8ff 48%, var(--card-bg, #fff));
+      box-shadow: 0 0.28rem 0.9rem color-mix(in srgb, #8d7cff 16%, transparent);
+    }
+    #friends-grid[data-view="compact"] :global(.friend-card-link--recommended .friend-card-info) {
+      border-color: color-mix(in srgb, #f4bb2e 42%, var(--card-border, oklch(85% 0 0 / 0.92)));
+      background: color-mix(in srgb, #fff0a2 48%, var(--card-bg, #fff));
+      box-shadow: 0 0.28rem 0.9rem color-mix(in srgb, #f4bb2e 18%, transparent);
+    }
+    :global(.dark) #friends-grid[data-view="compact"] :global(.friend-card-link--own .friend-card-info) {
+      border-color: color-mix(in srgb, #a594ff 36%, var(--card-border, rgba(255, 255, 255, 0.10)));
+      background: color-mix(in srgb, #3a2e7a 32%, var(--card-bg, #1c1d20));
+      box-shadow: 0 0.28rem 0.9rem color-mix(in srgb, #8d7cff 18%, transparent);
+    }
+    :global(.dark) #friends-grid[data-view="compact"] :global(.friend-card-link--recommended .friend-card-info) {
+      border-color: color-mix(in srgb, #e9bd51 32%, var(--card-border, rgba(255, 255, 255, 0.10)));
+      background: color-mix(in srgb, #7a5714 18%, var(--card-bg, #1c1d20));
+      box-shadow: 0 0.28rem 0.9rem color-mix(in srgb, #d39b24 12%, transparent);
     }
   </style>
   </MainGridLayout>
