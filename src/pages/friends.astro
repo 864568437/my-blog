@@ -633,6 +633,14 @@ const siteInfoText = _si
      * 数据源：Layout.astro 的 renderLinkStatus() 从 check-flink result.json 注入的
      *         data-siteshot 属性（与卡片内嵌截图共用同一数据流，不新增依赖）。
      * 仅精确指针设备启用；预览层 pointer-events:none 不阻塞卡片交互。
+     *
+     * 【关键】preview div 通过 document.body.appendChild 挂载到 body 末尾，
+     * 不属于 Swup 容器，跨页面切换不会被销毁。
+     * 样式必须放在全局 CSS（src/styles/components/friend-image-preview.css），
+     * 否则离开友链页后该 div 失去 position/opacity 等样式，
+     * 会落到 body 文档流中暴露已加载的图片作为"页面背景"。
+     * 即便样式已全局化，这里也在每次 Swup 切换前主动清空图片 src 并隐藏，
+     * 形成双重保险，避免任何时序竞态。
      */
     (function initFriendImagePreview() {
       if ((window as any).__friendImagePreviewReady) return;
@@ -650,6 +658,16 @@ const siteInfoText = _si
       document.body.appendChild(preview);
 
       var GAP = 16;
+
+      // 完全清理：移除 is-visible + 清空图片 src（释放解码缓存，避免过渡瞬间残影）
+      function hardHide() {
+        preview.classList.remove("is-visible");
+        // 把位置移到屏幕外，配合全局 visibility:hidden 双重保险
+        try {
+          preview.style.left = "-9999px";
+          preview.style.top = "-9999px";
+        } catch (_) { /* ignore */ }
+      }
 
       function place(x, y) {
         var rect = preview.getBoundingClientRect();
@@ -699,9 +717,11 @@ const siteInfoText = _si
         place(e.clientX, e.clientY);
       });
 
-      // 页面切换后清除残留预览
-      document.addEventListener("astro:page-load", hide);
-      document.addEventListener("astro:after-swap", hide);
+      // 页面切换前/后立即隐藏，避免 Swup 过渡期间（main-grid opacity 0.01）
+      // 预览图片以"页面背景"形式暴露在 body 末尾
+      document.addEventListener("astro:before-swap", hardHide);
+      document.addEventListener("astro:after-swap", hardHide);
+      document.addEventListener("astro:page-load", hardHide);
     })();
   </script>
 
@@ -896,51 +916,18 @@ const siteInfoText = _si
       color: rgba(0, 0, 0, 0.9);
     }
 
+    /* ============ 悬停主页截图预览（body 级浮层，样式已抽到全局 friend-image-preview.css） ============
+     * 这里只放 friends 页面特有的样式，全局基础样式（position/opacity/z-index 等）
+     * 见 src/styles/components/friend-image-preview.css。
+     * 必须放在全局：preview div 挂载到 document.body，不随 Swup 销毁；
+     * 若样式只在此页生效，跨页后 div 会落到 body 流中暴露图片。
+     */
     @media (max-width: 768px) {
       :has(> .page-header-toolbar-slot) {
         flex-direction: column;
       }
       .page-header-toolbar-slot {
         width: 100%;
-      }
-    }
-
-    /* ============ 悬停主页截图预览（body 级浮层，需 :global） ============ */
-    :global(.friend-image-preview) {
-      position: fixed;
-      z-index: 60;
-      max-width: min(28rem, 80vw);
-      max-height: min(24rem, 70vh);
-      padding: 0.5rem;
-      border: 2px solid var(--deep-text);
-      border-radius: var(--radius-large, 0.75rem);
-      background: var(--page-bg);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-      pointer-events: none;
-      opacity: 0;
-      transform: scale(0.92);
-      transition:
-        opacity 180ms ease,
-        transform 180ms ease;
-      /* 位置由脚本跟随鼠标设置 */
-    }
-
-    :global(.friend-image-preview.is-visible) {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    :global(.friend-image-preview img) {
-      display: block;
-      max-width: 100%;
-      max-height: calc(min(24rem, 70vh) - 1rem);
-      object-fit: contain;
-      border-radius: calc(var(--radius-large, 0.75rem) - 6px);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      :global(.friend-image-preview) {
-        transition: none;
       }
     }
   </style>

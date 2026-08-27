@@ -1,0 +1,62 @@
+/* ==========================================================================
+   友链卡片悬停预览层（全局样式）
+   --------------------------------------------------------------------------
+   【重要】此样式必须放在全局样式表中，不能放在某个 .astro 页面 <style> 里：
+   friends.astro 中动态创建的 .friend-image-preview div 会被挂载到
+   document.body 末尾（不随 Swup 销毁）。如果样式只在该页面生效，
+   一旦用户离开友链页跳转其它页面，<style> 块会被卸载，
+   该 div 就会失去 position: fixed / opacity: 0 / pointer-events: none，
+   落到 body 文档流中，把最后一次悬停加载的友链整站截图暴露在 Swup 过渡期间
+   （main-grid opacity 0.01）形成"页面背景被友链截图占据"的视觉异常。
+   ========================================================================== */
+
+.friend-image-preview {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 60;
+	max-width: min(28rem, 80vw);
+	max-height: min(24rem, 70vh);
+	padding: 0.5rem;
+	border: 2px solid var(--deep-text);
+	border-radius: var(--radius-large, 0.75rem);
+	background: var(--page-bg);
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+	/* 关键：默认完全隐藏 + 不响应指针，避免任何情况下意外可见 */
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transform: scale(0.92);
+	transition:
+		opacity 180ms ease,
+		transform 180ms ease,
+		visibility 0s linear 180ms;
+}
+
+.friend-image-preview.is-visible {
+	opacity: 1;
+	visibility: visible;
+	transform: scale(1);
+	/* 显示时 visibility 立即切换，配合 opacity 过渡形成淡入 */
+	transition:
+		opacity 180ms ease,
+		transform 180ms ease,
+		visibility 0s linear 0s;
+}
+
+.friend-image-preview img {
+	display: block;
+	max-width: 100%;
+	max-height: calc(min(24rem, 70vh) - 1rem);
+	object-fit: contain;
+	border-radius: calc(var(--radius-large, 0.75rem) - 6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.friend-image-preview {
+		transition: none;
+	}
+	.friend-image-preview.is-visible {
+		transition: none;
+	}
+}
