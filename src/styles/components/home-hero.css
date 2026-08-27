@@ -399,14 +399,11 @@
 
 .home-hero--motion-pending .home-hero__motto-text {
 	transform: translateY(68px);
-	filter: blur(14px);
 }
 
+/* LCP 优化：名称始终可见，不再被入场动画预隐藏 */
 .home-hero--motion-pending .home-hero__name {
-	opacity: 0;
-	transform: translateX(-78px) scaleX(0.78);
-	transform-origin: 0% 50%;
-	clip-path: inset(0 100% 0 0);
+	/* 保持可见以加速 LCP */
 }
 
 .home-hero--motion-pending .home-hero__name-badge {
@@ -430,7 +427,6 @@
 .home-hero--motion-pending .home-hero__speech {
 	opacity: 0;
 	transform: translate(-50%, 34px) scale(0.92);
-	filter: blur(10px);
 }
 
 .home-hero--motion-pending .home-hero__speech-type {
@@ -440,8 +436,7 @@
 .home-hero--motion-pending .home-hero__character-motion {
 	opacity: 0;
 	visibility: hidden;
-	filter: blur(10px) saturate(1.1);
-	transform: perspective(900px) translateY(58px) rotateX(68deg) scaleX(1.03) scaleY(0.72);
+	transform: translateY(58px) scaleX(1.03) scaleY(0.72);
 	transform-origin: 50% 100%;
 }
 
@@ -459,7 +454,6 @@
 .home-page--motion-pending > :not(#home-hero) [data-motion-card] {
 	opacity: 0;
 	transform: translateY(86px);
-	filter: blur(12px);
 }
 
 .home-page--motion-pending > :not(#home-hero) img,

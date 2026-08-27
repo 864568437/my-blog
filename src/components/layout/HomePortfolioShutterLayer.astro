@@ -299,6 +299,7 @@ const transparentPixel =
 		if (token !== initToken || !document.contains(root) || !matchesDesktop()) return;
 
 		gsap.registerPlugin(ScrollTrigger);
+		ScrollTrigger.config({ ignoreMobileResize: true, limitCallbacks: true });
 
 		const viewport = root.querySelector<HTMLElement>("[data-shutter-viewport]");
 		const finalImage = root.querySelector<HTMLElement>("[data-shutter-final-image]");

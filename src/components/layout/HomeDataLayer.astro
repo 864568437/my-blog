@@ -153,6 +153,7 @@ const skillItems = normalizeSkillItems({ items: skillsConfig.items });
 	import { formatCompactNumber } from "@/utils/home-data-layer.js";
 
 	gsap.registerPlugin(ScrollTrigger);
+	ScrollTrigger.config({ ignoreMobileResize: true, limitCallbacks: true });
 
 	type Cleanup = () => void;
 
@@ -376,13 +377,11 @@ const skillItems = normalizeSkillItems({ items: skillsConfig.items });
 				autoAlpha: 0,
 				y: 90,
 				rotateX: 10,
-				filter: "blur(10px)",
 				transformOrigin: "50% 100%",
 			}, {
 				autoAlpha: 1,
 				y: 0,
 				rotateX: 0,
-				filter: "blur(0px)",
 				duration: 1.15,
 				stagger: 0.18,
 			}, 0);
@@ -543,11 +542,9 @@ const skillItems = normalizeSkillItems({ items: skillsConfig.items });
 				bandTl.fromTo(loop, {
 					autoAlpha: 0,
 					y: 40,
-					filter: "blur(8px)",
 				}, {
 					autoAlpha: 1,
 					y: 0,
-					filter: "blur(0px)",
 					duration: 0.95,
 				}, 0.45);
 			}

@@ -239,11 +239,12 @@ const heroBioText = Array.isArray(profileConfig.bio)
 <script>
 	import { gsap } from "gsap";
 	import { ScrollTrigger } from "gsap/ScrollTrigger";
-	import { VFX } from "@vfx-js/core";
+
 	import { waitForPageLoaderHidden } from "@/utils/page-loader-controller.js";
 	import { HatchEffect } from "@/utils/hatch-effect.ts";
 
 	gsap.registerPlugin(ScrollTrigger);
+	ScrollTrigger.config({ ignoreMobileResize: true, limitCallbacks: true });
 
 	let workStatusTimer: number | null = null;
 	let heroOpeningTimeline: ReturnType<typeof gsap.timeline> | null = null;
@@ -279,7 +280,7 @@ const heroBioText = Array.isArray(profileConfig.bio)
 		}
 
 		const occupation = hero.querySelector(".home-hero__occupation");
-		const name = hero.querySelector(".home-hero__name");
+
 		const badge = hero.querySelector(".home-hero__name-badge");
 		const avatar = hero.querySelector(".home-hero__avatar-group");
 		const motto = hero.querySelector(".home-hero__motto-text");
@@ -344,22 +345,6 @@ const heroBioText = Array.isArray(profileConfig.bio)
 			}, 0.82);
 		}
 
-		if (name) {
-			heroOpeningTimeline.fromTo(name, {
-				autoAlpha: 0,
-				x: -78,
-				scaleX: 0.78,
-				clipPath: "inset(0 100% 0 0)",
-				transformOrigin: "0% 50%",
-			}, {
-				autoAlpha: 1,
-				x: 0,
-				scaleX: 1,
-				clipPath: "inset(0 0% 0 0)",
-				duration: 1.18,
-				ease: "expo.out",
-			}, 0.98);
-		}
 
 		if (badge) {
 			heroOpeningTimeline.fromTo(badge, {
@@ -416,22 +401,17 @@ const heroBioText = Array.isArray(profileConfig.bio)
 			heroOpeningTimeline.fromTo(characterMotion, {
 				autoAlpha: 0,
 				y: 58,
-				rotationX: 68,
 				scaleX: 1.03,
 				scaleY: 0.72,
-				transformPerspective: 900,
-				filter: "blur(10px) saturate(1.1)",
 				transformOrigin: "50% 100%",
 			}, {
 				autoAlpha: 1,
 				y: 0,
-				rotationX: 0,
 				scaleX: 1,
 				scaleY: 1,
-				filter: "blur(0px) saturate(1)",
 				duration: 1.56,
 				ease: "expo.out",
-				clearProps: "transform,filter,visibility",
+				clearProps: "transform,visibility",
 			}, 1.42);
 		}
 
@@ -449,12 +429,10 @@ const heroBioText = Array.isArray(profileConfig.bio)
 			heroOpeningTimeline.fromTo(motto, {
 				autoAlpha: 0,
 				y: 68,
-				filter: "blur(14px)",
 				clipPath: "inset(0 0 100% 0)",
 			}, {
 				autoAlpha: 1,
 				y: 0,
-				filter: "blur(0px)",
 				clipPath: "inset(0 0 0% 0)",
 				duration: 1.15,
 				ease: "expo.out",
@@ -467,17 +445,14 @@ const heroBioText = Array.isArray(profileConfig.bio)
 				xPercent: -50,
 				y: 34,
 				scale: 0.92,
-				filter: "blur(10px)",
 				transformOrigin: "50% 100%",
 			}, {
 				autoAlpha: 1,
 				xPercent: -50,
 				y: 0,
 				scale: 1,
-				filter: "blur(0px)",
 				duration: 0.92,
 				ease: "expo.out",
-				clearProps: "filter",
 			}, 2.62);
 		}
 
@@ -541,13 +516,11 @@ const heroBioText = Array.isArray(profileConfig.bio)
 					autoAlpha: 0,
 					y: 86,
 					rotateX: 12,
-					filter: "blur(12px)",
 					transformOrigin: "50% 100%",
 				}, {
 					autoAlpha: 1,
 					y: 0,
 					rotateX: 0,
-					filter: "blur(0px)",
 					duration: 1.05,
 					stagger: 0.12,
 					ease: "expo.out",
@@ -708,6 +681,7 @@ const heroBioText = Array.isArray(profileConfig.bio)
 
 		if (!document.contains(nameEl)) return;
 
+		const { VFX } = await import("@vfx-js/core");
 		destroyHeroHatch();
 
 		const heroEl = document.getElementById("home-hero");
@@ -779,12 +753,26 @@ const heroBioText = Array.isArray(profileConfig.bio)
 		destroyHeroHatch();
 	}
 
+	function nextIdle() {
+		return new Promise((resolve) => {
+			if (typeof requestIdleCallback === "function") {
+				requestIdleCallback(resolve, { timeout: 1500 });
+			} else {
+				setTimeout(resolve, 150);
+			}
+		});
+	}
+
 	async function scheduleHomeInit() {
 		const token = ++initToken;
 		cleanup();
 		if (!document.getElementById("home-hero")) return;
 
 		await waitForPageLoaderHidden();
+		if (token !== initToken || !document.getElementById("home-hero")) return;
+
+		// 延迟到浏览器空闲再初始化动画，避免与 LCP 抢占主线程（移动端无 page loader 会立即执行）
+		await nextIdle();
 		if (token !== initToken || !document.getElementById("home-hero")) return;
 
 		init();
