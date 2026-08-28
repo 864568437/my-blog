@@ -41,64 +41,39 @@ import { i18n } from "@/i18n/translation";
     var countEl = document.getElementById('site-visit-total');
     if (!countEl) return;
 
-    var walineURL = 'https://waline.fqzlr.com';
-
-    // 主要路径列表
-    var paths = ['/', '/posts/', '/guestbook/', '/moments/', '/gallery/', '/bangumi/', '/projects/', '/friends/', '/timeline/'];
-
-    /** 带重试和超时的 fetch 封装 */
-    function fetchWithRetry(url, retries, timeout) {
-      retries = retries || 2;
-      timeout = timeout || 5000;
-      return new Promise(function(resolve, reject) {
-        var attempt = 0;
-        function doFetch() {
-          var controller = new AbortController();
-          var timer = setTimeout(function() { controller.abort(); }, timeout);
-          fetch(url, { signal: controller.signal })
-            .then(function(res) {
-              clearTimeout(timer);
-              resolve(res);
-            })
-            .catch(function(err) {
-              clearTimeout(timer);
-              attempt++;
-              if (attempt <= retries) {
-                setTimeout(doFetch, 500 * attempt);
-              } else {
-                reject(err);
-              }
-            });
-        }
-        doFetch();
-      });
-    }
+    // Umami 统计（公开分享链接鉴权：先取 share token，再查全站 stats）
+    var UMAMI_HOST = 'https://umami.fqzlr.com';
+    var UMAMI_SHARE = 'kHCJG2ZUL1r6q5Js';
 
     function fetchTotal() {
-      var promises = paths.map(function(path) {
-        return fetchWithRetry(walineURL + '/api/page?path=' + encodeURIComponent(path))
-          .then(function(res) {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.json();
-          })
-          .then(function(data) {
-            var arr = Array.isArray(data) ? data : (data && data.data ? data.data : []);
-            var item = arr && arr.length > 0 ? arr[0] : null;
-            return item && item.views != null ? Number(item.views) : 0;
-          })
-          .catch(function() { return 0; });
-      });
-
-      Promise.all(promises).then(function(counts) {
-        var total = counts.reduce(function(sum, c) { return sum + c; }, 0);
-        if (total > 0 && countEl) {
-          countEl.textContent = total.toLocaleString();
-        } else if (countEl) {
+      fetch(UMAMI_HOST + '/api/share/' + UMAMI_SHARE, { cache: 'no-store' })
+        .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function(share) {
+          var end = Date.now();
+          return fetch(UMAMI_HOST + '/api/websites/' + share.websiteId + '/stats?startAt=0&endAt=' + end, {
+            headers: {
+              'x-umami-share-token': share.token,
+              'x-umami-share-context': '1',
+            },
+          }).then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+          });
+        })
+        .then(function(stats) {
+          var pv = Number(stats && stats.pageviews);
+          countEl.textContent = Number.isFinite(pv) && pv > 0 ? pv.toLocaleString() : '--';
+        })
+        .catch(function() {
           countEl.textContent = '--';
-        }
-      });
+        });
     }
 
     fetchTotal();
+    // swup/astro 页面切换后重新拉取
+    document.addEventListener('astro:page-load', function() {
+      var el = document.getElementById('site-visit-total');
+      if (el && el.textContent === '--') fetchTotal();
+    });
   })();
 </script>

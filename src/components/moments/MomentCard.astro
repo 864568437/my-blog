@@ -118,11 +118,11 @@ const imagesArray = images || [];
 			</div>
 		)}
 
-		{/* 标签 */}
+		{/* 标签：# 由 .moment-tag::before 渲染，文本里不能重复带 # */}
 		{tags && tags.length > 0 && (
 			<div class="moment-tags">
 				{tags.map((tag) => (
-					<span class="moment-tag">#{tag.trim()}</span>
+					<span class="moment-tag">{tag.trim().replace(/^#+/, "")}</span>
 				))}
 			</div>
 		)}

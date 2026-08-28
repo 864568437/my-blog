@@ -116,6 +116,47 @@ const { items } = Astro.props;
 
 <script>
 	import "@/scripts/friends-magic-portal";
+
+	/* 漫游舱截图同步：
+	 * 构建时多数友链没有 siteshot，隧道源图会回退为头像（imgurl）。
+	 * 运行时 Layout.astro 的 renderLinkStatus() 会把 check-flink 抓取的主页截图
+	 * 注入到每张 .friend-card-link 的 data-siteshot 上。每次打开漫游舱前，
+	 * 按站点 URL 把这些截图同步给 [data-portal-source]，让隧道墙展示主页截图而非头像。 */
+	function syncPortalScreenshots() {
+		const sources = document.querySelectorAll<HTMLImageElement>("[data-portal-source][data-portal-target]");
+		if (sources.length === 0) return;
+		const cards = document.querySelectorAll<HTMLElement>(".friend-card-link[data-siteshot]");
+		const shotByHost = new Map<string, string>();
+		cards.forEach((card) => {
+			const shot = card.dataset.siteshot?.trim();
+			const href = card.getAttribute("href") || "";
+			if (!shot || !href) return;
+			try {
+				shotByHost.set(new URL(href).host, shot);
+			} catch {
+				/* 非法 URL 跳过 */
+			}
+		});
+		if (shotByHost.size === 0) return;
+		sources.forEach((img) => {
+			const target = img.dataset.portalTarget || "";
+			let host = "";
+			try {
+				host = new URL(target).host;
+			} catch {
+				return;
+			}
+			const shot = shotByHost.get(host);
+			if (shot && img.getAttribute("src") !== shot) img.setAttribute("src", shot);
+		});
+	}
+
+	// 捕获阶段监听：先于触发按钮自身的 click 处理器执行，
+	// 保证漫游舱打开、开始加载纹理前源图 src 已替换为主页截图。
+	document.addEventListener("click", (e) => {
+		const trigger = (e.target as Element | null)?.closest?.("[data-friends-portal-trigger]");
+		if (trigger) syncPortalScreenshots();
+	}, true);
 </script>
 
 <style is:global>

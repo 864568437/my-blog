@@ -17,7 +17,7 @@ type PortalRuntime = {
 };
 
 type PortalImageRecord = {
-	url: string;
+	image: HTMLImageElement;
 	texture: THREE.Texture | null;
 	loading: boolean;
 	loaded: boolean;
@@ -71,9 +71,13 @@ const createTunnel = (
 	setCursor: (visible: boolean, pressed: boolean, x?: number, y?: number) => void,
 	initialDarkMode: boolean,
 ): TunnelController | null => {
-	const urls = [...frame.querySelectorAll<HTMLImageElement>("[data-portal-source]")]
-		.map((image) => image.currentSrc || image.src)
-		.filter(Boolean);
+	// Keep live references to the source <img> elements instead of snapshotting
+	// their URLs at setup time. The page lazily injects real homepage screenshots
+	// (from check-flink) into these elements right before the portal opens, so
+	// each texture load must read the current `src` at load time.
+	const sourceImages = [...frame.querySelectorAll<HTMLImageElement>("[data-portal-source]")].filter(
+		(image) => Boolean(image.currentSrc || image.src),
+	);
 
 	try {
 		const background = new THREE.Color("#02050c");
@@ -154,8 +158,8 @@ const createTunnel = (
 		};
 		setDarkMode(initialDarkMode);
 		let alive = true;
-		const imageRecords: PortalImageRecord[] = urls.map((url) => ({
-			url,
+		const imageRecords: PortalImageRecord[] = sourceImages.map((image) => ({
+			image,
 			texture: null,
 			loading: false,
 			loaded: false,
@@ -165,9 +169,13 @@ const createTunnel = (
 		let textureTimer = 0;
 		const loadTexture = (record: PortalImageRecord) => {
 			if (!alive || record.loading || record.loaded) return;
+			// 读 src 属性而非 currentSrc：同步脚本刚替换 src 时，
+			// currentSrc 可能仍指向旧的头像 URL。
+			const url = record.image.src;
+			if (!url) return;
 			record.loading = true;
 			textureLoader.load(
-				record.url,
+				url,
 				(texture: THREE.Texture) => {
 					void (async () => {
 						let displayTexture = texture;

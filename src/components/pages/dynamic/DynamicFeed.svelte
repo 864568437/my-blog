@@ -281,11 +281,11 @@ function createItem(entry: DynamicData) {
 		content.innerHTML = entry.html;
 	}
 
-	// 渲染标签：无标签时整段隐藏
+	// 渲染标签：无标签时整段隐藏（# 由 .moment-tag::before 渲染，文本里不能重复带 #）
 	const tagsContainer = root.querySelector<HTMLElement>("[data-dynamic-tags]");
 	if (tagsContainer && entry.tags && entry.tags.length > 0) {
 		tagsContainer.innerHTML = entry.tags
-			.map((tag) => `<span class="moment-tag">${tag.startsWith("#") ? tag : `#${tag}`}</span>`)
+			.map((tag) => `<span class="moment-tag">${String(tag).trim().replace(/^#+/, "")}</span>`)
 			.join("");
 	} else if (tagsContainer) {
 		tagsContainer.style.display = "none";

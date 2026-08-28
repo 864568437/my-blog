@@ -6,6 +6,23 @@
 
 if (!customElements.get("owner-aurora-flow")) {
 	class OwnerAuroraFlow extends HTMLElement {
+		canvas: HTMLCanvasElement | null;
+		context: CanvasRenderingContext2D | null;
+		card: HTMLElement | null;
+		particles: any[];
+		width: number;
+		height: number;
+		pixelRatio: number;
+		elapsed: number;
+		lastTimestamp: number;
+		animationFrame: number;
+		resizeFrame: number;
+		hoverAmount: number;
+		hoverTarget: number;
+		initialized: boolean;
+		resizeObserver: ResizeObserver | null;
+		initializeFrame: number;
+
 		constructor() {
 			super();
 			this.canvas = null;
