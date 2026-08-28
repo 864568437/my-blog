@@ -53,6 +53,7 @@ export { routinesConfig, routinePageConfig, getAllRoutines, getEnabledRoutines }
 export { placesConfig, placesPageConfig, getAllPlaces, getEnabledPlaces, getTotalVisitCount, getThisYearVisitCount } from "./placesConfig"; // 足迹配置
 export { galleryConfig } from "./galleryConfig"; // Gallery 相册配置
 export { pengyouConfig } from "./pengyouConfig"; // 朋友圈配置
+export { homeConfig } from "./homeConfig"; // 首页影像揭示层配置（HomeBlinds）
 export { homePortfolioShutterConfig } from "./homePortfolioShutterConfig";
 export { licenseConfig } from "./licenseConfig"; // 许可证配置
 // 组件配置

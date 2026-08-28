@@ -8,6 +8,106 @@ import type {
 	WALLPAPER_OVERLAY,
 } from "../constants/constants";
 
+/* ========== 首页影像揭示层（HomeBlinds） ========== */
+
+export type HomeBlindsSceneItem = {
+	/** 左侧竖排与顶栏左侧共用的英文标识 */
+	eyebrow: string;
+	title: string;
+	/** 图片内的介绍文案，五幕各有一套版式与动效 */
+	description: string;
+	image: string;
+	alt: string;
+};
+
+/**
+ * 揭示层（blinds 第一层）的入场标题。
+ * 节奏：整条长条横移 → 内缘往两侧退开露出「背面」的标题 →
+ * 侧边竖线与中缝横线跟随滑动后固定 → 长条往两侧缩放消失、中央虚线圆转 90° →
+ * 标题上移，第二层祝福语逐字翻入并循环。
+ */
+export type HomeBlindsHeadlineConfig = {
+	/** 标题文案，单行显示（参考版式为 4 字） */
+	title: string;
+	/** 标题上移后循环播放的祝福语，每条单行显示（参考版式为 5 字） */
+	messages: string[];
+	/** 长条揭示到虚线圆就位的入场总时长（秒），默认 0.5 */
+	enterDuration?: number;
+	/** 单条祝福语的停留时长（秒），默认 2.6 */
+	messageHold?: number;
+	/** 祝福语换一条的总时长（秒，含逐字延迟的尾巴），默认 0.75 */
+	messageFlipDuration?: number;
+};
+
+/**
+ * 迁移到揭示层的首页身份信息（原 HomeHero 文字内容）。
+ * 文字常驻显示，入场动画由 CSS 过渡驱动（长条揭示到位后浮现）。
+ */
+export type HomeBlindsHeroConfig = {
+	/** 是否显示身份信息层 */
+	enabled?: boolean;
+	/** 职业/身份标签，如「[啥都不会 / 无技术博主]」 */
+	occupation?: string;
+	/** 大标题，如「Fqzlrの博客」 */
+	displayName?: string;
+	/** 徽章文字，如「B站：番茄煮理人」 */
+	badge?: string;
+	/** 个人签名 */
+	bio?: string;
+	/** 右上角胶囊标签，如「BLOG」 */
+	pill?: string;
+	/** 右侧竖排大标题，如「博客」 */
+	verticalTitle?: string;
+	/** 右侧竖排名字，如「FQZLR」 */
+	verticalName?: string;
+	/** 右侧竖排创意标签，如「CREATIVE」 */
+	verticalCreative?: string;
+	/** 右下角竖排小字，如「システム起動完了」 */
+	footerText?: string;
+	/** 底部对话框中文 */
+	speechChinese?: string;
+	/** 底部对话框英文 */
+	speechEnglish?: string;
+};
+
+export type HomeBlindsConfig = {
+	/** 是否启用桌面端首页双层影像交互 */
+	enabled: boolean;
+	reveal: {
+		/** 固定背景图（首屏揭示层与首幕画面共用） */
+		backgroundImage: string;
+		/** 透明前景图 */
+		foregroundImage: string;
+		foregroundAlt: string;
+		/** 前景图完全进入后的透明度，取值 0-1 */
+		foregroundOpacity: number;
+		/** 前景图跟随鼠标移动的最大像素距离 */
+		pointerTravel: number;
+		/** 长条横移揭示的入场标题与循环祝福语 */
+		headline: HomeBlindsHeadlineConfig;
+		/** 迁移自 HomeHero 的身份信息文字层 */
+		hero?: HomeBlindsHeroConfig;
+	};
+	scenes: {
+		/** 横向影像层固定滚动距离，越小则横移越快 */
+		scrollDistance: number;
+		/** 背景跑马灯图片，按顺序从左往右无缝循环；只放一张也能跑 */
+		cycleImages: string[];
+		/** 跑马灯走完一轮列表的时长（秒），越大越慢 */
+		cycleDuration: number;
+		/** 由上一层背景与透明前景图合成的首幕文案（序幕） */
+		composite: Omit<HomeBlindsSceneItem, "image" | "alt"> & { alt: string };
+		/** 后续画面，运行时最多读取前 4 张 */
+		items: HomeBlindsSceneItem[];
+		/** 立牌图 */
+		standImages: string[];
+	};
+};
+
+export type HomeConfig = {
+	homeBlinds: HomeBlindsConfig;
+};
+
 export type SiteConfig = {
 	title: string;
 	subtitle: string;

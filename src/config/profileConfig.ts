@@ -116,7 +116,7 @@ export const profileConfig: ProfileConfig = {
 
 		// ---------- 角色对话气泡 ----------
 		showSpeech: true,
-		speechChinese: "番茄主理人？",
+		speechChinese: "B站：番茄煮理人？",
 		speechEnglish: "Welcome to my blog, enjoy your stay!",
 	},
 };

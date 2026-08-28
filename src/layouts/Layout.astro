@@ -345,7 +345,7 @@ const siteLang = lang.replace("_", "-");
             wallpaperWrapper.classList.remove("wallpaper-overlay");
             wallpaperWrapper.classList.add("wallpaper-fullscreen");
             if (isHomePage) {
-              // 首页：隐藏 wallpaper-wrapper（首页用 HomeHero）
+              // 首页：隐藏 wallpaper-wrapper（首页用影像揭示层）
               wallpaperWrapper.style.setProperty("display", "none", "important");
             } else {
               // 非首页：显示壁纸，铺满全屏
@@ -999,23 +999,14 @@ function disableAnimation() {
         try { applyWallpaperModeToDocument(currentMode); } catch (e) { /* ignore */ }
       });
 
-      // 首页 / 非首页的 HomeHero 显示控制
+      // 首页 / 非首页的主内容位置复位（首页首屏为影像揭示层）
       if (isHome) {
-        const homeHeroEl = document.getElementById("home-hero");
-        if (homeHeroEl) {
-          homeHeroEl.style.display = "";
-        }
         const mainContentEl = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement | null;
         if (mainContentEl) {
           mainContentEl.style.position = "";
           mainContentEl.style.top = "";
           mainContentEl.style.marginTop = "";
           mainContentEl.style.zIndex = "";
-        }
-      } else {
-        const homeHeroEl = document.getElementById("home-hero");
-        if (homeHeroEl) {
-          homeHeroEl.style.display = "none";
         }
       }
 

@@ -377,7 +377,7 @@ function ensureWallpaperState(mode: WALLPAPER_MODE) {
 }
 
 function showBannerMode() {
-	// 首页时不显示 wallpaper-wrapper（首页用 HomeHero 作为主视觉，不依赖壁纸）
+	// 首页时不显示 wallpaper-wrapper（首页用影像揭示层作为主视觉，不依赖壁纸）
 	const isHomeForBanner = checkIsHomePage(window.location.pathname);
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
@@ -388,7 +388,7 @@ function showBannerMode() {
 		wallpaperWrapper.style.top = `-${BANNER_HEIGHT_EXTEND}vh`;
 
 		if (isHomeForBanner) {
-			// 首页：保持 wallpaper-wrapper 隐藏，避免与 HomeHero 重叠
+			// 首页：保持 wallpaper-wrapper 隐藏，避免与影像揭示层重叠
 			wallpaperWrapper.style.setProperty("display", "none", "important");
 		} else {
 			// 非首页：显示 banner
@@ -412,13 +412,7 @@ function showBannerMode() {
 		}
 	}
 
-	// 恢复显示首页 HomeHero
-	const homeHero = document.getElementById("home-hero");
-	if (homeHero) {
-		homeHero.style.display = "";
-	}
-
-	// 横幅图片来源文本（首页隐藏，因为首页用HomeHero）
+	// 横幅图片来源文本（首页隐藏，因为首页用影像揭示层）
 	const creditDesktop = document.getElementById("banner-credit-desktop");
 	const creditMobile = document.getElementById("banner-credit-mobile");
 	const bannerCredit = document.getElementById("banner-credit");
@@ -448,7 +442,7 @@ function showBannerMode() {
 
 	// 调整主内容位置
 	if (isHomeForBanner) {
-		// 首页：主内容从顶部开始（因为用HomeHero）
+		// 首页：主内容从顶部开始（因为用影像揭示层）
 		const mainContent = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement;
 		if (mainContent) {
 			mainContent.classList.add("no-banner-layout");
@@ -495,7 +489,7 @@ function showBannerMode() {
 }
 
 function showOverlayMode() {
-	// 首页时不显示 wallpaper-wrapper（首页用 HomeHero 作为主视觉，不依赖壁纸）
+	// 首页时不显示 wallpaper-wrapper（首页用影像揭示层作为主视觉，不依赖壁纸）
 	const isHomeForOverlay = checkIsHomePage(window.location.pathname);
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
@@ -504,7 +498,7 @@ function showOverlayMode() {
 		wallpaperWrapper.classList.add("wallpaper-overlay");
 
 		if (isHomeForOverlay) {
-			// 首页：保持 wallpaper-wrapper 隐藏，避免与 HomeHero 重叠
+			// 首页：保持 wallpaper-wrapper 隐藏，避免与影像揭示层重叠
 			wallpaperWrapper.style.setProperty("display", "none", "important");
 		} else {
 			// 非首页：显示壁纸
@@ -520,13 +514,7 @@ function showOverlayMode() {
 		}
 	}
 
-	// 恢复显示首页 HomeHero
-	const homeHero = document.getElementById("home-hero");
-	if (homeHero) {
-		homeHero.style.display = "";
-	}
-
-	// 横幅图片来源文本（首页隐藏，因为首页用HomeHero）
+	// 横幅图片来源文本（首页隐藏，因为首页用影像揭示层）
 	const creditDesktop = document.getElementById("banner-credit-desktop");
 	const creditMobile = document.getElementById("banner-credit-mobile");
 	const bannerCredit = document.getElementById("banner-credit");
@@ -551,7 +539,7 @@ function showOverlayMode() {
 
 	// 调整布局
 	if (isHomeForOverlay) {
-		// 首页：主内容从顶部开始（因为用HomeHero）
+		// 首页：主内容从顶部开始（因为用影像揭示层）
 		const mainContent = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement;
 		if (mainContent) {
 			mainContent.classList.add("no-banner-layout");
@@ -567,7 +555,7 @@ function showOverlayMode() {
 }
 
 function showFullscreenMode() {
-	// 首页时不显示 wallpaper-wrapper（首页用 HomeHero 作为主视觉，不依赖壁纸）
+	// 首页时不显示 wallpaper-wrapper（首页用影像揭示层作为主视觉，不依赖壁纸）
 	const isHomeForFullscreenWallpaper = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
 	// 全屏壁纸模式：壁纸铺满全屏，内容正常显示（不透明）
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
@@ -576,7 +564,7 @@ function showFullscreenMode() {
 		wallpaperWrapper.classList.remove("wallpaper-overlay");
 		wallpaperWrapper.classList.add("wallpaper-fullscreen");
 		if (isHomeForFullscreenWallpaper) {
-			// 首页：保持 wallpaper-wrapper 隐藏，避免在公告/HomeHero 后面出现壁纸
+			// 首页：保持 wallpaper-wrapper 隐藏，避免在公告/影像层后面出现壁纸
 			wallpaperWrapper.style.setProperty("display", "none", "important");
 		} else {
 			// 非首页：显示壁纸，铺满全屏
@@ -608,18 +596,6 @@ function showFullscreenMode() {
 			bannerTextOverlay.classList.remove("hidden");
 		} else {
 			bannerTextOverlay.classList.add("hidden");
-		}
-	}
-
-	// 首页时不隐藏 HomeHero（首页使用 HomeHero 作为主视觉，不依赖 wallpaper-wrapper）
-	// 非首页时隐藏 HomeHero 避免与全屏壁纸重叠
-	const isHomePageFullscreen = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
-	const homeHero = document.getElementById("home-hero");
-	if (homeHero) {
-		if (isHomePageFullscreen) {
-			homeHero.style.display = "";
-		} else {
-			homeHero.style.display = "none";
 		}
 	}
 

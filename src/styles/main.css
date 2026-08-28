@@ -45,8 +45,8 @@
 @import './components/friend-image-preview.css';
 @import './components/post-card.css';
 @import './components/page-title.css';
-@import './components/home-hero.css';
 @import './components/home-ticker.css';
+@import './components/home-blinds.css';
 @import './components/home-data-layer.css';
 @import './components/home-portfolio-shutter.css';
 @import './components/animated-tabs.css';
