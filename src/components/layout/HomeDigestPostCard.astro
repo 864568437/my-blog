@@ -1,0 +1,165 @@
+---
+/**
+ * HomeDigestPostCard.astro —— 首页资讯区文章卡片
+ * 与 /posts/ 页（ArticleVirtualList.svelte）同款标记与样式体系：
+ *   mode="list" → .article-list-row-card（单列横卡）
+ *   mode="grid" → .article-grid-card（网格卡）
+ * post 对象由 HomeDigest.astro 整形后传入。
+ */
+import { Icon } from "astro-icon/components";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+
+interface Props {
+	mode: "list" | "grid";
+	post: {
+		id: string;
+		title: string;
+		url: string;
+		publishedIso: string;
+		publishedText: string;
+		category: string;
+		categoryStyle: string;
+		tags: { name: string; url: string }[];
+		description: string;
+		imageUrl: string;
+		imageReferrerPolicy: string;
+		pinned: boolean;
+		password: boolean;
+	};
+}
+
+const { mode, post } = Astro.props;
+---
+
+{
+	mode === "list" ? (
+		<article
+			class:list={["article-list-row-card", { "is-pinned": post.pinned, "no-cover": !post.imageUrl }]}
+			data-post-id={post.id}
+		>
+			<a href={post.url} class="article-list-row-card__content" aria-label={`查看文章：${post.title}`}>
+				<div class="article-list-row-card__layer-1">
+					{post.pinned && (
+						<span class="article-list-row-card__pinned-badge" aria-label="置顶文章">
+							<Icon name="material-symbols:push-pin" class="text-[0.9rem]" />
+							<span>{i18n(I18nKey.pinned)}</span>
+						</span>
+					)}
+					<h3 class="article-list-row-card__title">
+						{post.title}
+						{post.password && (
+							<span class="article-list-row-card__lock" aria-label="加密文章">
+								<Icon name="material-symbols:lock-outline" class="text-[0.9rem]" />
+							</span>
+						)}
+					</h3>
+				</div>
+
+				<div class="article-list-row-card__layer-2">
+					<span class="al-meta-item al-category" style={post.categoryStyle}>
+						<Icon name="material-symbols:folder-rounded" class="text-[0.9rem]" />
+						<span class="al-meta-text">{post.category}</span>
+					</span>
+					<span class="al-meta-item">
+						<Icon name="material-symbols:calendar-month-rounded" class="text-[0.9rem]" />
+						<time datetime={post.publishedIso}>{post.publishedText}</time>
+					</span>
+				</div>
+
+				{post.description && (
+					<div class="article-list-row-card__layer-3">
+						<p class="article-list-row-card__description">{post.description}</p>
+					</div>
+				)}
+
+				{post.tags.length > 0 && (
+					<div class="article-list-row-card__layer-4">
+						{post.tags.slice(0, 4).map((tag) => (
+							<a href={tag.url} class="al-tag-pill">#{tag.name}</a>
+						))}
+						{post.tags.length > 4 && (
+							<span class="al-tag-more">+{post.tags.length - 4}</span>
+						)}
+					</div>
+				)}
+			</a>
+
+			{post.imageUrl && (
+				<a href={post.url} class="article-list-row-card__cover" tabindex="-1" aria-hidden="true">
+					<div class="article-list-row-card__cover-image">
+						<img
+							class="article-list-row-card__img"
+							src={post.imageUrl}
+							alt={`文章配图：${post.title}`}
+							loading="lazy"
+							decoding="async"
+							referrerpolicy={post.imageReferrerPolicy || undefined}
+						/>
+					</div>
+				</a>
+			)}
+		</article>
+	) : (
+		<a
+			href={post.url}
+			class:list={["article-grid-card", { "is-pinned": post.pinned }]}
+			aria-label={`查看文章：${post.title}`}
+		>
+			{post.imageUrl && (
+				<div class="article-grid-card__image-wrapper">
+					<img
+						class="article-grid-card__image"
+						src={post.imageUrl}
+						alt={`文章配图：${post.title}`}
+						loading="lazy"
+						decoding="async"
+						referrerpolicy={post.imageReferrerPolicy || undefined}
+					/>
+					<div class="article-grid-card__gradient-overlay"></div>
+					{post.pinned && (
+						<span class="article-grid-card__pinned-badge article-grid-card__pinned-badge--corner">
+							<Icon name="material-symbols:push-pin" class="text-[0.9rem]" />
+							<span>{i18n(I18nKey.pinned)}</span>
+						</span>
+					)}
+				</div>
+			)}
+
+			<div class="article-grid-card__content">
+				<div class="article-grid-card__layer-1">
+					<h3 class="article-grid-card__title">
+						{post.title}
+						{post.password && (
+							<span class="article-grid-card__lock" aria-label="加密文章">
+								<Icon name="material-symbols:lock-outline" class="text-[0.9rem]" />
+							</span>
+						)}
+					</h3>
+				</div>
+
+				<div class="article-grid-card__layer-2">
+					<span class="article-grid-card__meta-item">
+						<Icon name="material-symbols:calendar-month-rounded" class="text-[0.9rem]" />
+						<time datetime={post.publishedIso}>{post.publishedText}</time>
+					</span>
+				</div>
+
+				<div class="article-grid-card__layer-3">
+					<span class="ag-category" style={post.categoryStyle}>#{post.category}</span>
+					{post.tags.length > 0 && (
+						<>
+							<span class="ag-meta-gap" aria-hidden="true"></span>
+							{post.tags.slice(0, 2).map((tag) => (
+								<a class="ag-tag-pill" href={tag.url}>#{tag.name}</a>
+							))}
+							{post.tags.length > 2 && (
+								<span class="ag-tag-more" aria-hidden="true">+{post.tags.length - 2}</span>
+							)}
+						</>
+					)}
+				</div>
+			</div>
+		</a>
+	)
+}

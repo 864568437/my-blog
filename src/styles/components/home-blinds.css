@@ -11,10 +11,6 @@
 	isolation: isolate;
 }
 
-.home-data-layer {
-	z-index: 2;
-}
-
 .home-blinds[data-home-blinds-enabled="false"] {
 	display: none;
 }

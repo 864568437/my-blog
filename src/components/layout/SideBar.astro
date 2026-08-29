@@ -29,6 +29,14 @@ interface Props {
 	headings?: MarkdownHeading[];
 	side?: "left" | "right" | "bottom";
 	postSlug?: string;
+	/**
+	 * 容器 DOM id 前缀（默认取 side 值）。
+	 * 首页 HomeDigest 等自建布局需传入独立值，
+	 * 避免与全局侧边栏 id 冲突或被 .lg:is-home 隐藏规则误伤。
+	 */
+	domId?: string;
+	/** 需要从该侧组件列表中排除的组件类型（如首页左栏不需要 editPostButton） */
+	excludeTypes?: WidgetComponentType[];
 }
 
 // 侧边栏位置常量
@@ -90,13 +98,16 @@ const getComponents = (): (
 	return [];
 };
 
-// 过滤组件：仅按 enable 过滤
+// 过滤组件：仅按 enable 过滤；再按调用方的 excludeTypes 排除
 // showOnPostPage / showOnNonPostPage 由客户端 JS 通过 CSS class 控制显隐
 // 这样可以确保 Swup 导航时所有 widget 都在 DOM 中，不会因静态容器不刷新而消失
 const filterAndSortComponents = (
 	components: (WidgetComponentConfig | MobileBottomComponentConfig)[],
 ) => {
-	return components.filter((comp) => comp.enable);
+	const excluded = new Set<WidgetComponentType>(Astro.props.excludeTypes ?? []);
+	return components.filter(
+		(comp) => comp.enable && !excluded.has(comp.type),
+	);
 };
 
 // 分离 top 和 sticky 位置的组件（保持原始数组顺序）
@@ -175,6 +186,7 @@ const getComponentProps = (
 // 获取所有需要渲染的组件
 const allComponents = getComponents();
 const filteredComponents = filterAndSortComponents(allComponents);
+const domPrefix = Astro.props.domId ?? side;
 
 // 对于移动端底部组件，直接使用所有组件，不进行position分组
 const isMobileBottom = side === SIDEBAR_SIDE.BOTTOM;
@@ -186,7 +198,7 @@ const bottomComponents = isMobileBottom ? filteredComponents : [];
 
 {
 	(topComponents.length > 0 || stickyComponents.length > 0 || bottomComponents.length > 0) && (
-		<div id={`${side}-sidebar`} class:list={[className, "flex flex-col w-full pt-0"]}>
+		<div id={`${domPrefix}-sidebar`} class:list={[className, "flex flex-col w-full pt-0"]}>
 			{/* Mobile bottom components - 直接渲染所有组件，不分组 */}
 			{isMobileBottom ? (
 				<div class="flex flex-col w-full gap-4">
@@ -219,7 +231,7 @@ const bottomComponents = isMobileBottom ? filteredComponents : [];
 					{/* Sticky components */}
 					{stickyComponents.length > 0 && (
 						<div
-							id={`${side}-sidebar-sticky`}
+							id={`${domPrefix}-sidebar-sticky`}
 							class:list={[
 								"transition-all duration-700 flex flex-col w-full mt-0",
 								"sticky",

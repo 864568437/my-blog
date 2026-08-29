@@ -47,8 +47,7 @@
 @import './components/page-title.css';
 @import './components/home-ticker.css';
 @import './components/home-blinds.css';
-@import './components/home-data-layer.css';
-@import './components/home-portfolio-shutter.css';
+@import './components/home-digest.css';
 @import './components/animated-tabs.css';
 @import './components/article-catalog.css';
 @import './components/page-loader.css';

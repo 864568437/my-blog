@@ -1466,6 +1466,27 @@ function disableAnimation() {
     renderLinkStatus();
   }
 
+  // 入场动画结束后摘除 onload-animation 类。
+  // fade-in-up 的 forwards 填充会把 transform 以计算值长期保留在元素上，
+  // 而任何非 none 的 transform 都会成为 position:fixed 后代的包含块——
+  // 首页满屏影像层（home-blinds 的 fixed 舞台与 ScrollTrigger 的 pin）会被
+  // 钉在文档流上随页面滚走，表现为"首图上滑消失 + 大片空白"。
+  // 动画播完后该类已无视觉作用（终态本就是 opacity:1 / transform:none），摘除即恢复。
+  document.addEventListener(
+    "animationend",
+    (event) => {
+      const target = event.target;
+      if (
+        event.animationName === "fade-in-up" &&
+        target instanceof Element &&
+        target.classList.contains("onload-animation")
+      ) {
+        target.classList.remove("onload-animation");
+      }
+    },
+    true,
+  );
+
   // 动态修改网页标题（标签页标题互动）
   let originTitle = document.title;
   let titleTime: ReturnType<typeof setTimeout>;

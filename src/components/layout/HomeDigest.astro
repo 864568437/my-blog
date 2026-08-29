@@ -1,0 +1,498 @@
+---
+/**
+ * HomeDigest.astro —— 首页资讯聚合层（替代原 HomeDataLayer 能力矩阵）
+ * --------------------------------------------------------------
+ * 布局（参考经典博客双栏结构）：[左侧组件栏] [主内容区]
+ *   断点与 MainGridLayout 一致：≥768px 双栏。
+ *
+ * 主内容区顶部为三个胶囊切换按钮（默认「文章」）：
+ *   1. 文章      —— /posts/ 页同款卡片体系（列表 1 条 / 网格 3 条，
+ *                   非活跃视图常驻 <template> 绝不渲染；
+ *                   模式与文章列表页共用 localStorage 偏好）
+ *   2. 我的动态  —— dynamic 集合最新 1 条，卡片复用 dynamic.css
+ *                   的 .dynamic-feed .moment-* 体系
+ *   3. 朋友的动态 —— 复用 /pengyou/ 页的 RSS 抓取（pengyou-utils）
+ *                   与 circle.css 卡片体系，取最新 6 条
+ *
+ * 侧边栏：直接实例化 SideBar（left），组件清单沿用
+ * sidebarLayoutConfig 配置；通过 domId 避开全局 #left-sidebar，
+ * 防止被 .lg:is-home 隐藏规则命中。
+ */
+import { getCollection, render, type CollectionEntry } from "astro:content";
+import * as path from "node:path";
+import type { ImageMetadata } from "astro";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import { Icon } from "astro-icon/components";
+import SideBar from "@/components/layout/SideBar.astro";
+import HomeDigestPostCard from "@/components/layout/HomeDigestPostCard.astro";
+import LayoutSwitch from "@/components/controls/LayoutSwitch.svelte";
+import { profileConfig, siteConfig } from "@/config";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+import { sortDynamics } from "@/utils/dynamic-utils";
+import {
+	fetchPengyouItems,
+	formatPengyouDate,
+	getPengyouAvatar,
+} from "@/utils/pengyou-utils";
+import {
+	processCoverImageSync,
+	shouldAddNoReferrer,
+} from "@/utils/image-utils";
+import {
+	getFileDirFromPath,
+	getPostUrlBySlug,
+	getTagUrl,
+	url as buildUrl,
+} from "@/utils/url-utils";
+import "@/styles/dynamic.css";
+import "@/styles/features/circle.css";
+import "@/styles/components/home-digest.css";
+
+interface Props {
+	/** 已排序的文章集合（由 [...page].astro 传入） */
+	posts?: CollectionEntry<"posts">[];
+	/** 最新文章展示数量（网格模式；列表模式固定显示第 1 条） */
+	postCount?: number;
+}
+
+const { posts, postCount = 3 } = Astro.props;
+
+// ── 我的动态：置顶优先、时间倒序，取第 1 条 ──
+const DYNAMIC_COUNT = 1;
+const markdownProcessor = await createMarkdownProcessor();
+const dynamics = await Promise.all(
+	sortDynamics(await getCollection("dynamic"))
+		.slice(0, DYNAMIC_COUNT)
+		.map(async (entry) => {
+			const rendered = await markdownProcessor.render(entry.body || "");
+			const dateFormatter = new Intl.DateTimeFormat(
+				siteConfig.lang.replace("_", "-"),
+				{ year: "numeric", month: "2-digit", day: "2-digit" },
+			);
+			return {
+				author: entry.data.author || profileConfig.name || "",
+				avatar: entry.data.avatar || profileConfig.avatar || "",
+				pinned: Boolean(entry.data.pinned),
+				tags: entry.data.tags || [],
+				location: entry.data.location || "",
+				device: entry.data.device || "",
+				dateText: dateFormatter.format(entry.data.published),
+				dateIso: entry.data.published.toISOString(),
+				html: rendered.code,
+			};
+		}),
+);
+
+// ── 朋友的动态：复用 /pengyou/ 页的 RSS 抓取，取最新 6 条 ──
+const FRIEND_COUNT = 6;
+const friendItems = (await fetchPengyouItems()).slice(0, FRIEND_COUNT);
+
+// ── 最新文章：数据整形逻辑与 /posts/ 页（ArticleVirtualList）保持一致 ──
+const articleImageFiles = import.meta.glob<ImageMetadata>(
+	"../../**/*.{png,jpg,jpeg,webp,avif}",
+	{ import: "default" },
+);
+const postDateFormatter = new Intl.DateTimeFormat(
+	siteConfig.lang.replace("_", "-"),
+	{ year: "numeric", month: "2-digit", day: "2-digit" },
+);
+
+async function resolveArticleImage(entry: CollectionEntry<"posts">) {
+	const processedImage = processCoverImageSync(entry.data.image, entry.id);
+
+	if (!processedImage) {
+		return { imageUrl: "", imageReferrerPolicy: "" };
+	}
+
+	const isLocal = !(
+		processedImage.startsWith("/") ||
+		processedImage.startsWith("http") ||
+		processedImage.startsWith("https") ||
+		processedImage.startsWith("data:")
+	);
+
+	if (isLocal) {
+		const basePath = getFileDirFromPath((entry as any).filePath || "");
+		const normalizedPath = path
+			.normalize(path.join("../../", basePath, processedImage))
+			.replace(/\\/g, "/");
+		const imageFile = articleImageFiles[normalizedPath];
+		if (!imageFile) {
+			return { imageUrl: "", imageReferrerPolicy: "" };
+		}
+		const image = await imageFile();
+		return { imageUrl: image.src, imageReferrerPolicy: "" };
+	}
+
+	const imageUrl = processedImage.startsWith("/")
+		? buildUrl(processedImage)
+		: processedImage;
+	return {
+		imageUrl,
+		imageReferrerPolicy: shouldAddNoReferrer(imageUrl) ? "no-referrer" : "",
+	};
+}
+
+const categoryColorPalette = [
+	"#fbbf24", "#fb7185", "#34d399", "#60a5fa", "#a78bfa", "#f472b6",
+	"#2dd4bf", "#fb923c", "#22d3ee", "#818cf8", "#e879f9", "#a3e635",
+	"#f87171", "#a78bfa", "#06b6d4", "#f59e0b", "#f43f5e", "#10b981",
+];
+
+function getCategoryColor(name: string): string {
+	let hash = 0;
+	for (let i = 0; i < name.length; i++) {
+		hash = name.charCodeAt(i) + ((hash << 5) - hash);
+	}
+	return `color: ${categoryColorPalette[Math.abs(hash) % categoryColorPalette.length]}`;
+}
+
+const latestPosts = await Promise.all(
+	(posts ?? []).slice(0, postCount).map(async (entry) => {
+		const { remarkPluginFrontmatter } = await render(entry);
+		const articleImage = await resolveArticleImage(entry);
+		const rawCategory = entry.data.category?.trim();
+		return {
+			id: entry.id,
+			title: entry.data.title,
+			url: getPostUrlBySlug(entry.id),
+			publishedIso: entry.data.published.toISOString(),
+			publishedText: postDateFormatter.format(entry.data.published),
+			category: rawCategory || i18n(I18nKey.uncategorized),
+			categoryStyle: getCategoryColor(rawCategory || i18n(I18nKey.uncategorized)),
+			tags: (entry.data.tags || [])
+				.map((tag) => tag.trim())
+				.filter(Boolean)
+				.map((tag) => ({ name: tag, url: getTagUrl(tag) })),
+			description:
+				entry.data.description ||
+				remarkPluginFrontmatter?.excerpt ||
+				"暂无文章简介，点击卡片查看完整内容。",
+			imageUrl: articleImage.imageUrl,
+			imageReferrerPolicy: articleImage.imageReferrerPolicy,
+			pinned: !!entry.data.pinned,
+			password: !!(entry.data as any).password,
+		};
+	}),
+);
+
+const profileLabel = profileConfig.name || "博主";
+// 与文章列表页同源：默认模式取配置，实际模式由客户端脚本按 localStorage 覆盖
+const isListDefault = siteConfig.postListLayout.defaultMode !== "grid";
+const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
+---
+
+<section class="home-digest" id="home-digest" aria-label="站点资讯">
+	<div class="home-digest__inner">
+		<div class="home-digest__grid">
+			{/* 左侧组件栏（≥768px 显示）；domId 避开全局 #left-sidebar，
+			    防止被 .lg:is-home 的首页侧栏隐藏规则命中；排除编辑按钮 */}
+			<aside class="home-digest__sidebar home-digest__sidebar--left">
+				<SideBar
+					side="left"
+					domId="home-digest-left"
+					excludeTypes={["editPostButton"]}
+					class="home-digest__widgets"
+				/>
+			</aside>
+
+			{/* 主内容列：Tab 胶囊 + 三面板 */}
+			<div class="home-digest__main">
+				<div class="home-digest__tabs" role="tablist" aria-label="内容切换">
+					<button
+						type="button"
+						class="home-digest__tab is-active"
+						data-tab="posts"
+						role="tab"
+						aria-selected="true"
+					>
+						<Icon name="material-symbols:home-rounded" style="width:1em;height:1em;" />
+						<span>文章</span>
+					</button>
+					<button
+						type="button"
+						class="home-digest__tab"
+						data-tab="dynamics"
+						role="tab"
+						aria-selected="false"
+					>
+						<Icon name="material-symbols:dynamic-feed-rounded" style="width:1em;height:1em;" />
+						<span>我的动态</span>
+					</button>
+					<button
+						type="button"
+						class="home-digest__tab"
+						data-tab="friends"
+						role="tab"
+						aria-selected="false"
+					>
+						<Icon name="material-symbols:group" style="width:1em;height:1em;" />
+						<span>朋友的动态</span>
+					</button>
+				</div>
+
+				{/* 面板 1：文章（默认激活）。与 /posts/ 页同构的卡片体系，
+				    活跃视图直接渲染（无 JS 也正确），非活跃视图放入 <template>
+				    （inert，浏览器绝对不渲染）；列表 1 条 / 网格 3 条 */}
+				<div class="home-digest__panel" data-panel="posts">
+					<header class="home-digest__heading">
+						<div class="home-digest__heading-text">
+							<p class="home-digest__kicker">LATEST</p>
+							<h2 class="home-digest__title">最新文章</h2>
+						</div>
+						<div class="home-digest__heading-actions">
+							{allowLayoutSwitch && (
+								<LayoutSwitch
+									client:load
+									activeLayout={isListDefault ? "list" : "grid"}
+								/>
+							)}
+							<a class="home-digest__more" href={buildUrl("/posts/")}>
+								<span>查看更多</span>
+								<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
+							</a>
+						</div>
+					</header>
+
+					<div
+						id="home-digest-posts"
+						class="home-digest__posts"
+						data-view={isListDefault ? "list" : "grid"}
+					>
+						<div class="article-list-view" data-digest-active>
+							{isListDefault ? (
+								<div class="article-list-vertical" aria-label="文章列表">
+									{latestPosts.slice(0, 1).map((post) => (
+										<HomeDigestPostCard mode="list" post={post} />
+									))}
+								</div>
+							) : (
+								<div class="home-digest__posts-grid" aria-label="文章网格">
+									{latestPosts.map((post) => (
+										<HomeDigestPostCard mode="grid" post={post} />
+									))}
+								</div>
+							)}
+						</div>
+
+						<template data-digest-view={isListDefault ? "grid" : "list"}>
+							<div class="article-list-view">
+								{isListDefault ? (
+									<div class="home-digest__posts-grid" aria-label="文章网格">
+										{latestPosts.map((post) => (
+											<HomeDigestPostCard mode="grid" post={post} />
+										))}
+									</div>
+								) : (
+									<div class="article-list-vertical" aria-label="文章列表">
+										{latestPosts.slice(0, 1).map((post) => (
+											<HomeDigestPostCard mode="list" post={post} />
+										))}
+									</div>
+								)}
+							</div>
+						</template>
+					</div>
+				</div>
+
+				{/* 面板 2：我的动态 */}
+				<div class="home-digest__panel" data-panel="dynamics" hidden>
+					<header class="home-digest__heading">
+						<div class="home-digest__heading-text">
+							<p class="home-digest__kicker">DYNAMICS</p>
+							<h2 class="home-digest__title">我的动态</h2>
+						</div>
+						<a class="home-digest__more" href={buildUrl("/dynamic/")}>
+							<span>查看全部</span>
+							<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
+						</a>
+					</header>
+
+					<div class="dynamic-feed home-digest__moments">
+						{dynamics.map((d) => (
+							<dynamic-entry class="moment-item" data-dynamic-entry>
+								<article>
+									<a href={buildUrl("/about/")} class="moment-avatar dynamic-avatar" aria-label={profileLabel}>
+										<img
+											src={d.avatar}
+											alt={d.author}
+											class="moment-avatar__img"
+											loading="lazy"
+											decoding="async"
+										/>
+									</a>
+									<div class="moment-content dynamic-identity">
+										<div class="moment-name-row dynamic-entry-header">
+											<strong class="moment-name">{d.author}</strong>
+											{d.pinned && (
+												<span class="moment-pinned-tag">
+													<Icon name="material-symbols:push-pin" class="moment-pinned-tag__icon" />
+													<span>置顶</span>
+												</span>
+											)}
+										</div>
+										<div class="moment-meta">
+											<span class="moment-meta__time">
+												<a class="dynamic-time" href={buildUrl("/dynamic/")}>
+													<Icon name="material-symbols:schedule-outline-rounded" style="width:1em;height:1em;" />
+													<time datetime={d.dateIso}>{d.dateText}</time>
+												</a>
+											</span>
+											{d.location && (
+												<span class="moment-meta__location">
+													<Icon name="material-symbols:location-on" style="width:1em;height:1em;" />
+													<span>{d.location}</span>
+												</span>
+											)}
+											{d.device && (
+												<span class="moment-meta__device">
+													<Icon name="material-symbols:phone-android" style="width:1em;height:1em;" />
+													<span>{d.device}</span>
+												</span>
+											)}
+										</div>
+										<div class="moment-text dynamic-content" set:html={d.html} />
+										<div class="moment-footer-row">
+											<div class="moment-tags">
+												{d.tags.map((tag) => (
+													<span class="moment-tag">#{tag}</span>
+												))}
+											</div>
+										</div>
+									</div>
+								</article>
+							</dynamic-entry>
+						))}
+					</div>
+				</div>
+
+				{/* 面板 3：朋友的动态（/pengyou/ 同款 circle 卡片） */}
+				<div class="home-digest__panel" data-panel="friends" hidden>
+					<header class="home-digest__heading">
+						<div class="home-digest__heading-text">
+							<p class="home-digest__kicker">FRIENDS</p>
+							<h2 class="home-digest__title">朋友的动态</h2>
+						</div>
+						<a class="home-digest__more" href={buildUrl("/pengyou/")}>
+							<span>查看全部</span>
+							<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
+						</a>
+					</header>
+
+					{friendItems.length > 0 ? (
+						<div class="home-digest__friends">
+							{friendItems.map((item) => (
+								<a
+									href={item.link}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="circle-card"
+								>
+									<div class="card-avatar-watermark" data-initial={(item.author || "?").slice(0, 1)}>
+										<img src={getPengyouAvatar(item)} alt="" loading="lazy" />
+									</div>
+									<span class="card-date-overlay">{formatPengyouDate(item.date)}</span>
+									<h3 class="card-title">{item.title}</h3>
+									<span class="card-author-tag">{item.author}</span>
+								</a>
+							))}
+						</div>
+					) : (
+						<div class="circle-error home-digest__friends-empty">
+							<Icon name="material-symbols:sentiment-neutral-outline" class="text-4xl text-neutral-400" />
+							<p class="error-text">暂无动态</p>
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
+<script>
+	// 模块脚本（非 inline）：Astro 打包为外部 .js 文件，
+	// 不受浏览器/内置预览 CSP 对 unsafe-inline 的拦截影响。
+	// 职责：
+	//   1. Tab 胶囊切换：文章 / 我的动态 / 朋友的动态（hidden 属性显隐）
+	//   2. 文章面板的列表/网格视图交换（与 /posts/ 页共用 localStorage）
+	//   3. 封面图淡入（is-loaded，失败也标记避免永久透明）
+	function currentMode(): "list" | "grid" {
+		const container = document.getElementById("home-digest-posts");
+		const fallback = container?.dataset.view === "grid" ? "grid" : "list";
+		let stored: string | null = null;
+		try {
+			stored = localStorage.getItem("postListLayout");
+		} catch {}
+		return stored === "grid" || stored === "list" ? stored : fallback;
+	}
+
+	function applyLayout() {
+		const container = document.getElementById("home-digest-posts");
+		if (!container) return;
+		const active = container.querySelector<HTMLElement>("[data-digest-active]");
+		const tpl = container.querySelector<HTMLTemplateElement>("[data-digest-view]");
+		if (!active || !tpl) return;
+
+		const want = currentMode();
+		if (tpl.dataset.digestView === want) {
+			// 交换：template 里的目标视图变为活跃，原活跃内容收进 template
+			const wantHtml = tpl.innerHTML;
+			tpl.innerHTML = active.innerHTML;
+			active.innerHTML = wantHtml;
+			tpl.dataset.digestView = want === "list" ? "grid" : "list";
+			container.dataset.view = want;
+		}
+	}
+
+	// 封面图淡入：与 ArticleVirtualList 的 is-loaded 机制一致；
+	// 加载失败同样标记，避免图片永久 opacity:0 造成布局空洞
+	function markImagesLoaded() {
+		document
+			.querySelectorAll<HTMLImageElement>(
+				"#home-digest-posts .article-list-row-card__img, #home-digest-posts .article-grid-card__image",
+			)
+			.forEach((img) => {
+				if (img.complete) {
+					img.classList.add("is-loaded");
+				} else {
+					img.addEventListener("load", () => img.classList.add("is-loaded"));
+					img.addEventListener("error", () => img.classList.add("is-loaded"));
+				}
+			});
+	}
+
+	// Tab 切换：事件委托，click 驱动，无JS时默认显示文章面板
+	function initTabs(section: HTMLElement) {
+		if (section.dataset.tabsBound === "1") return;
+		section.dataset.tabsBound = "1";
+		const tabs = section.querySelectorAll<HTMLElement>(".home-digest__tab");
+		const panels = section.querySelectorAll<HTMLElement>(".home-digest__panel");
+		tabs.forEach((tab) => {
+			tab.addEventListener("click", () => {
+				const target = tab.dataset.tab;
+				if (!target || tab.classList.contains("is-active")) return;
+				tabs.forEach((t) => {
+					const on = t === tab;
+					t.classList.toggle("is-active", on);
+					t.setAttribute("aria-selected", on ? "true" : "false");
+				});
+				panels.forEach((p) => {
+					p.hidden = p.dataset.panel !== target;
+				});
+				if (target === "posts") markImagesLoaded();
+			});
+		});
+	}
+
+	function init() {
+		const section = document.getElementById("home-digest");
+		if (section) initTabs(section);
+		applyLayout();
+		markImagesLoaded();
+	}
+	init();
+	window.addEventListener("layoutChange", applyLayout);
+	// Swup 换页后重新初始化（模块脚本本身只执行一次）
+	document.addEventListener("astro:page-load", init);
+</script>

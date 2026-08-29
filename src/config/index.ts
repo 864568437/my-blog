@@ -54,7 +54,6 @@ export { placesConfig, placesPageConfig, getAllPlaces, getEnabledPlaces, getTota
 export { galleryConfig } from "./galleryConfig"; // Gallery 相册配置
 export { pengyouConfig } from "./pengyouConfig"; // 朋友圈配置
 export { homeConfig } from "./homeConfig"; // 首页影像揭示层配置（HomeBlinds）
-export { homePortfolioShutterConfig } from "./homePortfolioShutterConfig";
 export { licenseConfig } from "./licenseConfig"; // 许可证配置
 // 组件配置
 export { musicPlayerConfig } from "./musicConfig"; // 音乐播放器配置

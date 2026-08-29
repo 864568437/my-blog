@@ -1,7 +1,6 @@
 ---
 import HomeBlinds from "@components/layout/HomeBlinds.astro";
-import HomeDataLayer from "@components/layout/HomeDataLayer.astro";
-import HomePortfolioShutterLayer from "@components/layout/HomePortfolioShutterLayer.astro";
+import HomeDigest from "@components/layout/HomeDigest.astro";
 import HomeTicker from "@components/layout/HomeTicker.astro";
 import type { GetStaticPaths } from "astro";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
@@ -19,11 +18,9 @@ const { page } = Astro.props;
 	<div class="home-page">
 		<!-- 首屏：双层影像揭示层（已承载原 HomeHero 的文字内容） -->
 		<HomeBlinds />
-		<!-- 过渡位：公告跑马灯，衔接影像层结束与站点数据层 -->
+		<!-- 过渡位：公告跑马灯，衔接影像层结束与资讯聚合层 -->
 		<HomeTicker />
-		<div class="home-data-stack">
-			<HomeDataLayer />
-			<HomePortfolioShutterLayer />
-		</div>
+		<!-- 资讯聚合层：左右组件栏 + 最新动态 + 最新文章 -->
+		<HomeDigest posts={page.data} />
 	</div>
 </MainGridLayout>

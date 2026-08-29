@@ -2035,7 +2035,10 @@ export function bootHomeBlinds() {
 			}
 			activeCleanup = cleanup;
 		})
-		.catch(() => {
+		.catch((error) => {
+			// 失败必须可见：静默吞掉后页面退化为无 pin 的普通滚动流，
+			// 症状（首图上滑消失、场景区空白）与脚本未加载时无法区分
+			console.error("[home-blinds] 初始化失败，已退化为静态渲染：", error);
 			if (generation === bootGeneration && nextRoot.isConnected) {
 				nextRoot.dataset.homeBlindsReady = "fallback";
 			}

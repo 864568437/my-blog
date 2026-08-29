@@ -10,11 +10,9 @@ import { Icon } from "astro-icon/components";
 import ImageWrapper from "@/components/common/ImageWrapper.astro";
 import FloatingDock from "@/components/controls/FloatingDock.astro";
 import ScrollDownIndicator from "@/components/controls/ScrollDownIndicator.astro";
-import TypewriterText from "@/components/features/TypewriterText.astro";
 import NavMenuPanel from "@components/layout/NavMenuPanel.astro";
 import {
 	backgroundWallpaper,
-	commentConfig,
 	live2dModelConfig,
 	navBarConfig,
 	sidebarLayoutConfig,
@@ -111,60 +109,12 @@ const gradientHeight = backgroundWallpaper.banner?.gradient?.height ?? "30vh";
 const shouldRenderGradient =
 	gradientEnabledOnDesktop || gradientEnabledOnMobile || gradientSwitchable;
 
-// 处理分设备控制的横幅信贷显示
-const creditEnableConfig = backgroundWallpaper.banner?.credit?.enable;
-const creditEnabledOnDesktop =
-	typeof creditEnableConfig === "object"
-		? creditEnableConfig.desktop
-		: creditEnableConfig;
-const creditEnabledOnMobile =
-	typeof creditEnableConfig === "object"
-		? creditEnableConfig.mobile
-		: creditEnableConfig;
-
-const hasBannerCredit =
-	isBannerMode && isBackgroundEnabled && creditEnableConfig;
-
-// 处理分设备控制的横幅信贷文本和链接
-const creditTextConfig = backgroundWallpaper.banner?.credit?.text;
-const creditTextDesktop =
-	typeof creditTextConfig === "object"
-		? creditTextConfig.desktop
-		: creditTextConfig;
-const creditTextMobile =
-	typeof creditTextConfig === "object"
-		? creditTextConfig.mobile
-		: creditTextConfig;
-
-const creditUrlConfig = backgroundWallpaper.banner?.credit?.url;
-const creditUrlDesktop =
-	typeof creditUrlConfig === "object"
-		? creditUrlConfig.desktop
-		: creditUrlConfig;
-const creditUrlMobile =
-	typeof creditUrlConfig === "object"
-		? creditUrlConfig.mobile
-		: creditUrlConfig;
-
 // 检查是否为首页
 const isHomePageCheck = isHomePage(Astro.url.pathname);
 
 // 检查是否在文章详情页
 const isPostPage = !!postSlug;
 
-// 随机选择副标题（当打字机关闭且为数组时）
-const getRandomSubtitle = () => {
-	const subtitle = backgroundWallpaper.banner?.homeText?.subtitle;
-	if (Array.isArray(subtitle)) {
-		const randomIndex = Math.floor(Math.random() * subtitle.length);
-		return subtitle[randomIndex];
-	}
-	return subtitle;
-};
-const randomSubtitle = getRandomSubtitle();
-
-// 主页横幅文本只在首页且全局开关为 true 时显示，不区分设备
-const homeTextEnable = backgroundWallpaper.banner?.homeText?.enable;
 // 横幅类模式（banner / fullscreen）共用横幅覆盖元素（参考 Firefly：全屏壁纸模式同样显示居中标题）
 const isBannerLikeMode = isBannerMode || isFullscreenMode;
 // 是否渲染横幅覆盖层（页面标题 / 文章元信息 / 暗层）。
@@ -172,8 +122,6 @@ const isBannerLikeMode = isBannerMode || isFullscreenMode;
 // 渲染后由 CSS 按当前模式（banner/fullscreen/overlay/none）控制显示
 const shouldRenderBannerOverlays =
 	isWallpaperSwitchable || (isBackgroundEnabled && isBannerLikeMode);
-
-const showHomeText = isBannerLikeMode && !!homeTextEnable && isHomePageCheck;
 
 const showBannerPostMeta =
 	shouldRenderBannerOverlays &&
@@ -338,8 +286,8 @@ const mobileQuality = Math.round(configQuality * 0.9);
 
 <NavMenuPanel links={navBarConfig.links} />
 
-<!-- Wallpaper - 如果允许切换则始终渲染，否则只渲染当前模式 -->
-{(isWallpaperSwitchable || isBannerMode || isFullscreenMode || isOverlayMode) && (
+<!-- Wallpaper - 首页不渲染壁纸区（首屏由影像揭示层全屏承接），其余页面照常 -->
+{!isHomePageCheck && (isWallpaperSwitchable || isBannerMode || isFullscreenMode || isOverlayMode) && (
 <div id="wallpaper-wrapper" class:list={[
 	`z-10 w-full transition duration-700 overflow-hidden ${mobileNonHomeBannerClass}`,
 	isFullscreenMode ? 'wallpaper-fullscreen' : '',
@@ -476,63 +424,7 @@ const mobileQuality = Math.round(configQuality * 0.9);
         {showBannerDim && <div class="banner-dim-overlay absolute inset-0"></div>}
     </div>
 
-    <div id="banner-overlay-container" class="absolute inset-0 z-20 pointer-events-none transition-swup-fade">    <!-- Home page text overlay - 始终渲染以便切换模式时控制显示 -->
-    {homeTextEnable && (
-        <div class={`banner-home-text-overlay absolute inset-0 z-20 flex items-center justify-center ${!showHomeText ? 'hidden' : ''}`}>
-            <div class="w-4/5 lg:w-3/4 text-center mb-0">
-                <div class="flex flex-col">
-                    {backgroundWallpaper.banner?.homeText?.title && (
-                        <h1 class="banner-title font-bold text-white mb-2 lg:mb-4 leading-tight" style={{ fontSize: backgroundWallpaper.banner.homeText.titleSize || "3rem" }}>
-                            {backgroundWallpaper.banner.homeText.title}
-                        </h1>
-                    )}
-                    {backgroundWallpaper.banner?.homeText?.subtitle && (
-                        <h2 id="banner-subtitle" class="banner-subtitle text-white/90 leading-snug" style={{ fontSize: backgroundWallpaper.banner.homeText.subtitleSize || "1.5rem" }} data-subtitles={JSON.stringify(backgroundWallpaper.banner.homeText.subtitle)}>
-                            {backgroundWallpaper.banner.homeText.typewriter?.enable ? (
-                                <TypewriterText
-                                    text={backgroundWallpaper.banner.homeText.subtitle}
-                                    speed={backgroundWallpaper.banner.homeText.typewriter.speed}
-                                    deleteSpeed={backgroundWallpaper.banner.homeText.typewriter.deleteSpeed}
-                                    pauseTime={backgroundWallpaper.banner.homeText.typewriter.pauseTime}
-                                />
-                            ) : (
-                                randomSubtitle
-                            )}
-                        </h2>
-                    )}
-                </div>
-            </div>
-        </div>
-    )}
-
-    <script is:inline>
-        function setRandomSubtitle() {
-            const subtitleElement = document.getElementById('banner-subtitle');
-            if (!subtitleElement) return;
-
-            const subtitlesData = subtitleElement.dataset.subtitles;
-            if (!subtitlesData) return;
-
-            try {
-                const subtitles = JSON.parse(subtitlesData);
-                // Only randomize if it's an array and typewriter is NOT enabled (check for typewriter class)
-                if (Array.isArray(subtitles) && subtitles.length > 0 && !subtitleElement.querySelector('.typewriter')) {
-                    // Use a global variable to persist the subtitle across Swup navigations
-                    // This variable will be reset on full page reload (F5), meeting the requirement
-                    if (!window.fireflyCachedSubtitle) {
-                        const randomIndex = Math.floor(Math.random() * subtitles.length);
-                        window.fireflyCachedSubtitle = subtitles[randomIndex];
-                    }
-                    subtitleElement.textContent = window.fireflyCachedSubtitle;
-                }
-            } catch (e) {
-                console.error("Failed to parse subtitles", e);
-            }
-        }
-
-        // Run on initial load
-        setRandomSubtitle();
-    </script>
+    <div id="banner-overlay-container" class="absolute inset-0 z-20 pointer-events-none transition-swup-fade">
 
     <!-- Non-home non-post page title overlay (desktop only) -->
     {showBannerPageTitle && (
@@ -642,8 +534,8 @@ const mobileQuality = Math.round(configQuality * 0.9);
 </div>
 )}
 
-{/* 当壁纸未渲染时，添加空的 Swup 占位容器，避免 Swup 找不到容器而回退为整页加载 */}
-{!(isWallpaperSwitchable || isBannerMode || isOverlayMode) && (
+{/* 当壁纸未渲染时（壁纸全关 或 首页），添加空的 Swup 占位容器，避免 Swup 找不到容器而回退为整页加载 */}
+{(!(isWallpaperSwitchable || isBannerMode || isOverlayMode) || isHomePageCheck) && (
 <>
     <div id="banner-overlay-container" class="hidden"></div>
     <div id="banner-dim-container" class="hidden"></div>
@@ -665,16 +557,6 @@ const mobileQuality = Math.round(configQuality * 0.9);
           data-tablet-sidebar={sidebarLayoutConfig.tabletSidebar ?? "left"}
           data-show-both-sidebars-on-post={sidebarLayoutConfig.showBothSidebarsOnPostPage ? "true" : "false"}
         >
-            <!-- 网站浏览量 -->
-            {hasBannerCredit && (creditEnabledOnDesktop || creditEnabledOnMobile) && isHomePageCheck && <div
-                id="banner-credit"
-                class="onload-animation transition-all absolute justify-center items-center rounded-full px-3 right-4 -top-13 bg-black/60 h-9 flex"
-            >
-                <Icon class="text-white/75 text-[1.25rem] mr-1" name="material-symbols:visibility-outline-rounded" ></Icon>
-                <span class="text-white/75 text-xs waline-pageview-count" data-path="/" id="view-count">--</span><span class="text-white/75 text-xs"> 次浏览</span>
-            </div>}
-
-
             {/* 渲染左侧边栏 - CSS .lg\:is-home 控制首页隐藏 */}
             {sidebarLayoutConfig.position !== "right" ? (
                 <>
@@ -704,11 +586,19 @@ const mobileQuality = Math.round(configQuality * 0.9);
                 <main id="swup-container" class="transition-main">
                 {/* 携带网格布局类名，用于JS更新父容器 */}
                 <div id="grid-class-carrier" data-grid-class={gridCols} class="hidden"></div>
-                {/* 备用 h1 标题 - 当主页横幅文本未启用时，提供隐藏的主标题 */}
-                {isHomePageCheck && !showHomeText && (
+                {/* 备用 h1 标题 - 首页无可见大标题，提供隐藏的主标题保证 SEO */}
+                {isHomePageCheck && (
                         <h1 class="sr-only">{siteConfig.title}</h1>
                 )}
-                <div id="content-wrapper" class="onload-animation transition-leaving">
+                {/* 首页不挂 onload-animation：fade-in-up 的 forwards 填充会让 #content-wrapper
+                    长期保留非 none 的 transform 计算值，而 transform 元素会成为 position:fixed
+                    后代的包含块——HomeBlinds 的满屏 fixed 舞台与 ScrollTrigger 的 pin 会被钉在
+                    文档流上随页面滚走，表现为"首图上滑消失 + pin-spacer 大段空白"。
+                    首屏视觉由 HomeBlinds 自带的揭示动画承担；其他页面维持原有入场动画。 */}
+                <div
+                    id="content-wrapper"
+                    class:list={["transition-leaving", { "onload-animation": !isHomePageCheck }]}
+                >
                     <slot></slot>
 
                 </div>
@@ -749,16 +639,6 @@ const mobileQuality = Math.round(configQuality * 0.9);
         {live2dModelConfig.enable && <Live2DWidget config={live2dModelConfig} />}
     </div>
 </div>
-
-{commentConfig.type === 'waline' && commentConfig.waline?.visitorCount && <script type="module" is:inline define:vars={{ serverURL: commentConfig.waline.serverURL }}>
-  import { pageviewCount } from 'https://unpkg.com/@waline/client@v3/dist/waline.js';
-
-  pageviewCount({
-    serverURL,
-    path: "/",
-    update: true,
-  });
-</script>}
 
 <FloatingDock headings={headings} />
 
