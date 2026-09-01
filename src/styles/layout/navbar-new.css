@@ -368,7 +368,9 @@
 	transform: rotate(0deg) scale(0.92);
 }
 
-@media (max-width: 768px) {
+/* 1023px 以下隐藏：中段菜单与搜索按钮已占满窄条，主题按钮挤在搜索
+   旁显示不全；移动端的主题切换由 MobileDock 承担 */
+@media (max-width: 1023px) {
 	.nav-theme-btn {
 		display: none !important;
 	}

@@ -206,7 +206,10 @@ const profileName = profileConfig.name || "博主";
 														alt="动态图片"
 														loading="lazy"
 														decoding="async"
-														referrerpolicy={img.referrerPolicy || undefined}
+														referrerpolicy={
+														(img.referrerPolicy ||
+															undefined) as astroHTML.JSX.HTMLAttributeReferrerPolicy
+													}
 													/>
 												))}
 											</span>

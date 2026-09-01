@@ -102,6 +102,20 @@ export type HomeBlindsConfig = {
 		/** 立牌图 */
 		standImages: string[];
 	};
+	/**
+	 * 终幕文字层：最后一张图放大全屏后居中显示（参考 home-end-finale 的
+	 * 文字排布与滚动驱动入场）。字段留空则不渲染对应行
+	 */
+	finale?: {
+		/** 顶部小字，如 "The End" */
+		eyebrow?: string;
+		/** 主标题英文段 */
+		titleEn?: string;
+		/** 主标题中文段（含引号装饰） */
+		titleZh?: string;
+		/** 底部版权行 */
+		copyright?: string;
+	};
 };
 
 export type HomeConfig = {

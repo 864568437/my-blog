@@ -90,5 +90,13 @@ export const homeConfig: HomeConfig = {
 			],
 			standImages: ["/assets/images/home-blinds/act4/1.webp"],
 		},
+		// 终幕文字层：最后一张图放大全屏后居中显示，随放大尾段淡入上移
+		// （排布与动画节奏复刻自 XUIOO 博客的 home-end-finale，文案可自由修改）
+		finale: {
+			eyebrow: "The End",
+			titleEn: "Pure Wish True",
+			titleZh: "「纯粹祈愿皆成真」",
+			copyright: "Copyright © 2026 Fqzlr. All Rights Reserved",
+		},
 	},
 };

@@ -991,6 +991,13 @@ html.is-page-transitioning .banner-home-text-overlay {
     background: transparent !important;
 }
 
+/* 首页主内容区是 absolute（脱离文档流），body 高度塌缩为一屏——
+   #top-row 的 sticky 包含块随之只有一屏高，滚过一屏导航栏就被带出
+   视口。首页导航栏改用 fixed 常驻视口，不依赖包含块高度 */
+.lg\:is-home #top-row {
+    position: fixed;
+}
+
 /* 首页主内容区从顶部开始 — 覆盖 .no-banner-layout 的 top: 5.5rem */
 .lg\:is-home .absolute.w-full.z-30,
 .lg\:is-home .absolute.w-full.z-30.no-banner-layout,
