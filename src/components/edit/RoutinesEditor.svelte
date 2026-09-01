@@ -1,15 +1,15 @@
 <script lang="ts">
-import { onMount } from "svelte";
 import { marked } from "marked";
+import { onMount } from "svelte";
+import { setupRepoDrafts } from "@/utils/draftHelpers";
 import {
+	deepClone,
+	ensureIconify,
+	genId,
+	getRepoFile,
 	hasValidToken,
 	showToast,
-	ensureIconify,
-	getRepoFile,
-	genId,
-	deepClone,
 } from "@/utils/editMode";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
 
 interface RoutineItem {
 	id: string;
@@ -37,9 +37,26 @@ let fileSha = $state<string | null>(null);
 let originalTS = $state<string>("");
 
 const emojiOptions = [
-	"📌", "📝", "🎯", "⏰", "💪", "🧘", "📚", "💤",
-	"🏃", "🍎", "💧", "☀️", "🌙", "✅", "🚀", "🔥",
-	"💡", "🎨", "🎵", "❤️",
+	"📌",
+	"📝",
+	"🎯",
+	"⏰",
+	"💪",
+	"🧘",
+	"📚",
+	"💤",
+	"🏃",
+	"🍎",
+	"💧",
+	"☀️",
+	"🌙",
+	"✅",
+	"🚀",
+	"🔥",
+	"💡",
+	"🎨",
+	"🎵",
+	"❤️",
 ];
 
 const pageKey = "routines";
@@ -82,7 +99,7 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 	}
 	let arrayStr = tsContent.substring(bracketStart + 1, idx).trim();
 	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]\}])/g, "$1");
+	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
 	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
 	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
 	try {
@@ -94,7 +111,10 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 }
 
 function parseRoutinesFromTS(tsContent: string): RoutineItem[] {
-	const items = parseArrayFromTS(tsContent, "export const routinesConfig: RoutineItem[] = [");
+	const items = parseArrayFromTS(
+		tsContent,
+		"export const routinesConfig: RoutineItem[] = [",
+	);
 	return items.map((item: any, index: number) => ({
 		id: item.id || `routine-${index}`,
 		name: item.name || "",
@@ -245,7 +265,9 @@ const drafts = setupRepoDrafts({
 	getOriginalContent: () => originalTS,
 	setOriginalContent: (v) => (originalTS = v),
 	getCommitMsg: (isEdit) =>
-		isEdit ? `chore(routines): 更新日常规划` : `chore(routines): 创建日常规划配置`,
+		isEdit
+			? "chore(routines): 更新日常规划"
+			: "chore(routines): 创建日常规划配置",
 	onSubmitted: () => {
 		setTimeout(() => window.location.reload(), 1200);
 	},
@@ -273,7 +295,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarAdd", handleSidebarAdd);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -419,7 +444,9 @@ async function loadRepoData() {
 }
 
 function hideSSRContent() {
-	document.querySelectorAll(".routine-card").forEach((c) => ((c as HTMLElement).style.display = "none"));
+	document
+		.querySelectorAll(".routine-card")
+		.forEach((c) => ((c as HTMLElement).style.display = "none"));
 	const grids = document.querySelectorAll(".routines-grid");
 	grids.forEach((g) => ((g as HTMLElement).style.display = "none"));
 	const empty = document.querySelector(".w-full.p-12.text-center");
@@ -429,7 +456,9 @@ function hideSSRContent() {
 }
 
 function showSSRContent() {
-	document.querySelectorAll(".routine-card").forEach((c) => ((c as HTMLElement).style.display = ""));
+	document
+		.querySelectorAll(".routine-card")
+		.forEach((c) => ((c as HTMLElement).style.display = ""));
 	const grids = document.querySelectorAll(".routines-grid");
 	grids.forEach((g) => ((g as HTMLElement).style.display = ""));
 	const empty = document.querySelector(".w-full.p-12.text-center");
@@ -545,7 +574,8 @@ function restoreItem(index: number) {
 }
 
 function handleAdd() {
-	const maxOrder = routines.length > 0 ? Math.max(...routines.map((r) => r.order)) : 0;
+	const maxOrder =
+		routines.length > 0 ? Math.max(...routines.map((r) => r.order)) : 0;
 	routines = [
 		{
 			id: genId("rt"),

@@ -1,13 +1,13 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { setupRepoDrafts } from "@/utils/draftHelpers";
 import {
-	showToast,
-	genId,
 	deepClone,
 	ensureIconify,
+	genId,
 	getRepoFile,
+	showToast,
 } from "@/utils/editMode";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
 
 interface FriendItem {
 	id?: string;
@@ -46,7 +46,7 @@ function parseFriendsFromTS(tsContent: string): FriendItem[] {
 	}
 	let arrayStr = tsContent.substring(bracketStart, idx).trim();
 	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]\}])/g, "$1");
+	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
 	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
 	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
 	try {
@@ -194,7 +194,7 @@ const drafts = setupRepoDrafts({
 	getOriginalContent: () => originalTS,
 	setOriginalContent: (v) => (originalTS = v),
 	getCommitMsg: (isEdit) =>
-		isEdit ? `chore: update friends` : `chore: create friends`,
+		isEdit ? "chore: update friends" : "chore: create friends",
 	onSubmitted: () => {
 		setTimeout(() => window.location.reload(), 1200);
 	},
@@ -223,7 +223,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarAdd", handleSidebarAdd);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -318,7 +321,10 @@ function collectFromDOM() {
 	grid.querySelectorAll(".friend-card").forEach((el) => {
 		const card = el as HTMLElement;
 		// 当前项目的友链卡片是直接 <a> 标签
-		const link = card.tagName === "A" ? (card as HTMLAnchorElement) : card.querySelector("a") as HTMLAnchorElement | null;
+		const link =
+			card.tagName === "A"
+				? (card as HTMLAnchorElement)
+				: (card.querySelector("a") as HTMLAnchorElement | null);
 		if (!link) return;
 		// 获取标题 - 在 .font-bold 或 .friend-card-title 中
 		const title =
@@ -335,7 +341,9 @@ function collectFromDOM() {
 		const img = card.querySelector("img") as HTMLImageElement | null;
 		// 获取标签
 		const tagEls = card.querySelectorAll(".text-\\[0\\.65rem\\]");
-		const tags = Array.from(tagEls).map(t => t.textContent?.trim() || "").filter(Boolean);
+		const tags = Array.from(tagEls)
+			.map((t) => t.textContent?.trim() || "")
+			.filter(Boolean);
 		items.push({
 			id: card.dataset.friendId || link.href,
 			title,

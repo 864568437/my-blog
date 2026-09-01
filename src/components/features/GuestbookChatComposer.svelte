@@ -384,7 +384,11 @@ async function handleImageSelection(event: Event) {
 	isUploadingImage = true;
 	onToolError("");
 	try {
-		const url = await uploadGuestbookImage(file, imageUploadURL, imageUploadToken);
+		const url = await uploadGuestbookImage(
+			file,
+			imageUploadURL,
+			imageUploadToken,
+		);
 		const name = file.name
 			.replace(/\.[^.]+$/u, "")
 			.replace(/[[\]]/gu, "")

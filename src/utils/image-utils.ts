@@ -115,7 +115,8 @@ export function getFallbackFormat(): "avif" | "webp" {
  */
 export function shouldAddNoReferrer(urlStr: string): boolean {
 	if (!urlStr.startsWith("http")) return false;
-	const domains = (siteConfig.imageOptimization as any)?.noReferrerDomains || [];
+	const domains =
+		(siteConfig.imageOptimization as any)?.noReferrerDomains || [];
 	if (domains.length === 0) return false;
 	try {
 		const hostname = new URL(urlStr).hostname;

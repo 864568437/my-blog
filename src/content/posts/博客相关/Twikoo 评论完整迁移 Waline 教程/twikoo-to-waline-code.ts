@@ -618,7 +618,7 @@ btnPreview.addEventListener('click', () => {
     \`;
   }).join('');
 });
-<\/script>
+</script>
 </body>
 </html>
 `;

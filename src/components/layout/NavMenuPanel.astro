@@ -13,19 +13,23 @@ interface Props {
 	links: (NavBarLink | LinkPreset)[];
 }
 
-const processedLinks = Astro.props.links.map((item: NavBarLink | LinkPreset) => {
-	const link: NavBarLink =
-		typeof item === "number" ? LinkPresets[item] : item;
-	return {
-		...link,
-		children: link.children?.map((child: NavBarLink | LinkPreset): NavBarLink => {
-			if (typeof child === "number") {
-				return LinkPresets[child];
-			}
-			return child;
-		}),
-	};
-});
+const processedLinks = Astro.props.links.map(
+	(item: NavBarLink | LinkPreset) => {
+		const link: NavBarLink =
+			typeof item === "number" ? LinkPresets[item] : item;
+		return {
+			...link,
+			children: link.children?.map(
+				(child: NavBarLink | LinkPreset): NavBarLink => {
+					if (typeof child === "number") {
+						return LinkPresets[child];
+					}
+					return child;
+				},
+			),
+		};
+	},
+);
 
 // Logo 加载逻辑（与 Navbar 一致，用于移动端抽屉顶部品牌区）
 const navbarTitle = siteConfig.navbar.title || siteConfig.title;

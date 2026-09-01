@@ -48,10 +48,7 @@ try {
 		let u = b.data.link || "";
 		if (!u) {
 			const s = b.id.replace(/\\/g, "/").replace(/\.(md|mdx|markdown)$/i, "");
-			u =
-				b.data.category === "music"
-					? "/music/"
-					: "/bangumi/";
+			u = b.data.category === "music" ? "/music/" : "/bangumi/";
 		}
 		allItems.push({
 			type: b.data.category === "music" ? "music" : "bangumi",

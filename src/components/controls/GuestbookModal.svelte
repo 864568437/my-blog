@@ -1,83 +1,83 @@
 <script lang="ts">
-	import { onMount, tick } from "svelte";
-	import Icon from "@/components/common/Icon.svelte";
-	import GuestbookChat, {
-		type GuestbookSyncSnapshot,
-	} from "@/components/features/GuestbookChat.svelte";
+import { onMount, tick } from "svelte";
+import Icon from "@/components/common/Icon.svelte";
+import GuestbookChat, {
+	type GuestbookSyncSnapshot,
+} from "@/components/features/GuestbookChat.svelte";
 
-	// 同步状态快照（来自 GuestbookChat），用于合并到顶部标题栏
-	let syncSnapshot = $state<GuestbookSyncSnapshot>({
-		totalCount: 0,
-		initialLoading: true,
-		lastSyncedAt: null,
-		isOffline: false,
-		syncing: false,
-		syncError: "",
-	});
+// 同步状态快照（来自 GuestbookChat），用于合并到顶部标题栏
+let syncSnapshot = $state<GuestbookSyncSnapshot>({
+	totalCount: 0,
+	initialLoading: true,
+	lastSyncedAt: null,
+	isOffline: false,
+	syncing: false,
+	syncError: "",
+});
 
-	let isOpen = $state(false);
-	let chatMounted = $state(false);
+let isOpen = $state(false);
+let chatMounted = $state(false);
 
-	/**
-	 * 格式化顶部标题栏中的同步时间。
-	 * 与原 GuestbookChat 内部标题栏保持一致。
-	 */
-	function formatSyncedAt(value: number | null): string {
-		if (!value) return "等待同步";
-		const date = new Date(value);
-		const pad = (n: number) => n.toString().padStart(2, "0");
-		return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+/**
+ * 格式化顶部标题栏中的同步时间。
+ * 与原 GuestbookChat 内部标题栏保持一致。
+ */
+function formatSyncedAt(value: number | null): string {
+	if (!value) return "等待同步";
+	const date = new Date(value);
+	const pad = (n: number) => n.toString().padStart(2, "0");
+	return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function formatSyncStatus(snapshot: GuestbookSyncSnapshot): string {
+	if (snapshot.isOffline) return "离线";
+	if (snapshot.syncing) return "同步中";
+	if (snapshot.syncError) return "同步失败";
+	return "同步";
+}
+
+// 同步状态文案（在线：同步于/同步中/同步失败/等待同步；离线：离线）
+const syncStatusText = $derived(formatSyncStatus(syncSnapshot));
+const syncedAtText = $derived(formatSyncedAt(syncSnapshot.lastSyncedAt));
+const messageCountText = $derived(
+	syncSnapshot.initialLoading ? "--" : syncSnapshot.totalCount,
+);
+
+export function toggle() {
+	isOpen = !isOpen;
+	(window as any).__guestbookModalOpen = isOpen;
+	if (isOpen) {
+		tick().then(() => {
+			chatMounted = true;
+		});
 	}
+}
 
-	function formatSyncStatus(snapshot: GuestbookSyncSnapshot): string {
-		if (snapshot.isOffline) return "离线";
-		if (snapshot.syncing) return "同步中";
-		if (snapshot.syncError) return "同步失败";
-		return "同步";
+function close() {
+	isOpen = false;
+	(window as any).__guestbookModalOpen = false;
+}
+
+function handleKeydown(e: KeyboardEvent) {
+	if (e.key === "Escape" && isOpen) {
+		close();
 	}
+}
 
-	// 同步状态文案（在线：同步于/同步中/同步失败/等待同步；离线：离线）
-	const syncStatusText = $derived(formatSyncStatus(syncSnapshot));
-	const syncedAtText = $derived(formatSyncedAt(syncSnapshot.lastSyncedAt));
-	const messageCountText = $derived(
-		syncSnapshot.initialLoading ? "--" : syncSnapshot.totalCount,
-	);
+// GuestbookChat 同步状态变更回调
+function handleSyncChange(snapshot: GuestbookSyncSnapshot) {
+	syncSnapshot = snapshot;
+}
 
-	export function toggle() {
-		isOpen = !isOpen;
-		(window as any).__guestbookModalOpen = isOpen;
-		if (isOpen) {
-			tick().then(() => {
-				chatMounted = true;
-			});
-		}
-	}
-
-	function close() {
-		isOpen = false;
-		(window as any).__guestbookModalOpen = false;
-	}
-
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === "Escape" && isOpen) {
-			close();
-		}
-	}
-
-	// GuestbookChat 同步状态变更回调
-	function handleSyncChange(snapshot: GuestbookSyncSnapshot) {
-		syncSnapshot = snapshot;
-	}
-
-	onMount(() => {
-		const toggleHandler = () => toggle();
-		window.addEventListener("toggle-guestbook", toggleHandler);
-		window.addEventListener("keydown", handleKeydown);
-		return () => {
-			window.removeEventListener("toggle-guestbook", toggleHandler);
-			window.removeEventListener("keydown", handleKeydown);
-		};
-	});
+onMount(() => {
+	const toggleHandler = () => toggle();
+	window.addEventListener("toggle-guestbook", toggleHandler);
+	window.addEventListener("keydown", handleKeydown);
+	return () => {
+		window.removeEventListener("toggle-guestbook", toggleHandler);
+		window.removeEventListener("keydown", handleKeydown);
+	};
+});
 </script>
 
 {#if isOpen}

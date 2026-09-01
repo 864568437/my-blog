@@ -52,7 +52,9 @@ if (!customElements.get("recommended-star-flow")) {
 		connectedCallback() {
 			if (this.initialized) return;
 			if (document.readyState === "loading") {
-				document.addEventListener("DOMContentLoaded", this.initialize, { once: true });
+				document.addEventListener("DOMContentLoaded", this.initialize, {
+					once: true,
+				});
 				return;
 			}
 			this.scheduleInitialize();
@@ -84,7 +86,10 @@ if (!customElements.get("recommended-star-flow")) {
 			this.card?.addEventListener("pointerleave", this.handlePointerLeave);
 			this.card?.addEventListener("focusin", this.handleFocusIn);
 			this.card?.addEventListener("focusout", this.handleFocusOut);
-			document.addEventListener("visibilitychange", this.handleVisibilityChange);
+			document.addEventListener(
+				"visibilitychange",
+				this.handleVisibilityChange,
+			);
 
 			if (typeof ResizeObserver !== "undefined") {
 				this.resizeObserver = new ResizeObserver(this.handleResize);
@@ -107,7 +112,10 @@ if (!customElements.get("recommended-star-flow")) {
 			cancelAnimationFrame(this.resizeFrame);
 			this.resizeObserver?.disconnect();
 			window.removeEventListener("resize", this.handleResize);
-			document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+			document.removeEventListener(
+				"visibilitychange",
+				this.handleVisibilityChange,
+			);
 			this.card?.removeEventListener("pointerenter", this.handlePointerEnter);
 			this.card?.removeEventListener("pointerleave", this.handlePointerLeave);
 			this.card?.removeEventListener("focusin", this.handleFocusIn);
@@ -122,11 +130,32 @@ if (!customElements.get("recommended-star-flow")) {
 				return seed / 4294967296;
 			};
 			const layerPattern = [0, 1, 0, 2, 1, 0, 1, 2, 0, 1, 0, 2, 1, 0, 1, 2];
-			const ySlots = [0.2, 0.7, 0.43, 0.77, 0.17, 0.57, 0.32, 0.64, 0.82, 0.5, 0.25, 0.73, 0.16, 0.84, 0.39, 0.58];
+			const ySlots = [
+				0.2, 0.7, 0.43, 0.77, 0.17, 0.57, 0.32, 0.64, 0.82, 0.5, 0.25, 0.73,
+				0.16, 0.84, 0.39, 0.58,
+			];
 			const layers = [
-				{ radius: [3.1, 4.35], alpha: [0.56, 0.7], float: [1.9, 3.5], curve: [2.1, 3.9], glow: [4, 7] },
-				{ radius: [4.5, 6.25], alpha: [0.72, 0.88], float: [2.9, 5], curve: [3.5, 6], glow: [7, 11] },
-				{ radius: [6.3, 8.35], alpha: [0.88, 1], float: [4, 6.4], curve: [4.8, 7.8], glow: [11, 16] },
+				{
+					radius: [3.1, 4.35],
+					alpha: [0.56, 0.7],
+					float: [1.9, 3.5],
+					curve: [2.1, 3.9],
+					glow: [4, 7],
+				},
+				{
+					radius: [4.5, 6.25],
+					alpha: [0.72, 0.88],
+					float: [2.9, 5],
+					curve: [3.5, 6],
+					glow: [7, 11],
+				},
+				{
+					radius: [6.3, 8.35],
+					alpha: [0.88, 1],
+					float: [4, 6.4],
+					curve: [4.8, 7.8],
+					glow: [11, 16],
+				},
 			];
 			const between = (range) => range[0] + (range[1] - range[0]) * random();
 
@@ -149,7 +178,9 @@ if (!customElements.get("recommended-star-flow")) {
 					twinklePhase: random() * Math.PI * 2,
 					twinkleSpeed: 0.88 + random() * 1.05,
 					rotation: random() * Math.PI * 2,
-					rotationSpeed: (0.2 + random() * (0.18 + layer * 0.09)) * (random() > 0.5 ? 1 : -1),
+					rotationSpeed:
+						(0.2 + random() * (0.18 + layer * 0.09)) *
+						(random() > 0.5 ? 1 : -1),
 					hasTrail: layer > 0 || index % 4 === 0,
 					tailScale: 3.2 + random() * 1.7 + layer * 0.75,
 				};
@@ -217,10 +248,13 @@ if (!customElements.get("recommended-star-flow")) {
 				const radius = particle.radius;
 				const enterDistance = Math.max(0, Math.min(1, progress / 0.14));
 				const exitDistance = Math.max(0, Math.min(1, (1 - progress) / 0.2));
-				const enterFade = enterDistance * enterDistance * (3 - 2 * enterDistance);
+				const enterFade =
+					enterDistance * enterDistance * (3 - 2 * enterDistance);
 				const exitFade = exitDistance * exitDistance * (3 - 2 * exitDistance);
 				const edgeFade = enterFade * exitFade;
-				const drift = Math.sin(time * particle.driftFrequency + particle.twinklePhase);
+				const drift = Math.sin(
+					time * particle.driftFrequency + particle.twinklePhase,
+				);
 				const curveAngle = progress * Math.PI * 2 + particle.curvePhase;
 				const rawX =
 					radius +
@@ -243,10 +277,7 @@ if (!customElements.get("recommended-star-flow")) {
 					0.9 +
 					Math.sin(time * particle.twinkleSpeed + particle.twinklePhase) * 0.08;
 				const scale =
-					0.94 +
-					twinkle * 0.06 +
-					beamBoost * 0.24 +
-					this.hoverAmount * 0.08;
+					0.94 + twinkle * 0.06 + beamBoost * 0.24 + this.hoverAmount * 0.08;
 				const alpha = Math.min(
 					1,
 					particle.baseAlpha *
@@ -325,7 +356,8 @@ if (!customElements.get("recommended-star-flow")) {
 			context.translate(x, y);
 			context.globalCompositeOperation = "source-over";
 			context.shadowColor = `rgba(241, 171, 31, ${0.48 + beamBoost * 0.3})`;
-			context.shadowBlur = particle.glow + beamBoost * 10 + this.hoverAmount * 3;
+			context.shadowBlur =
+				particle.glow + beamBoost * 10 + this.hoverAmount * 3;
 			this.traceRoundedStar(context, radius, rotation, 0.18);
 			context.fillStyle = `rgba(${fill}, ${alpha})`;
 			context.fill();

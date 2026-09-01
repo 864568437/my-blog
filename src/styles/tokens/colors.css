@@ -1,31 +1,34 @@
 /* ===== 设计令牌：颜色 =====
-   使用 --hue 变量控制全局色相，支持主题色动态切换 */
+   极简中性灰阶（参考 tblog / x.ai 视觉语言）：
+   所有色块去饱和，仅保留黑白灰与少量点缀色。
+   --hue 仅为兼容保留（setting-utils 仍会写入），调色板不再引用。 */
 
 :root {
   --hue: 250;
 
-  --primary: oklch(0.55 0.12 var(--hue));
+  --primary: oklch(0.30 0 0);
   --page-bg: oklch(1 0 0);
   --card-bg: transparent;
   --card-bg-transparent: transparent;
+  --article-surface-bg: #F5F5F5;
 
-  --btn-content: oklch(0.55 0.12 var(--hue));
+  --btn-content: oklch(0.25 0 0);
   --btn-regular-bg: transparent;
-  --btn-regular-bg-hover: oklch(0.94 0.02 var(--hue));
-  --btn-regular-bg-active: oklch(0.90 0.03 var(--hue));
+  --btn-regular-bg-hover: oklch(0.94 0 0);
+  --btn-regular-bg-active: oklch(0.90 0 0);
 
-  --btn-plain-bg-hover: oklch(0.94 0.02 var(--hue));
-  --btn-plain-bg-active: oklch(0.90 0.03 var(--hue));
+  --btn-plain-bg-hover: oklch(0.94 0 0);
+  --btn-plain-bg-active: oklch(0.90 0 0);
 
-  --btn-card-bg-hover: oklch(0.96 0.015 var(--hue));
-  --btn-card-bg-active: oklch(0.92 0.025 var(--hue));
+  --btn-card-bg-hover: oklch(0.96 0 0);
+  --btn-card-bg-active: oklch(0.92 0 0);
 
   --enter-btn-bg: transparent;
-  --enter-btn-bg-hover: oklch(0.94 0.02 var(--hue));
-  --enter-btn-bg-active: oklch(0.90 0.03 var(--hue));
+  --enter-btn-bg-hover: oklch(0.94 0 0);
+  --enter-btn-bg-active: oklch(0.90 0 0);
 
-  --deep-text: oklch(0.25 0.02 var(--hue));
-  --title-active: oklch(0.55 0.12 var(--hue));
+  --deep-text: oklch(0.10 0 0);
+  --title-active: oklch(0.30 0 0);
 
   /* 全局文字色阶：缺失会导致面包屑/正文/侧边栏出现默认黑色 fallback */
   --text-primary: var(--deep-text);
@@ -33,28 +36,37 @@
   --text-muted: var(--content-meta);
 
   /* 文字发光（夜晚模式）：默认 0，白天不发光；夜晚通过 --text-glow-strength 控制 */
-  --text-glow-color: oklch(0.75 0.14 var(--hue));
+  --text-glow-color: oklch(0.75 0 0);
   --text-glow-strength: 0;
   --text-glow: 0 0 0 transparent;
 
-  --line-divider: oklch(0.85 0.02 var(--hue));
-  --line-color: oklch(0.85 0.02 var(--hue));
-  --meta-divider: oklch(0.75 0.03 var(--hue));
-  --content-meta: oklch(0.45 0.05 var(--hue));
+  --line-divider: oklch(0.85 0 0);
+  --line-color: oklch(0.85 0 0);
+  --meta-divider: oklch(0.75 0 0);
+  --content-meta: oklch(0.45 0 0);
 
-  --inline-code-bg: oklch(0.95 0.01 var(--hue));
-  --inline-code-color: oklch(0.20 0.05 var(--hue));
-  --selection-bg: oklch(0.85 0.08 var(--hue));
-  --codeblock-bg: oklch(0.97 0.005 var(--hue));
-  --codeblock-topbar-bg: oklch(0.93 0.015 var(--hue));
+  --article-pinned-accent: oklch(0.52 0.20 25);
+  --article-title-marker: oklch(0.62 0.16 190);
 
-  --license-block-bg: oklch(0.97 0.005 var(--hue));
+  --inline-code-bg: oklch(0.95 0 0);
+  --inline-code-color: oklch(0.20 0 0);
+  --selection-bg: oklch(0.85 0 0);
+  --codeblock-bg: oklch(0.97 0 0);
+  --codeblock-topbar-bg: oklch(0.93 0 0);
+  --codeblock-border: oklch(0.85 0 0);
 
-  --link-underline: oklch(0.85 0.06 var(--hue));
-  --link-hover: oklch(0.50 0.12 var(--hue));
-  --link-active: oklch(0.55 0.12 var(--hue));
+  --license-block-bg: oklch(0.97 0 0);
+
+  --link-underline: oklch(0.85 0 0);
+  --link-hover: oklch(0.50 0 0);
+  --link-active: oklch(0.30 0 0);
 
   --float-panel-bg: oklch(1 0 0);
+
+  /* 导航栏三段胶囊（参考 tblog：无色相的实底灰面板） */
+  --navbar-bg: #E7E7E7;
+  --navbar-highlight-bg: #000000;
+  --navbar-highlight-text: #FFFFFF;
 
   --scrollbar-bg-light: rgba(0, 0, 0, 0.4);
   --scrollbar-bg-hover-light: rgba(0, 0, 0, 0.5);
@@ -83,20 +95,7 @@
   --toc-width: 14rem;
   --toc-item-active: oklch(0.20 0 0);
 
-  --color-selection-bar: linear-gradient(to right, 
-    oklch(0.80 0.10 0), 
-    oklch(0.80 0.10 30), 
-    oklch(0.80 0.10 60), 
-    oklch(0.80 0.10 90), 
-    oklch(0.80 0.10 120), 
-    oklch(0.80 0.10 150), 
-    oklch(0.80 0.10 180), 
-    oklch(0.80 0.10 210), 
-    oklch(0.80 0.10 240), 
-    oklch(0.80 0.10 270), 
-    oklch(0.80 0.10 300), 
-    oklch(0.80 0.10 330), 
-    oklch(0.80 0.10 360));
+  --color-selection-bar: linear-gradient(to right, oklch(0.20 0 0), oklch(0.50 0 0), oklch(0.80 0 0));
 
   --guestbook-panel: transparent;
   --guestbook-surface: transparent;
@@ -118,6 +117,7 @@
   --guestbook-line: var(--line-divider);
   --guestbook-danger: var(--admonitions-color-caution);
   --guestbook-success: var(--admonitions-color-tip);
+  --guestbook-waiting: #E5484D;
   --guestbook-avatar-size: 2.625rem;
   --guestbook-chat-height: min(74vh, 47.5rem);
   --guestbook-chat-min-height: 37.5rem;
@@ -127,8 +127,9 @@
   --guestbook-mobile-dock-clearance: 6.25rem;
 
   /* 关于页专用：区块卡片底色 + 标题强调色 */
-  --tag-graph-surface: oklch(0.975 0.008 var(--hue));
-  --article-title-marker: oklch(0.55 0.12 var(--hue));
+  --tag-graph-surface: #fafafa;
+  --tag-graph-text: #18181b;
+  --tag-graph-muted: #52525b;
 
   /* 说说页面专用：参考站点设计令牌 */
   --moments-surface: color-mix(in oklch, var(--card-bg, oklch(1 0 0)) 92%, var(--page-bg, oklch(1 0 0)));
@@ -139,57 +140,66 @@
   --card-text-secondary: var(--content-meta);
 }
 
-/* 暗色主题：深色底 + 亮前景，使用 --hue 控制色相 */
+/* 暗色主题：纯黑底 + 白前景，所有色块去饱和 */
 :root.dark {
-  --primary: oklch(0.75 0.14 var(--hue));
-  --page-bg: oklch(0.16 0.014 var(--hue));
+  --primary: oklch(0.85 0 0);
+  --page-bg: oklch(0.08 0 0);
   --card-bg: transparent;
   --card-bg-transparent: transparent;
+  --article-surface-bg: #131313;
 
-  /* 夜晚模式：纯白文字（最高亮度为 0.98，让饱和度滑条能调至接近全白） */
-  --deep-text: oklch(0.92 0.005 var(--hue));
-  --title-active: oklch(0.75 0.14 var(--hue));
+  --deep-text: oklch(0.90 0 0);
+  --title-active: oklch(0.70 0 0);
 
   /* 文字色阶：夜晚使用 deep-text 作为 primary，避免黑色 fallback */
   --text-primary: var(--deep-text);
   --text-secondary: var(--content-meta);
   --text-muted: var(--content-meta);
 
-  /* 夜晚模式文字发光：基于主题色相的柔和光晕 */
-  --text-glow-color: oklch(0.75 0.14 var(--hue));
+  /* 夜晚模式文字发光：中性白光晕 */
+  --text-glow-color: oklch(0.75 0 0);
   --text-glow-strength: 0.5;
   --text-glow:
     0 0 calc(var(--text-glow-strength, 0) * 4px) color-mix(in srgb, var(--text-glow-color) calc(var(--text-glow-strength, 0) * 60%), transparent);
 
-  --btn-content: oklch(0.75 0.14 var(--hue));
+  --btn-content: oklch(0.85 0 0);
   --btn-regular-bg: transparent;
-  --btn-regular-bg-hover: oklch(0.22 0.03 var(--hue));
-  --btn-regular-bg-active: oklch(0.26 0.04 var(--hue));
+  --btn-regular-bg-hover: oklch(0.18 0 0);
+  --btn-regular-bg-active: oklch(0.22 0 0);
 
-  --btn-plain-bg-hover: oklch(0.22 0.03 var(--hue));
-  --btn-plain-bg-active: oklch(0.26 0.04 var(--hue));
+  --btn-plain-bg-hover: oklch(0.18 0 0);
+  --btn-plain-bg-active: oklch(0.22 0 0);
 
-  --btn-card-bg-hover: oklch(0.20 0.025 var(--hue));
-  --btn-card-bg-active: oklch(0.24 0.035 var(--hue));
+  --btn-card-bg-hover: oklch(0.16 0 0);
+  --btn-card-bg-active: oklch(0.20 0 0);
 
-  --line-divider: oklch(0.28 0.03 var(--hue));
-  --line-color: oklch(0.28 0.03 var(--hue));
-  --meta-divider: oklch(0.38 0.04 var(--hue));
-  --content-meta: oklch(0.65 0.06 var(--hue));
+  --line-divider: oklch(0.25 0 0);
+  --line-color: oklch(0.25 0 0);
+  --meta-divider: oklch(0.35 0 0);
+  --content-meta: oklch(0.65 0 0);
 
-  --inline-code-bg: oklch(0.22 0.02 var(--hue));
-  --inline-code-color: oklch(0.85 0.04 var(--hue));
-  --selection-bg: oklch(0.35 0.10 var(--hue));
-  --codeblock-bg: oklch(0.14 0.01 var(--hue));
-  --codeblock-topbar-bg: oklch(0.22 0.02 var(--hue));
+  --article-pinned-accent: oklch(0.72 0.16 25);
+  --article-title-marker: oklch(0.78 0.15 190);
 
-  --license-block-bg: oklch(0.14 0.01 var(--hue));
+  --inline-code-bg: oklch(0.18 0 0);
+  --inline-code-color: oklch(0.85 0 0);
+  --selection-bg: oklch(0.30 0 0);
+  --codeblock-bg: #131313;
+  --codeblock-topbar-bg: #131313;
+  --codeblock-border: #242424;
 
-  --link-underline: oklch(0.35 0.08 var(--hue));
-  --link-hover: oklch(0.70 0.14 var(--hue));
-  --link-active: oklch(0.75 0.14 var(--hue));
+  --license-block-bg: oklch(0.12 0 0);
 
-  --float-panel-bg: oklch(0.14 0.014 var(--hue));
+  --link-underline: oklch(0.30 0 0);
+  --link-hover: oklch(0.65 0 0);
+  --link-active: oklch(0.80 0 0);
+
+  --float-panel-bg: oklch(0.10 0 0);
+
+  /* 导航栏三段胶囊（暗色：参考 tblog 的近黑面板 + 白色反色高亮） */
+  --navbar-bg: #0A0A0A;
+  --navbar-highlight-bg: #FFFFFF;
+  --navbar-highlight-text: #000000;
 
   --scrollbar-bg: var(--scrollbar-bg-dark);
   --scrollbar-bg-hover: var(--scrollbar-bg-hover-dark);
@@ -231,15 +241,17 @@
   --guestbook-line: var(--line-divider);
   --guestbook-danger: var(--admonitions-color-caution);
   --guestbook-success: var(--admonitions-color-tip);
+  --guestbook-waiting: #E5484D;
 
   /* 关于页专用：区块卡片底色 + 标题强调色 */
-  --tag-graph-surface: oklch(0.18 0.015 var(--hue));
-  --article-title-marker: oklch(0.75 0.14 var(--hue));
+  --tag-graph-surface: #17181c;
+  --tag-graph-text: #f4f4f5;
+  --tag-graph-muted: #d4d4d8;
 
   /* 说说页面专用：暗色模式 */
-  --moments-surface: oklch(0.20 0.01 var(--hue) / 0.88);
+  --moments-surface: oklch(0.20 0 0 / 0.88);
   --moments-border: color-mix(in oklch, var(--line-divider) 92%, transparent);
-  --moments-soft: oklch(0.22 0.01 var(--hue));
+  --moments-soft: oklch(0.22 0 0);
   --card-border: var(--line-divider);
   --card-text-secondary: var(--content-meta);
 }

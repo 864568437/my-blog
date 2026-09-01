@@ -4,7 +4,12 @@
  */
 
 export type BangumiCategory = "anime" | "book" | "game" | "music" | "real";
-export type BangumiSubcategory = "movie" | "tv" | "anime" | "documentary" | "game";
+export type BangumiSubcategory =
+	| "movie"
+	| "tv"
+	| "anime"
+	| "documentary"
+	| "game";
 
 export interface BangumiItem {
 	id: string;
@@ -52,7 +57,8 @@ export const bangumiConfig: BangumiItem[] = [
 		score: 10,
 		image: "https://fqzlr.com/Acover/三傻大闹宝莱坞.webp",
 		tags: ["喜剧", "剧情", "爱情"],
-		comment: "讲述了三个大学生在工程学院的故事。影片通过幽默的方式，探讨了教育制度、友情和梦想等主题，剧情紧凑，音乐动人，是印度电影的经典之作�",
+		comment:
+			"讲述了三个大学生在工程学院的故事。影片通过幽默的方式，探讨了教育制度、友情和梦想等主题，剧情紧凑，音乐动人，是印度电影的经典之作�",
 		published: "2025-01-09",
 		enabled: true,
 	},
@@ -76,7 +82,8 @@ export const bangumiConfig: BangumiItem[] = [
 		score: 10,
 		image: "https://fqzlr.com/Acover/你的名字.webp",
 		tags: ["动画", "爱情", "奇幻"],
-		comment: "讲述了男女主角通过梦境交换身体，寻找彼此的故事。影片画面精美，剧情感人，音乐动�",
+		comment:
+			"讲述了男女主角通过梦境交换身体，寻找彼此的故事。影片画面精美，剧情感人，音乐动�",
 		published: "2025-01-09",
 		enabled: true,
 	},
@@ -112,7 +119,8 @@ export const bangumiConfig: BangumiItem[] = [
 		score: 8,
 		image: "https://fqzlr.com/Acover/午夜凶铃.webp",
 		tags: ["日本", "恐怖"],
-		comment: "鬼片启蒙作品，小时候从碟子上看的，电视里爬出来的那一段属实是童年阴影",
+		comment:
+			"鬼片启蒙作品，小时候从碟子上看的，电视里爬出来的那一段属实是童年阴影",
 		published: "2025-06-19",
 		enabled: true,
 	},
@@ -535,9 +543,11 @@ export const bangumiConfig: BangumiItem[] = [
 		title: "人性的弱点（卡耐基经典励志系列）",
 		category: "book",
 		status: 2,
-		image: "https://cdn.weread.qq.com/weread/cover/35/YueWen_918483/t6_YueWen_918483.jpg",
+		image:
+			"https://cdn.weread.qq.com/weread/cover/35/YueWen_918483/t6_YueWen_918483.jpg",
 		tags: ["个人成长-沟通表达", "卡耐基"],
-		comment: "(美)戴尔·卡耐基（Dale Carnegie，1888―1955年）被誉为是20世纪最伟大的心灵导师和成功学大师，美国现代成人教育之父，著名演说家、心理学和人际关系学家。代表作《人性的弱点》《人性的优点》《美好的人生》《沟通的艺术》等。这些书出版之后，立即风靡全球，先后被译成几十种文字，在他辞世半个世纪后，他的书仍占据美国《纽约时报》畅销榜前列，被誉为“人类出版史上的奇迹”。",
+		comment:
+			"(美)戴尔·卡耐基（Dale Carnegie，1888―1955年）被誉为是20世纪最伟大的心灵导师和成功学大师，美国现代成人教育之父，著名演说家、心理学和人际关系学家。代表作《人性的弱点》《人性的优点》《美好的人生》《沟通的艺术》等。这些书出版之后，立即风靡全球，先后被译成几十种文字，在他辞世半个世纪后，他的书仍占据美国《纽约时报》畅销榜前列，被誉为“人类出版史上的奇迹”。",
 		published: "2026-05-10",
 		enabled: true,
 	},
@@ -546,9 +556,11 @@ export const bangumiConfig: BangumiItem[] = [
 		title: "强者思维",
 		category: "book",
 		status: 2,
-		image: "https://cdn.weread.qq.com/weread/cover/50/cpplatform_ohulsqfabtcppehqdqtmcr/t6_cpplatform_ohulsqfabtcppehqdqtmcr1696758968.jpg",
+		image:
+			"https://cdn.weread.qq.com/weread/cover/50/cpplatform_ohulsqfabtcppehqdqtmcr/t6_cpplatform_ohulsqfabtcppehqdqtmcr1696758968.jpg",
 		tags: ["哲学宗教-思维科学", "陈宇"],
-		comment: "什么是“强者思维”？所谓强者思维，并非让我们用“努力”去对抗这个世界，而是发现并且遵循这个世界的客观规律，顺应趋势，借势而起。  \r\n本书引导读者不断逼近问题的本质，清醒地解决所有问题：\r\n如何应对焦虑和痛苦，活得更通透；如何读懂人心，洞悉人性；如何理解财富的真相，用强大的思维能力实现轻松变现……\r\n重塑底层思维模式，拥有更强大的人生。",
+		comment:
+			"什么是“强者思维”？所谓强者思维，并非让我们用“努力”去对抗这个世界，而是发现并且遵循这个世界的客观规律，顺应趋势，借势而起。  \r\n本书引导读者不断逼近问题的本质，清醒地解决所有问题：\r\n如何应对焦虑和痛苦，活得更通透；如何读懂人心，洞悉人性；如何理解财富的真相，用强大的思维能力实现轻松变现……\r\n重塑底层思维模式，拥有更强大的人生。",
 		published: "2025-03-10",
 		enabled: true,
 	},
@@ -557,9 +569,11 @@ export const bangumiConfig: BangumiItem[] = [
 		title: "认知觉醒：开启自我改变的原动力",
 		category: "book",
 		status: 2,
-		image: "https://cdn.weread.qq.com/weread/cover/86/YueWen_33628204/t6_YueWen_33628204.jpg",
+		image:
+			"https://cdn.weread.qq.com/weread/cover/86/YueWen_33628204/t6_YueWen_33628204.jpg",
 		tags: ["心理-认知与行为", "周岭"],
-		comment: "为什么我们做事总是急于求成、避难趋易？所谓有耐心，就是要“咬牙坚持、死磕到底”？如何不再用“三分钟热情”和“打鸡血”的方式做事？如何保持极度专注？如何消除焦虑？如何提高学习能力？这是一部可以穿透时间的个人成长方法论。7大底层概念，20个成长关键词，助你彻底走出焦虑与迷茫，拥有清醒的认知、清楚的目标、清晰的路径、清爽的情绪。通过“大脑构造、潜意识、元认知”等思维规律，你将真正看清自己；通过“深度学习、关联、反馈”等事物规律，你将真正看清世界，提升自控力、专注力、学习力……只有洞悉底层的内在规律，我们才能真正开启自我改变的原动力。",
+		comment:
+			"为什么我们做事总是急于求成、避难趋易？所谓有耐心，就是要“咬牙坚持、死磕到底”？如何不再用“三分钟热情”和“打鸡血”的方式做事？如何保持极度专注？如何消除焦虑？如何提高学习能力？这是一部可以穿透时间的个人成长方法论。7大底层概念，20个成长关键词，助你彻底走出焦虑与迷茫，拥有清醒的认知、清楚的目标、清晰的路径、清爽的情绪。通过“大脑构造、潜意识、元认知”等思维规律，你将真正看清自己；通过“深度学习、关联、反馈”等事物规律，你将真正看清世界，提升自控力、专注力、学习力……只有洞悉底层的内在规律，我们才能真正开启自我改变的原动力。",
 		published: "2026-05-18",
 		enabled: true,
 	},
@@ -568,9 +582,11 @@ export const bangumiConfig: BangumiItem[] = [
 		title: "啊2.0",
 		category: "book",
 		status: 2,
-		image: "https://cdn.weread.qq.com/weread/cover/58/YueWen_33629539/t6_YueWen_33629539.jpg",
+		image:
+			"https://cdn.weread.qq.com/weread/cover/58/YueWen_33629539/t6_YueWen_33629539.jpg",
 		tags: ["文学-散文杂著", "大冰"],
-		comment: "千万销量作者大冰2020作品《啊2.0》，包含旧书全文并新增10万字，续写增写8篇含笑带泪的故事。文字为生8年后，坦诚讲述自己沉浮岁月的大冰与他的济南；得了“喉癌”不能发声不能再唱歌的老谢与他的小奇迹；甘心放弃全世界，也要陪着女儿一起长大的普通男人周三；决心重返皇后镇的小S；感动了万千读者的白血病少年王越阳遗愿的后来……他们是普通生活中发着微光的普通人，他们是曾经路过我们生命的、五光十色的小孩；他们的故事，让我们明白，世间大多数传奇，不过是普普通通的人们将心意化作了行动而已。",
+		comment:
+			"千万销量作者大冰2020作品《啊2.0》，包含旧书全文并新增10万字，续写增写8篇含笑带泪的故事。文字为生8年后，坦诚讲述自己沉浮岁月的大冰与他的济南；得了“喉癌”不能发声不能再唱歌的老谢与他的小奇迹；甘心放弃全世界，也要陪着女儿一起长大的普通男人周三；决心重返皇后镇的小S；感动了万千读者的白血病少年王越阳遗愿的后来……他们是普通生活中发着微光的普通人，他们是曾经路过我们生命的、五光十色的小孩；他们的故事，让我们明白，世间大多数传奇，不过是普普通通的人们将心意化作了行动而已。",
 		published: "2025-04-25",
 		enabled: true,
 	},
@@ -579,9 +595,11 @@ export const bangumiConfig: BangumiItem[] = [
 		title: "追风筝的人（珍藏纪念版）",
 		category: "book",
 		status: 2,
-		image: "https://cdn.weread.qq.com/weread/cover/46/yuewen_546339/t6_yuewen_5463391747707629.jpg",
+		image:
+			"https://cdn.weread.qq.com/weread/cover/46/yuewen_546339/t6_yuewen_5463391747707629.jpg",
 		tags: ["文学-外国文学", "卡勒德·胡赛尼"],
-		comment: "全球现象级畅销书，快乐大本营高圆圆感动推荐，窦靖童创作灵感的来源，奥巴马送给女儿的新年礼物。十周年珍藏纪念版，特别收入新版前言和阿富汗摄影别册。为你千千万万遍！\r\n“许多年过去了，人们说陈年旧事可以被埋葬，然而我终于明白这是错的，因为往事会自行爬上来。回首前尘，我意识到在过去二十六年里，自己始终在窥视着那荒芜的小径。”\r\n12岁的阿富汗富家少爷阿米尔与仆人哈桑情同手足。然而，在一场风筝比赛后，发生了一件悲惨不堪的事，阿米尔为自己的懦弱感到自责和痛苦，逼走了哈桑，不久，自己也跟随父亲逃往美国。\r\n成年后的阿米尔始终无法原谅自己当年对哈桑的背叛。为了赎罪，阿米尔再度踏上暌违二十多年的故乡，希望能为不幸的好友尽最后一点心力，却发现一个惊天谎言，儿时的噩梦再度重演，阿米尔该如何抉择？\r\n小说如此残忍而又美丽，作者以温暖细腻的笔法勾勒人性的本质与救赎，读来令人荡气回肠。",
+		comment:
+			"全球现象级畅销书，快乐大本营高圆圆感动推荐，窦靖童创作灵感的来源，奥巴马送给女儿的新年礼物。十周年珍藏纪念版，特别收入新版前言和阿富汗摄影别册。为你千千万万遍！\r\n“许多年过去了，人们说陈年旧事可以被埋葬，然而我终于明白这是错的，因为往事会自行爬上来。回首前尘，我意识到在过去二十六年里，自己始终在窥视着那荒芜的小径。”\r\n12岁的阿富汗富家少爷阿米尔与仆人哈桑情同手足。然而，在一场风筝比赛后，发生了一件悲惨不堪的事，阿米尔为自己的懦弱感到自责和痛苦，逼走了哈桑，不久，自己也跟随父亲逃往美国。\r\n成年后的阿米尔始终无法原谅自己当年对哈桑的背叛。为了赎罪，阿米尔再度踏上暌违二十多年的故乡，希望能为不幸的好友尽最后一点心力，却发现一个惊天谎言，儿时的噩梦再度重演，阿米尔该如何抉择？\r\n小说如此残忍而又美丽，作者以温暖细腻的笔法勾勒人性的本质与救赎，读来令人荡气回肠。",
 		published: "2025-06-06",
 		enabled: true,
 	},
@@ -590,9 +608,11 @@ export const bangumiConfig: BangumiItem[] = [
 		title: "恶意",
 		category: "book",
 		status: 2,
-		image: "https://cdn.weread.qq.com/weread/cover/29/3300020529/t6_3300020529.jpg",
+		image:
+			"https://cdn.weread.qq.com/weread/cover/29/3300020529/t6_3300020529.jpg",
 		tags: ["精品小说-悬疑推理", "东野圭吾"],
-		comment: "★ 东野圭吾名作，2022版新译本！\r\n\r\n★ 与《白夜行》《嫌疑人X的献身》《解忧杂货店》并称东野圭吾四大杰作，从《恶意》开始真正认识东野圭吾\r\n\r\n★ 深刻揭示人性，处处是悬念，加贺恭一郎系列扛鼎之作\r\n\r\n★《纽约时报》《华尔街日报》《柯克斯书评》推荐\r\n\r\n★ ZUI大的恶意不是SHA了你，而是毁了你\r\n\r\n★ 赌上全部人生也要贯彻到底的恶意，究竟从何而来？\r\n\r\n★ 中文版发行量350万册 ，豆瓣评分8.7，跻身豆瓣推理小说百强榜！",
+		comment:
+			"★ 东野圭吾名作，2022版新译本！\r\n\r\n★ 与《白夜行》《嫌疑人X的献身》《解忧杂货店》并称东野圭吾四大杰作，从《恶意》开始真正认识东野圭吾\r\n\r\n★ 深刻揭示人性，处处是悬念，加贺恭一郎系列扛鼎之作\r\n\r\n★《纽约时报》《华尔街日报》《柯克斯书评》推荐\r\n\r\n★ ZUI大的恶意不是SHA了你，而是毁了你\r\n\r\n★ 赌上全部人生也要贯彻到底的恶意，究竟从何而来？\r\n\r\n★ 中文版发行量350万册 ，豆瓣评分8.7，跻身豆瓣推理小说百强榜！",
 		published: "2025-04-12",
 		enabled: true,
 	},
@@ -601,9 +621,11 @@ export const bangumiConfig: BangumiItem[] = [
 		title: "被嫌弃的松子的一生（2021版｜同名电影原著）",
 		category: "book",
 		status: 2,
-		image: "https://cdn.weread.qq.com/weread/cover/50/YueWen_36927214/t6_YueWen_36927214.jpg",
+		image:
+			"https://cdn.weread.qq.com/weread/cover/50/YueWen_36927214/t6_YueWen_36927214.jpg",
 		tags: ["精品小说-女性小说", "山田宗树"],
-		comment: "在东京尽情享受大学生活的川尻笙，某天父亲突然到访，告知他30多年前失踪的松子姑姑最近在东京被人杀害了。负责整理姑姑遗物的笙，开始调查松子的一生。从中学教师到风俗女郎，松子一生都在追寻爱，被家人驱赶，遭情人抛弃，被命运百般羞辱，却始终对人心无戒备。对于爱，她不懂什么叫绝望，只知道要勇敢地去追寻。她的一生，是荒诞的一生，是失败的一生，却也是不放弃希望的一生，是认真活过的一生。",
+		comment:
+			"在东京尽情享受大学生活的川尻笙，某天父亲突然到访，告知他30多年前失踪的松子姑姑最近在东京被人杀害了。负责整理姑姑遗物的笙，开始调查松子的一生。从中学教师到风俗女郎，松子一生都在追寻爱，被家人驱赶，遭情人抛弃，被命运百般羞辱，却始终对人心无戒备。对于爱，她不懂什么叫绝望，只知道要勇敢地去追寻。她的一生，是荒诞的一生，是失败的一生，却也是不放弃希望的一生，是认真活过的一生。",
 		published: "2025-04-15",
 		enabled: true,
 	},
@@ -612,9 +634,11 @@ export const bangumiConfig: BangumiItem[] = [
 		title: "冯唐成事心法",
 		category: "book",
 		status: 2,
-		image: "https://cdn.weread.qq.com/weread/cover/22/YueWen_35138325/t6_YueWen_35138325.jpg",
+		image:
+			"https://cdn.weread.qq.com/weread/cover/22/YueWen_35138325/t6_YueWen_35138325.jpg",
 		tags: ["经济理财-管理", "冯唐"],
-		comment: "他是热爱文艺的管理专家，是精通麦肯锡与曾国藩成事学的商业领袖，是医学博士出身的投资人。10年麦肯锡战略规划经验，5年华润医疗集团创始心得，5年中信资本投资管理启示——冯唐20年持续跨界成事经验，凝结成这本《冯唐成事心法》。冯唐说：“我将自己二十年职业管理生涯中吃过的苦、踩过的雷、翻过的山、见识过的人，总结为‘冯唐成事心法’。”以西方麦肯锡管理方法为经，以中国经典成事智慧为纬，融合冯唐20年职场亲身实践的经验，以冯唐独特观点+方法语录提炼+丰富运用场景+经验案例+实战方法为内容框架，助你在现实中修行，在工作中求法，在沟通中识人，在思考中升级。写给每一个想干事、能干事、持续成大事的人。",
+		comment:
+			"他是热爱文艺的管理专家，是精通麦肯锡与曾国藩成事学的商业领袖，是医学博士出身的投资人。10年麦肯锡战略规划经验，5年华润医疗集团创始心得，5年中信资本投资管理启示——冯唐20年持续跨界成事经验，凝结成这本《冯唐成事心法》。冯唐说：“我将自己二十年职业管理生涯中吃过的苦、踩过的雷、翻过的山、见识过的人，总结为‘冯唐成事心法’。”以西方麦肯锡管理方法为经，以中国经典成事智慧为纬，融合冯唐20年职场亲身实践的经验，以冯唐独特观点+方法语录提炼+丰富运用场景+经验案例+实战方法为内容框架，助你在现实中修行，在工作中求法，在沟通中识人，在思考中升级。写给每一个想干事、能干事、持续成大事的人。",
 		published: "2026-04-15",
 		enabled: true,
 	},
@@ -636,12 +660,15 @@ export const bangumiConfig: BangumiItem[] = [
 		category: "music",
 		status: 2,
 		score: 0,
-		image: "https://tu.fqzlr.com/file/music/1787049801020_P.S.我爱你_live_-黄丽玲_1_.jpg",
+		image:
+			"https://tu.fqzlr.com/file/music/1787049801020_P.S.我爱你_live_-黄丽玲_1_.jpg",
 		tags: [],
 		published: "2026-05-17",
 		artist: "黄丽玲",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787049805078_P.S.我爱你_live_-黄丽玲_1_.m4a",
-		lrcUrl: "https://tu.fqzlr.com/file/music/1787049797691_P.S.我爱你_live_-黄丽玲_1_.lrc",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787049805078_P.S.我爱你_live_-黄丽玲_1_.m4a",
+		lrcUrl:
+			"https://tu.fqzlr.com/file/music/1787049797691_P.S.我爱你_live_-黄丽玲_1_.lrc",
 		enabled: true,
 	},
 	{
@@ -650,12 +677,15 @@ export const bangumiConfig: BangumiItem[] = [
 		category: "music",
 		status: 2,
 		score: 0,
-		image: "https://tu.fqzlr.com/file/music/1787054562476_一生所爱卢冠廷莫文蔚.jpg",
+		image:
+			"https://tu.fqzlr.com/file/music/1787054562476_一生所爱卢冠廷莫文蔚.jpg",
 		tags: [],
 		published: "2026-06-15",
 		artist: "卢冠廷 / 莫文蔚",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787054572694_一生所爱卢冠廷莫文蔚.m4a",
-		lrcUrl: "https://tu.fqzlr.com/file/music/1787054552207_一生所爱卢冠廷莫文蔚.lrc",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787054572694_一生所爱卢冠廷莫文蔚.m4a",
+		lrcUrl:
+			"https://tu.fqzlr.com/file/music/1787054552207_一生所爱卢冠廷莫文蔚.lrc",
 		enabled: true,
 	},
 	{
@@ -696,7 +726,8 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-06-15",
 		artist: "周深",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787049821225_大鱼唱片版周深.m4a",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787049821225_大鱼唱片版周深.m4a",
 		lrcUrl: "https://tu.fqzlr.com/file/music/1787049817399_大鱼唱片版周深.lrc",
 		enabled: true,
 	},
@@ -710,7 +741,8 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-06-15",
 		artist: "陈奕迅",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787049825448_富士山下陈奕迅.m4a",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787049825448_富士山下陈奕迅.m4a",
 		lrcUrl: "https://tu.fqzlr.com/file/music/1787049823130_富士山下陈奕迅.lrc",
 		enabled: true,
 	},
@@ -724,8 +756,10 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-06-15",
 		artist: "杨千嬅",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787049854373_少女的祈祷杨千嬅.m4a",
-		lrcUrl: "https://tu.fqzlr.com/file/music/1787054532960_少女的祈祷杨千嬅.lrc",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787049854373_少女的祈祷杨千嬅.m4a",
+		lrcUrl:
+			"https://tu.fqzlr.com/file/music/1787054532960_少女的祈祷杨千嬅.lrc",
 		enabled: true,
 	},
 	{
@@ -738,7 +772,8 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-06-15",
 		artist: "孙燕姿",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787049885021_我怀念的孙燕姿.m4a",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787049885021_我怀念的孙燕姿.m4a",
 		lrcUrl: "https://tu.fqzlr.com/file/music/1787049874629_我怀念的孙燕姿.lrc",
 		enabled: true,
 	},
@@ -762,12 +797,15 @@ export const bangumiConfig: BangumiItem[] = [
 		category: "music",
 		status: 2,
 		score: 0,
-		image: "https://tu.fqzlr.com/file/music/1787049874720_我的心在海对面杨栋梁.jpg",
+		image:
+			"https://tu.fqzlr.com/file/music/1787049874720_我的心在海对面杨栋梁.jpg",
 		tags: [],
 		published: "2026-05-17",
 		artist: "杨栋梁",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787049882708_我的心在海对面杨栋梁w.m4a",
-		lrcUrl: "https://tu.fqzlr.com/file/music/1787049870424_我的心在海对面杨栋梁.lrc",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787049882708_我的心在海对面杨栋梁w.m4a",
+		lrcUrl:
+			"https://tu.fqzlr.com/file/music/1787049870424_我的心在海对面杨栋梁.lrc",
 		enabled: true,
 	},
 	{
@@ -780,8 +818,10 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-06-15",
 		artist: "凤凰传奇",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787054473833_海底Live凤凰传奇.m4a",
-		lrcUrl: "https://tu.fqzlr.com/file/music/1787049824601_海底Live凤凰传奇.lrc",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787054473833_海底Live凤凰传奇.m4a",
+		lrcUrl:
+			"https://tu.fqzlr.com/file/music/1787049824601_海底Live凤凰传奇.lrc",
 		enabled: true,
 	},
 	{
@@ -794,7 +834,8 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-06-15",
 		artist: "Beyond",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787054492452_海阔天空Beyond.m4a",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787054492452_海阔天空Beyond.m4a",
 		lrcUrl: "https://tu.fqzlr.com/file/music/1787049834674_海阔天空Beyond.lrc",
 		enabled: true,
 	},
@@ -818,12 +859,15 @@ export const bangumiConfig: BangumiItem[] = [
 		category: "music",
 		status: 2,
 		score: 0,
-		image: "https://tu.fqzlr.com/file/music/1787049801292_爱得起李溪芮张彬彬MIYA米娅RYO凉夜_1_.jpg",
+		image:
+			"https://tu.fqzlr.com/file/music/1787049801292_爱得起李溪芮张彬彬MIYA米娅RYO凉夜_1_.jpg",
 		tags: [],
 		published: "2026-05-17",
 		artist: "MIYA米娅 / RYO凉夜",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787049815963_爱得起李溪芮张彬彬MIYA米娅RYO凉夜.m4a",
-		lrcUrl: "https://tu.fqzlr.com/file/music/1787049808638_爱得起李溪芮张彬彬MIYA米娅RYO凉夜.lrc",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787049815963_爱得起李溪芮张彬彬MIYA米娅RYO凉夜.m4a",
+		lrcUrl:
+			"https://tu.fqzlr.com/file/music/1787049808638_爱得起李溪芮张彬彬MIYA米娅RYO凉夜.lrc",
 		enabled: true,
 	},
 	{
@@ -836,7 +880,8 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-06-15",
 		artist: "陈奕迅",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787049816890_爱情转移陈奕迅.m4a",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787049816890_爱情转移陈奕迅.m4a",
 		lrcUrl: "https://tu.fqzlr.com/file/music/1787049815118_爱情转移陈奕迅.lrc",
 		enabled: true,
 	},
@@ -846,12 +891,15 @@ export const bangumiConfig: BangumiItem[] = [
 		category: "music",
 		status: 2,
 		score: 0,
-		image: "https://tu.fqzlr.com/file/music/1787054514670_玫瑰徐泽要不要买菜.jpg",
+		image:
+			"https://tu.fqzlr.com/file/music/1787054514670_玫瑰徐泽要不要买菜.jpg",
 		tags: [],
 		published: "2026-05-17",
 		artist: "徐泽（要不要买菜）",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787054529447_玫瑰徐泽要不要买菜.m4a",
-		lrcUrl: "https://tu.fqzlr.com/file/music/1787054504625_玫瑰徐泽要不要买菜.lrc",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787054529447_玫瑰徐泽要不要买菜.m4a",
+		lrcUrl:
+			"https://tu.fqzlr.com/file/music/1787054504625_玫瑰徐泽要不要买菜.lrc",
 		enabled: true,
 	},
 	{
@@ -864,8 +912,10 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-06-15",
 		artist: "海龟先生",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787054539659_男孩别哭海龟先生.m4a",
-		lrcUrl: "https://tu.fqzlr.com/file/music/1787054518124_男孩别哭海龟先生.lrc",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787054539659_男孩别哭海龟先生.m4a",
+		lrcUrl:
+			"https://tu.fqzlr.com/file/music/1787054518124_男孩别哭海龟先生.lrc",
 		enabled: true,
 	},
 	{
@@ -878,7 +928,8 @@ export const bangumiConfig: BangumiItem[] = [
 		tags: [],
 		published: "2026-05-16",
 		artist: "国风堂 / 哦漏",
-		audioUrl: "https://tu.fqzlr.com/file/music/1787054596674_知我-国风堂哦漏.m4a",
+		audioUrl:
+			"https://tu.fqzlr.com/file/music/1787054596674_知我-国风堂哦漏.m4a",
 		lrcUrl: "https://tu.fqzlr.com/file/music/1787054571675_知我-国风堂哦漏.lrc",
 		enabled: true,
 	},

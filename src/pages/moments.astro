@@ -1,11 +1,15 @@
 ---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { Icon } from "astro-icon/components";
 import Comment from "@/components/comment/index.astro";
+import MomentsEditor from "@/components/edit/MomentsEditor.svelte";
 import MomentCard from "@/components/moments/MomentCard.astro";
 import MomentsCover from "@/components/moments/MomentsCover.astro";
-import MainGridLayout from "@layouts/MainGridLayout.astro";
-import MomentsEditor from "@/components/edit/MomentsEditor.svelte";
-import { momentsCover, getEnabledMoments, momentsPageConfig } from "@/config/momentsConfig";
+import {
+	getEnabledMoments,
+	momentsCover,
+	momentsPageConfig,
+} from "@/config/momentsConfig";
 
 /**
  * 页面已迁移至 /dynamic/

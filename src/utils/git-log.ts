@@ -28,7 +28,7 @@ export function getGitLog(limit = 300): GitCommit[] {
 	try {
 		const raw = execSync(
 			`git log --format="%h%x1f%ad%x1f%s%x1f%b%x1f" --name-only -z --date=format:"%Y-%m-%d" -n ${limit}`,
-			{ encoding: "utf-8", cwd: process.cwd() }
+			{ encoding: "utf-8", cwd: process.cwd() },
 		);
 		// token 流：提交记录(\x1f 分隔) 与文件名交替出现
 		const commits: GitCommit[] = [];
@@ -44,7 +44,11 @@ export function getGitLog(limit = 300): GitCommit[] {
 					date,
 					subject,
 					// 剔除格式串末尾分隔符产生的空字段
-					body: fields.slice(3).join("\x1f").replace(/\x1f+$/, "").trim(),
+					body: fields
+						.slice(3)
+						.join("\x1f")
+						.replace(/\x1f+$/, "")
+						.trim(),
 					files: [],
 				};
 			} else {

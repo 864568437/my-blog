@@ -1,31 +1,31 @@
 <script lang="ts">
-import { onMount, tick } from "svelte";
 import { marked } from "marked";
+import { onMount, tick } from "svelte";
+import { repoConfig } from "@/config/editConfig";
 import {
-	hasValidCredentials,
-	showToast,
-	ensureIconify,
-	getRepoFile,
-	createRepoFile,
-	updateRepoFile,
-	readFileAsText,
-	getStoredAppId,
-	setStoredAppId,
-	getStoredPrivateKey,
-	setStoredPrivateKey,
+	clearDraftsByPage,
 	clearStoredCredentials,
-	validateCredentials,
-	invalidateToken,
-	saveDraft,
+	createRepoFile,
+	ensureIconify,
 	getDraftCount,
 	getDraftsByPage,
-	removeDraft,
-	clearDraftsByPage,
-	registerSubmitHandler,
-	submitAllDrafts,
+	getRepoFile,
+	getStoredAppId,
+	getStoredPrivateKey,
+	hasValidCredentials,
+	invalidateToken,
 	onDraftsChanged,
+	readFileAsText,
+	registerSubmitHandler,
+	removeDraft,
+	saveDraft,
+	setStoredAppId,
+	setStoredPrivateKey,
+	showToast,
+	submitAllDrafts,
+	updateRepoFile,
+	validateCredentials,
 } from "@/utils/editMode";
-import { repoConfig } from "@/config/editConfig";
 
 const postFiles = import.meta.glob("../../content/posts/**/*.{md,mdx}", {
 	query: "?raw",
@@ -160,7 +160,7 @@ function generateFrontmatter(): string {
 	}
 	lines.push(`draft: ${isDraft}`);
 	lines.push(`pinned: ${isPinned}`);
-	lines.push(`author: fqzlr`);
+	lines.push("author: fqzlr");
 	lines.push("---");
 	return lines.join("\n");
 }
@@ -270,14 +270,10 @@ function applyLocalArticle(key: string, rawContent: string): void {
 	const { data: fmData, body } = parseFrontmatter(rawContent);
 
 	// 去掉前缀和扩展名，得到相对路径（用作 savePath / slug 来源）
-	const relPath = key
-		.replace("../../content/", "")
-		.replace(/\.(md|mdx)$/, "");
+	const relPath = key.replace("../../content/", "").replace(/\.(md|mdx)$/, "");
 
 	existingExt = ext;
-	slug = relPath.includes("/")
-		? relPath.split("/").pop() || ""
-		: relPath;
+	slug = relPath.includes("/") ? relPath.split("/").pop() || "" : relPath;
 	savePath = `src/content/${relPath}`;
 	editMode = true;
 
@@ -611,7 +607,7 @@ async function publishDraftPayload(
 	if (payload.category) fmLines.push(`category: ${esc(payload.category)}`);
 	fmLines.push(`draft: ${!!payload.isDraft}`);
 	fmLines.push(`pinned: ${!!payload.isPinned}`);
-	fmLines.push(`author: fqzlr`);
+	fmLines.push("author: fqzlr");
 	fmLines.push("---");
 	const body = String(payload.content || "").trimStart();
 	const fullContent = `${fmLines.join("\n")}\n\n${body}`;
@@ -631,9 +627,8 @@ async function publishDraftPayload(
 			commitMsg,
 			repoConfig,
 		);
-	} else {
-		return await createRepoFile(filePath, fullContent, commitMsg, repoConfig);
 	}
+	return await createRepoFile(filePath, fullContent, commitMsg, repoConfig);
 }
 
 // ============ Save / Publish ============

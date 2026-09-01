@@ -133,8 +133,7 @@ let fetchFailed = false;
 
 // 检查是否已配置 Bangumi 用户ID
 const isUserIdConfigured =
-	bangumiApiConfig.username &&
-	bangumiApiConfig.username.trim() !== "";
+	bangumiApiConfig.username && bangumiApiConfig.username.trim() !== "";
 
 if (!isUserIdConfigured) {
 	console.log("[Bangumi] ⚠️ 未配置 Bangumi 用户ID，跳过数据获取");

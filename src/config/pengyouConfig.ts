@@ -17,7 +17,7 @@ export interface PengyouConfig {
 }
 
 export const pengyouConfig: PengyouConfig = {
-	api: '',
+	api: "",
 	rss: [
 		{
 			name: "萌萌知识库",
@@ -29,12 +29,11 @@ export const pengyouConfig: PengyouConfig = {
 			url: "https://blog.tsh520.cn/rss.xml",
 			enabled: true,
 		},
-				{
+		{
 			name: "顾拾柒",
 			url: "https://blog.olinl.com/rss.xml",
 			enabled: true,
 		},
-		
 	],
-	data: []
+	data: [],
 };

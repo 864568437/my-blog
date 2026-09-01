@@ -42,7 +42,7 @@ export function inRange(n: number, range: [number, number]): boolean {
  */
 export function groupByFailCount(
 	list: FriendStatusItem[],
-	ranges: FailZoneRanges
+	ranges: FailZoneRanges,
 ): { failWindow: FriendStatusItem[]; tombstone: FriendStatusItem[] } {
 	const failWindowList: FriendStatusItem[] = [];
 	const tombstoneList: FriendStatusItem[] = [];
@@ -74,7 +74,7 @@ export function groupByFailCount(
 export function partitionAll(
 	friends: FriendItem[],
 	failMap: Map<string, number> | Record<string, number>,
-	ranges: FailZoneRanges
+	ranges: FailZoneRanges,
 ): { normal: FriendItem[]; failWindow: FriendItem[]; tombstone: FriendItem[] } {
 	const failLookup =
 		failMap instanceof Map

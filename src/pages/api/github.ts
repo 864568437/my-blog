@@ -30,8 +30,7 @@ export async function GET({ request }: { request: Request }) {
 	const path = url.searchParams.get("path");
 
 	const hasServerAuth = !!(
-		import.meta.env?.PUBLIC_GITHUB_APP_ID &&
-		import.meta.env?.GH_PRIVATE_KEY
+		import.meta.env?.PUBLIC_GITHUB_APP_ID && import.meta.env?.GH_PRIVATE_KEY
 	);
 	const hasAppId = !!import.meta.env?.PUBLIC_GITHUB_APP_ID;
 
@@ -166,8 +165,7 @@ async function forwardRequest(
 		const text = await resp.text();
 
 		const responseHeaders: Record<string, string> = {
-			"Content-Type":
-				resp.headers.get("Content-Type") || "application/json",
+			"Content-Type": resp.headers.get("Content-Type") || "application/json",
 			...corsHeaders(),
 		};
 

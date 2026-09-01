@@ -20,30 +20,26 @@
  *    修改 /api/dynamic.json.ts 优先读取 dynamic.json 源（或在构建
  *    脚本中将 JSON 同步为 markdown）。
  */
-import { onMount } from "svelte";
+
 import { marked } from "marked";
-import {
-	showToast,
-	ensureIconify,
-	genId,
-	deepClone,
-} from "@/utils/editMode";
+import { onMount } from "svelte";
+import { dynamicConfig, profileConfig } from "@/config";
 import { setupRepoDrafts } from "@/utils/draftHelpers";
-import { profileConfig, dynamicConfig } from "@/config";
+import { deepClone, ensureIconify, genId, showToast } from "@/utils/editMode";
 
 /** 单条动态的内部数据模型（与 API 层略有差异：published 为 ISO 字符串） */
 interface DynamicItem {
 	id: string;
-	published: string;          // ISO 字符串
+	published: string; // ISO 字符串
 	pinned: boolean;
 	tags: string[];
 	location?: string;
 	device?: string;
 	author?: string;
 	avatar?: string;
-	body: string;               // Markdown 原文
-	_draft?: boolean;           // 新建标记：未提交时存在
-	_deleted?: boolean;         // 删除标记：提交前软删除
+	body: string; // Markdown 原文
+	_draft?: boolean; // 新建标记：未提交时存在
+	_deleted?: boolean; // 删除标记：提交前软删除
 }
 
 // ====== 状态 ======
@@ -83,7 +79,7 @@ const pageName = "动态";
 function buildFrontmatter(item: DynamicItem): string {
 	const lines = ["---"];
 	lines.push(`published: ${item.published}`);
-	if (item.pinned) lines.push(`pinned: true`);
+	if (item.pinned) lines.push("pinned: true");
 	if (item.tags && item.tags.length > 0) {
 		lines.push("tags:");
 		item.tags.forEach((t) => lines.push(`  - ${t}`));
@@ -143,8 +139,8 @@ const drafts = setupRepoDrafts({
 	},
 	getCommitMsg: (isEdit) =>
 		isEdit
-			? `chore(dynamic): update dynamic content`
-			: `chore(dynamic): add dynamic content`,
+			? "chore(dynamic): update dynamic content"
+			: "chore(dynamic): add dynamic content",
 });
 
 /** 是否有未保存修改（驱动侧边栏「保存」按钮可用状态） */
@@ -185,7 +181,10 @@ onMount(() => {
 
 	// 清理：组件卸载时移除全部监听
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -436,7 +435,6 @@ function formatDate(dateStr: string): string {
 		minute: "2-digit",
 	});
 }
-
 </script>
 
 <!--

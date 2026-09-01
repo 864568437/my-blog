@@ -17,10 +17,16 @@ export function dicebearUrl(seed: string | undefined | null): string {
 }
 
 /** 内联 SVG 字母头像（data URI，永远不失败） */
-export function inlineSvgAvatar(name: string | undefined | null, size = 80): string {
+export function inlineSvgAvatar(
+	name: string | undefined | null,
+	size = 80,
+): string {
 	const text = (name || "?").trim().slice(0, 1).toUpperCase() || "?";
 	// 用稳定哈希生成背景色（避免每次刷新颜色变）
-	const hash = Array.from(text).reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 0);
+	const hash = Array.from(text).reduce(
+		(acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0,
+		0,
+	);
 	const hue = hash % 360;
 	const bg = `hsl(${hue}, 55%, 55%)`;
 	const fg = "#fff";
@@ -31,12 +37,15 @@ export function inlineSvgAvatar(name: string | undefined | null, size = 80): str
 		`<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" ` +
 		`font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-weight="700" ` +
 		`font-size="${fontSize}" fill="${fg}">${text}</text>` +
-		`</svg>`;
+		"</svg>";
 	return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
 }
 
 /** Google favicon（按 host 拉取，最后兜底） */
-export function googleFaviconUrl(host: string | undefined | null, size = 64): string {
+export function googleFaviconUrl(
+	host: string | undefined | null,
+	size = 64,
+): string {
 	const h = (host || "").replace(/^www\./, "");
 	if (!h) return inlineSvgAvatar("?");
 	return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(h)}&sz=${size}`;
@@ -47,7 +56,10 @@ export function googleFaviconUrl(host: string | undefined | null, size = 64): st
  *   userAvatar（博主提供）→ 加载失败才用 dicebear → 再失败才用内联 SVG
  *   用于：img 的 src 初始值（用 userAvatar），然后通过 onerror 链切换
  */
-export function fallbackAvatar(name: string | undefined | null, userAvatar?: string): string {
+export function fallbackAvatar(
+	name: string | undefined | null,
+	userAvatar?: string,
+): string {
 	if (userAvatar && userAvatar.trim()) return userAvatar.trim();
 	return dicebearUrl(name);
 }

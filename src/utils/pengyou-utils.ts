@@ -2,7 +2,7 @@
  * 朋友圈（/pengyou/）数据抓取与整形工具
  * 供 pengyou.astro 与首页 HomeDigest.astro 共用
  */
-import { pengyouConfig, type PengyouItem } from "@/config/pengyouConfig";
+import { type PengyouItem, pengyouConfig } from "@/config/pengyouConfig";
 
 export type { PengyouItem };
 
@@ -18,9 +18,13 @@ function decodeHtmlEntities(str: string): string {
 	return str.replace(/&[a-z]+;/gi, (match) => entities[match] || match);
 }
 
-export function parseRssItems(
-	xml: string,
-): { title: string; link: string; pubDate: string; description: string; content: string }[] {
+export function parseRssItems(xml: string): {
+	title: string;
+	link: string;
+	pubDate: string;
+	description: string;
+	content: string;
+}[] {
 	const results: {
 		title: string;
 		link: string;
@@ -37,13 +41,20 @@ export function parseRssItems(
 
 		const titleMatch = itemContent.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
 		const linkMatch = itemContent.match(/<link[^>]*>([\s\S]*?)<\/link>/i);
-		const pubDateMatch = itemContent.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i);
-		const descMatch = itemContent.match(/<description[^>]*>([\s\S]*?)<\/description>/i);
+		const pubDateMatch = itemContent.match(
+			/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i,
+		);
+		const descMatch = itemContent.match(
+			/<description[^>]*>([\s\S]*?)<\/description>/i,
+		);
 		const contentMatch =
-			itemContent.match(/<content:encoded[^>]*>([\s\S]*?)<\/content:encoded>/i) ||
-			itemContent.match(/<encoded[^>]*>([\s\S]*?)<\/encoded>/i);
+			itemContent.match(
+				/<content:encoded[^>]*>([\s\S]*?)<\/content:encoded>/i,
+			) || itemContent.match(/<encoded[^>]*>([\s\S]*?)<\/encoded>/i);
 
-		let content = (contentMatch ? contentMatch[1] : descMatch ? descMatch[1] : "").trim();
+		let content = (
+			contentMatch ? contentMatch[1] : descMatch ? descMatch[1] : ""
+		).trim();
 		content = decodeHtmlEntities(content);
 		content = content.replace(/<[^>]*>/g, "");
 		content = content.replace(/\s+/g, " ").trim();
@@ -60,7 +71,9 @@ export function parseRssItems(
 				title,
 				link: linkMatch[1].trim(),
 				pubDate: pubDateMatch ? pubDateMatch[1].trim() : "",
-				description: descMatch ? descMatch[1].replace(/<[^>]*>/g, "").trim() : "",
+				description: descMatch
+					? descMatch[1].replace(/<[^>]*>/g, "").trim()
+					: "",
 				content: content || "暂无内容",
 			});
 		}

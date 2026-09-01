@@ -4,13 +4,14 @@
  *
  * 也可纯 Node 跑（无 tsx 时手动改后缀 .mjs 并删 import type 注解）
  */
-import { describe, it } from "node:test";
+
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import {
 	dicebearUrl,
-	inlineSvgAvatar,
-	googleFaviconUrl,
 	fallbackAvatar,
+	googleFaviconUrl,
+	inlineSvgAvatar,
 	onErrorFirstJump,
 	onErrorSecondJump,
 } from "./avatar-fallback.ts";
@@ -22,22 +23,38 @@ describe("dicebearUrl", () => {
 	});
 	it("encodes special characters in seed", () => {
 		const url = dicebearUrl("hello world & friends");
-		assert.equal(url, "https://api.dicebear.com/7.x/notionists/svg?seed=hello%20world%20%26%20friends");
+		assert.equal(
+			url,
+			"https://api.dicebear.com/7.x/notionists/svg?seed=hello%20world%20%26%20friends",
+		);
 	});
 	it("uses 'guest' as default when seed is empty/undefined/null", () => {
-		assert.equal(dicebearUrl(""), "https://api.dicebear.com/7.x/notionists/svg?seed=guest");
-		assert.equal(dicebearUrl(undefined), "https://api.dicebear.com/7.x/notionists/svg?seed=guest");
-		assert.equal(dicebearUrl(null), "https://api.dicebear.com/7.x/notionists/svg?seed=guest");
+		assert.equal(
+			dicebearUrl(""),
+			"https://api.dicebear.com/7.x/notionists/svg?seed=guest",
+		);
+		assert.equal(
+			dicebearUrl(undefined),
+			"https://api.dicebear.com/7.x/notionists/svg?seed=guest",
+		);
+		assert.equal(
+			dicebearUrl(null),
+			"https://api.dicebear.com/7.x/notionists/svg?seed=guest",
+		);
 	});
 	it("preserves unicode characters via encodeURIComponent", () => {
 		const url = dicebearUrl("小陆ya");
-		assert.equal(url, "https://api.dicebear.com/7.x/notionists/svg?seed=%E5%B0%8F%E9%99%86ya");
+		assert.equal(
+			url,
+			"https://api.dicebear.com/7.x/notionists/svg?seed=%E5%B0%8F%E9%99%86ya",
+		);
 	});
 });
 
 describe("inlineSvgAvatar", () => {
 	// helper: 解码 data URI 后再断言
-	const decode = (svg: string) => decodeURIComponent(svg.replace(/^data:image\/svg\+xml;utf8,/, ""));
+	const decode = (svg: string) =>
+		decodeURIComponent(svg.replace(/^data:image\/svg\+xml;utf8,/, ""));
 
 	it("returns a data URI", () => {
 		const svg = inlineSvgAvatar("test");
@@ -95,11 +112,17 @@ describe("inlineSvgAvatar", () => {
 describe("googleFaviconUrl", () => {
 	it("builds Google favicon URL with given size", () => {
 		const url = googleFaviconUrl("example.com", 64);
-		assert.equal(url, "https://www.google.com/s2/favicons?domain=example.com&sz=64");
+		assert.equal(
+			url,
+			"https://www.google.com/s2/favicons?domain=example.com&sz=64",
+		);
 	});
 	it("strips leading www.", () => {
 		const url = googleFaviconUrl("www.example.com", 32);
-		assert.equal(url, "https://www.google.com/s2/favicons?domain=example.com&sz=32");
+		assert.equal(
+			url,
+			"https://www.google.com/s2/favicons?domain=example.com&sz=32",
+		);
 	});
 	it("falls back to inline SVG when host is empty", () => {
 		const url = googleFaviconUrl("");
@@ -143,7 +166,9 @@ describe("onErrorFirstJump / onErrorSecondJump (img onerror chain)", () => {
 	});
 	it("handles null/undefined in onerror jumps", () => {
 		assert.ok(onErrorFirstJump(null).includes("seed=guest"));
-		assert.ok(onErrorSecondJump(undefined).startsWith("data:image/svg+xml;utf8,"));
+		assert.ok(
+			onErrorSecondJump(undefined).startsWith("data:image/svg+xml;utf8,"),
+		);
 	});
 });
 

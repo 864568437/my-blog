@@ -32,7 +32,8 @@ export const notebookFolders: NotebookFolder[] = [
 	{
 		slug: "ximalaya",
 		name: "喜马拉雅",
-		cover: "https://tu.fqzlr.com/file/博客横屏封面/1787054610773_2026年6月2日suolong.png",
+		cover:
+			"https://tu.fqzlr.com/file/博客横屏封面/1787054610773_2026年6月2日suolong.png",
 		summary: "记录从喜马拉雅听到的优质文章和有声书，偶尔也会写一些听书笔记",
 		tags: [],
 		enabled: true,
@@ -246,9 +247,7 @@ export function getEnabledNotes(): NotebookNote[] {
 export function getNotesByFolder(folderSlug: string): NotebookNote[] {
 	return getEnabledNotes()
 		.filter((n) => n.folder === folderSlug)
-		.sort(
-			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-		);
+		.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export function getNoteById(id: string): NotebookNote | undefined {

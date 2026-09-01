@@ -20,8 +20,14 @@ const STORAGE_SESSIONS_KEY = "ai-chat:sessions";
 const STORAGE_SESSION_PREFIX = "ai-chat:session:";
 const MAX_SESSIONS = 20;
 
-const SUGGESTIONS = aiSearchConfig.suggestions || ["博客的技术栈是什么？", "介绍一下自己"];
-const FOLLOW_UP_SUGGESTIONS = aiSearchConfig.followUpSuggestions || ["说说最近的文章", "有什么推荐的项目？"];
+const SUGGESTIONS = aiSearchConfig.suggestions || [
+	"博客的技术栈是什么？",
+	"介绍一下自己",
+];
+const FOLLOW_UP_SUGGESTIONS = aiSearchConfig.followUpSuggestions || [
+	"说说最近的文章",
+	"有什么推荐的项目？",
+];
 
 let isOpen = $state(false);
 let inputVal = $state("");
@@ -261,9 +267,11 @@ async function send(text?: string) {
 
 	try {
 		await new Promise((resolve) => setTimeout(resolve, 800));
-		
-		messages[aiIdx].content = 
-			"你好呀！我是" + aiSearchConfig.aiName + "~ 👋\n\n" +
+
+		messages[aiIdx].content =
+			"你好呀！我是" +
+			aiSearchConfig.aiName +
+			"~ 👋\n\n" +
 			"目前 AI 对话功能需要配置后端 API 才能使用。你可以：\n\n" +
 			"1. 在 `src/config/aiSearchConfig.ts` 中配置你的 AI API 地址\n" +
 			"2. 或者搭建自己的后端服务来处理对话请求\n\n" +

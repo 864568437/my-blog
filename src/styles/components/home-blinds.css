@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    首页双层影像交互：背景揭示 + 横向五幕影像
    ============================================ */
 
@@ -148,6 +148,90 @@
 	visibility: hidden;
 	pointer-events: none;
 	will-change: opacity;
+}
+
+/* 终幕放大层：最后一幕从图框重新放大回全屏。几何算法与 .home-blinds__portal
+   收缩互逆——元素恒为满屏，放大靠 clip-path 从图框扩到 0，内部图片做等比 scale。
+   挂在根层级、恒为 position: fixed（与 fixed-stage 同款机制，root 无 transform
+   祖先，fixed 始终相对视口）：pin 期间 section 被钉在视口顶，二者几何重合；
+   pin 释放后图片继续钉在原地，由衔接带(z2)与内容区背景(z2)从上方盖过。
+   z 序：fixed-stage(0) < 终幕层(1) < 衔接带/内容区(2)。 */
+.home-blinds__finale-portal {
+	position: fixed;
+	inset: 0;
+	z-index: 1;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+	background: var(--page-bg);
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	will-change: opacity, filter;
+}
+
+.home-blinds__finale-image {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	display: block;
+	/* 兜底尺寸：自然尺寸未就绪时先按满屏撑住，就绪后由控制器替换成视口 cover 渲染尺寸 */
+	width: 100vw;
+	height: 100vh;
+	object-fit: cover;
+	object-position: center;
+	user-select: none;
+	-webkit-user-drag: none;
+	will-change: transform;
+}
+
+/* 影像层与内容区的衔接带：水波纹 / 渐变过渡。负 margin 上叠到终幕全屏图底缘，
+   autoAlpha 由控制器随终幕放大尾段淡入（见 home-blinds-controller 的 renderFinale）。 */
+.home-blinds-transition {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	overflow: hidden;
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+}
+
+.home-blinds-transition__gradient {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to bottom, transparent, var(--page-bg));
+}
+
+.home-blinds-transition__waves {
+	position: absolute;
+	bottom: -1px;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* 与设置面板的水波纹 / 渐变开关联动（html 上的 data-*-enabled 属性，
+   逻辑与壁纸区 #header-waves / #wallpaper-gradient 完全一致）：
+   水波纹优先，开启时渐变让位；水波纹关闭后渐变顶上。 */
+html[data-waves-enabled="true"] .home-blinds-transition__waves {
+	display: block !important;
+}
+
+html[data-waves-enabled="true"] .home-blinds-transition__gradient {
+	display: none !important;
+}
+
+html[data-waves-enabled="false"] .home-blinds-transition__waves {
+	display: none !important;
+}
+
+html[data-waves-enabled="false"] .home-blinds-transition__gradient {
+	display: block !important;
+}
+
+html[data-gradient-enabled="false"] .home-blinds-transition__gradient {
+	display: none !important;
 }
 
 /* ============================================

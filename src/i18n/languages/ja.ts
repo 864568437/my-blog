@@ -327,7 +327,8 @@ export const ja: Translation = {
 	[Key.animeSubtitle]: "視聴したアニメ・映画・ドキュメンタリーの記録",
 	[Key.animeLastUpdated]: "最終更新：",
 	[Key.animeNotConfigured]: "未設定",
-	[Key.animeNotConfiguredDesc]: "siteConfig.ts で TMDB または Bilibili データソースを設定してください",
+	[Key.animeNotConfiguredDesc]:
+		"siteConfig.ts で TMDB または Bilibili データソースを設定してください",
 	[Key.animeTotal]: "合計",
 	[Key.animeBilibiliAvg]: "Bilibili平均",
 	[Key.animeTmdbAvg]: "TMDB平均",
@@ -362,7 +363,8 @@ export const ja: Translation = {
 
 	// Bangumi API
 	[Key.bangumiFetchError]: "データ取得失敗",
-	[Key.bangumiFetchErrorDesc]: "Bangumi API に接続できません。後で再試行するかネットワークを確認してください",
+	[Key.bangumiFetchErrorDesc]:
+		"Bangumi API に接続できません。後で再試行するかネットワークを確認してください",
 
 	// 主题设置面板 Tab 标签
 	[Key.displayTabTheme]: "テーマ",

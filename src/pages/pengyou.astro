@@ -1,10 +1,10 @@
 ---
 import { Icon } from "astro-icon/components";
-import { pengyouConfig } from "@/config/pengyouConfig";
-import { circleConfig } from "@/config/circleConfig";
-import MainGridLayout from "@/layouts/MainGridLayout.astro";
-import PengyouEditor from "@/components/edit/PengyouEditor.svelte";
 import PageHeader from "@/components/common/PageHeader.astro";
+import PengyouEditor from "@/components/edit/PengyouEditor.svelte";
+import { circleConfig } from "@/config/circleConfig";
+import { pengyouConfig } from "@/config/pengyouConfig";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import {
 	fetchPengyouItems,
 	formatPengyouDate as formatDate,
@@ -19,12 +19,14 @@ const description = "来看看我的朋友们都在干嘛";
 const items: PengyouItem[] = await fetchPengyouItems();
 const { rss } = pengyouConfig;
 
-const totalFriends = new Set(items.map(i => i.author)).size;
+const totalFriends = new Set(items.map((i) => i.author)).size;
 const totalArticles = items.length;
-const itemsJson = JSON.stringify(items.map(i => ({
-	...i,
-	avatar: getAvatar(i),
-})));
+const itemsJson = JSON.stringify(
+	items.map((i) => ({
+		...i,
+		avatar: getAvatar(i),
+	})),
+);
 ---
 
 <MainGridLayout title={title} description={description}>

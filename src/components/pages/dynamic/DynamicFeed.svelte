@@ -124,7 +124,9 @@ const pageEntries = $derived(
 );
 
 /** 总页数（最少 1，用于分页按钮边界判断） */
-const totalPages = $derived(Math.max(1, Math.ceil(filtered.length / itemsPerPage)));
+const totalPages = $derived(
+	Math.max(1, Math.ceil(filtered.length / itemsPerPage)),
+);
 
 /**
  * 从 URL ?page= 读取当前页码，至少为 1。
@@ -183,9 +185,7 @@ function populateYears() {
 	all.textContent = allYearsText;
 	yearSelect.append(all);
 	const years = [
-		...new Set(
-			entries.map((entry) => new Date(entry.published).getFullYear()),
-		),
+		...new Set(entries.map((entry) => new Date(entry.published).getFullYear())),
 	].sort((a, b) => b - a);
 	for (const year of years) {
 		const option = document.createElement("option");
@@ -285,7 +285,10 @@ function createItem(entry: DynamicData) {
 	const tagsContainer = root.querySelector<HTMLElement>("[data-dynamic-tags]");
 	if (tagsContainer && entry.tags && entry.tags.length > 0) {
 		tagsContainer.innerHTML = entry.tags
-			.map((tag) => `<span class="moment-tag">${String(tag).trim().replace(/^#+/, "")}</span>`)
+			.map(
+				(tag) =>
+					`<span class="moment-tag">${String(tag).trim().replace(/^#+/, "")}</span>`,
+			)
 			.join("");
 	} else if (tagsContainer) {
 		tagsContainer.style.display = "none";

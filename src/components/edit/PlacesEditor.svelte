@@ -1,14 +1,14 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { setupRepoDrafts } from "@/utils/draftHelpers";
 import {
+	deepClone,
+	ensureIconify,
+	genId,
+	getRepoFile,
 	hasValidToken,
 	showToast,
-	ensureIconify,
-	getRepoFile,
-	genId,
-	deepClone,
 } from "@/utils/editMode";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
 
 interface PlaceItem {
 	id: string;
@@ -79,7 +79,7 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 	}
 	let arrayStr = tsContent.substring(bracketStart + 1, idx).trim();
 	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]\}])/g, "$1");
+	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
 	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
 	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
 	try {
@@ -91,7 +91,10 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 }
 
 function parsePlacesFromTS(tsContent: string): PlaceItem[] {
-	const items = parseArrayFromTS(tsContent, "export const placesConfig: PlaceItem[] = [");
+	const items = parseArrayFromTS(
+		tsContent,
+		"export const placesConfig: PlaceItem[] = [",
+	);
 	return items.map((item: any, index: number) => ({
 		id: item.id || `place-${index}`,
 		date: item.date || new Date().toISOString().slice(0, 10),
@@ -261,7 +264,7 @@ const drafts = setupRepoDrafts({
 	getOriginalContent: () => originalTS,
 	setOriginalContent: (v) => (originalTS = v),
 	getCommitMsg: (isEdit) =>
-		isEdit ? `chore(places): 更新旅行足迹` : `chore(places): 创建足迹配置`,
+		isEdit ? "chore(places): 更新旅行足迹" : "chore(places): 创建足迹配置",
 	onSubmitted: () => {
 		setTimeout(() => window.location.reload(), 1200);
 	},
@@ -289,7 +292,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarAdd", handleSidebarAdd);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -347,7 +353,7 @@ function collectFromDOM() {
 		const metaDiv = card.querySelector(".text-right");
 		const countText =
 			metaDiv?.querySelector(".font-semibold")?.textContent?.trim() || "1";
-		const visitCount = parseInt(countText.replace(/[^\d]/g, "")) || 1;
+		const visitCount = Number.parseInt(countText.replace(/[^\d]/g, "")) || 1;
 		const dateText =
 			metaDiv?.querySelector("div:last-child")?.textContent?.trim() || "";
 		const date = dateText || new Date().toISOString().slice(0, 10);
@@ -554,7 +560,10 @@ function addTag(index: number, tag: string) {
 
 function removeTag(index: number, tagIndex: number) {
 	const currentTags = places[index].tags || [];
-	places[index] = { ...places[index], tags: currentTags.filter((_, i) => i !== tagIndex) };
+	places[index] = {
+		...places[index],
+		tags: currentTags.filter((_, i) => i !== tagIndex),
+	};
 	places = [...places];
 }
 
@@ -568,7 +577,10 @@ function addPhoto(index: number, photoUrl: string) {
 
 function removePhoto(index: number, photoIndex: number) {
 	const currentPhotos = places[index].photos || [];
-	places[index] = { ...places[index], photos: currentPhotos.filter((_, i) => i !== photoIndex) };
+	places[index] = {
+		...places[index],
+		photos: currentPhotos.filter((_, i) => i !== photoIndex),
+	};
 	places = [...places];
 }
 

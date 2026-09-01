@@ -68,7 +68,10 @@ const finalCrumbs: BreadcrumbItem[] = (() => {
 	if (first.href === "/" || first.name === "首页") {
 		return breadcrumbs;
 	}
-	return [{ name: "首页", href: "/", icon: "material-symbols:home-rounded" }, ...breadcrumbs];
+	return [
+		{ name: "首页", href: "/", icon: "material-symbols:home-rounded" },
+		...breadcrumbs,
+	];
 })();
 ---
 

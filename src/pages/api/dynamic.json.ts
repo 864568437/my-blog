@@ -1,13 +1,13 @@
 import { getCollection } from "astro:content";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import { profileConfig } from "@/config";
 import {
 	dynamicSearchText,
 	dynamicSlug,
 	sortDynamics,
 } from "@/utils/dynamic-utils";
-import { profileConfig } from "@/config";
-import { readFileSync, existsSync } from "node:fs";
-import { resolve } from "node:path";
 
 const markdownImagePattern = /!\[([^\]]*)\]\((\S+?)(?:\s+["']([^"']*)["'])?\)/g;
 

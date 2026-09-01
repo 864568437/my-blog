@@ -1,7 +1,12 @@
 ---
 import "@/styles/vendor/waline.css";
-import { commentConfig, getEnabledFriends, profileConfig, siteConfig } from "@/config";
 import WalineRoleBadge from "@/components/features/WalineRoleBadge.astro";
+import {
+	commentConfig,
+	getEnabledFriends,
+	profileConfig,
+	siteConfig,
+} from "@/config";
 
 interface Props {
 	path: string;
@@ -21,7 +26,7 @@ const config = {
 		level3: "摸鱼金丹",
 		level4: "怠惰元婴",
 		level5: "摆烂仙帝",
-		admin: "主理人"
+		admin: "主理人",
 	},
 	...(commentConfig.waline?.visitorCount ? { pageview: true } : {}),
 };
@@ -38,9 +43,10 @@ const ownSiteUrl = siteConfig?.site_url || "";
 // 站长识别昵称列表（displayName 兜底，添加截图里出现过的「🍅番茄」等）
 const ownerNicknames = Array.from(
 	new Set(
-		[profileConfig?.displayName, profileConfig?.name, "🍅番茄"]
-			.filter((v) => typeof v === "string" && v.trim())
-	)
+		[profileConfig?.displayName, profileConfig?.name, "🍅番茄"].filter(
+			(v) => typeof v === "string" && v.trim(),
+		),
+	),
 );
 ---
 <!-- Waline -->

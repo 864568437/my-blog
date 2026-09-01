@@ -1,13 +1,13 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { setupRepoDrafts } from "@/utils/draftHelpers";
 import {
-	showToast,
-	genId,
 	deepClone,
 	ensureIconify,
+	genId,
 	getRepoFile,
+	showToast,
 } from "@/utils/editMode";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
 
 interface PengyouRSSItem {
 	id?: string;
@@ -124,11 +124,10 @@ function tsObjectLiteralToJSON(src: string): string {
 				out += '"' + word + '"';
 				i = j;
 				continue;
-			} else {
-				out += word;
-				i = j;
-				continue;
 			}
+			out += word;
+			i = j;
+			continue;
 		}
 
 		out += c;
@@ -265,7 +264,7 @@ const drafts = setupRepoDrafts({
 	getOriginalContent: () => originalTS,
 	setOriginalContent: (v) => (originalTS = v),
 	getCommitMsg: (isEdit) =>
-		isEdit ? `chore: update pengyou rss` : `chore: create pengyou rss`,
+		isEdit ? "chore: update pengyou rss" : "chore: create pengyou rss",
 	onSubmitted: () => {
 		setTimeout(() => window.location.reload(), 1200);
 	},
@@ -293,7 +292,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarAdd", handleSidebarAdd);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -370,9 +372,7 @@ async function loadRepoData() {
 		try {
 			const repoItems: PengyouRSSItem[] = parseRSSFromTS(existing.content);
 			originalTS = existing.content;
-			const repoMap = new Map(
-				repoItems.map((s) => [s.url, s]),
-			);
+			const repoMap = new Map(repoItems.map((s) => [s.url, s]));
 			rssSources = rssSources.map((s) => {
 				const repoItem = repoMap.get(s.url);
 				if (repoItem) {
@@ -384,9 +384,7 @@ async function loadRepoData() {
 				}
 				return s;
 			});
-			const existingUrls = new Set(
-				rssSources.map((s) => s.url),
-			);
+			const existingUrls = new Set(rssSources.map((s) => s.url));
 			for (const g of repoItems) {
 				if (!existingUrls.has(g.url)) {
 					rssSources = [...rssSources, { ...g, id: g.id || genId("py") }];
@@ -399,12 +397,14 @@ async function loadRepoData() {
 		}
 	} else {
 		if (rssSources.length === 0) {
-			rssSources = [{
-				id: genId("py"),
-				name: "",
-				url: "",
-				enabled: true,
-			}];
+			rssSources = [
+				{
+					id: genId("py"),
+					name: "",
+					url: "",
+					enabled: true,
+				},
+			];
 		}
 		originalTS = buildPengyouConfigTS(rssSources);
 	}
@@ -533,7 +533,11 @@ async function handleSubmit() {
 	}
 }
 
-function updateField(index: number, field: keyof PengyouRSSItem, value: string | boolean) {
+function updateField(
+	index: number,
+	field: keyof PengyouRSSItem,
+	value: string | boolean,
+) {
 	rssSources[index] = { ...rssSources[index], [field]: value };
 	rssSources = [...rssSources];
 }

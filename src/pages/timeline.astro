@@ -10,7 +10,7 @@ import TimelineGraph from "@/components/controls/TimelineGraph.astro";
 import { siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
-import { commitType, getGitLog, type GitCommit } from "@/utils/git-log";
+import { commitType, type GitCommit, getGitLog } from "@/utils/git-log";
 
 if (!siteConfig.pages.timeline) {
 	return Astro.redirect("/404/");

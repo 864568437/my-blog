@@ -369,7 +369,8 @@ export const ru: Translation = {
 
 	// Bangumi API
 	[Key.bangumiFetchError]: "Ошибка загрузки данных",
-	[Key.bangumiFetchErrorDesc]: "Не удалось получить данные с Bangumi API. Проверьте настройки.",
+	[Key.bangumiFetchErrorDesc]:
+		"Не удалось получить данные с Bangumi API. Проверьте настройки.",
 
 	// Timeline
 	[Key.timeline]: "Хронология",

@@ -6,44 +6,41 @@
  *   断点与 MainGridLayout 一致：≥768px 双栏。
  *
  * 主内容区顶部为三个胶囊切换按钮（默认「文章」）：
- *   1. 文章      —— /posts/ 页同款卡片体系（列表 1 条 / 网格 3 条，
+ *   1. 文章      —— /posts/ 页同款卡片体系（列表 3 条 / 网格 6 条，
  *                   非活跃视图常驻 <template> 绝不渲染；
  *                   模式与文章列表页共用 localStorage 偏好）
- *   2. 我的动态  —— dynamic 集合最新 1 条，卡片复用 dynamic.css
+ *   2. 我的动态  —— dynamic 集合最新 3 条，卡片复用 dynamic.css
  *                   的 .dynamic-feed .moment-* 体系
- *   3. 朋友的动态 —— 复用 /pengyou/ 页的 RSS 抓取（pengyou-utils）
- *                   与 circle.css 卡片体系，取最新 6 条
+ *   3. 朋友的动态 —— 复用 /pengyou/ 页的 RSS 抓取（pengyou-utils），
+ *                   卡片与文章列表卡同款，取最新 4 条
+ * 各面板「查看更多」统一沉底，面板高度与左侧组件栏对齐。
  *
  * 侧边栏：直接实例化 SideBar（left），组件清单沿用
  * sidebarLayoutConfig 配置；通过 domId 避开全局 #left-sidebar，
  * 防止被 .lg:is-home 隐藏规则命中。
  */
-import { getCollection, render, type CollectionEntry } from "astro:content";
+import { type CollectionEntry, getCollection, render } from "astro:content";
 import * as path from "node:path";
-import type { ImageMetadata } from "astro";
 import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import type { ImageMetadata } from "astro";
 import { Icon } from "astro-icon/components";
-import SideBar from "@/components/layout/SideBar.astro";
-import HomeDigestPostCard from "@/components/layout/HomeDigestPostCard.astro";
 import LayoutSwitch from "@/components/controls/LayoutSwitch.svelte";
+import HomeDigestPostCard from "@/components/layout/HomeDigestPostCard.astro";
+import SideBar from "@/components/layout/SideBar.astro";
 import { profileConfig, siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import { sortDynamics } from "@/utils/dynamic-utils";
 import {
-	fetchPengyouItems,
-	formatPengyouDate,
-	getPengyouAvatar,
-} from "@/utils/pengyou-utils";
-import {
 	processCoverImageSync,
 	shouldAddNoReferrer,
 } from "@/utils/image-utils";
+import { fetchPengyouItems, formatPengyouDate } from "@/utils/pengyou-utils";
 import {
+	url as buildUrl,
 	getFileDirFromPath,
 	getPostUrlBySlug,
 	getTagUrl,
-	url as buildUrl,
 } from "@/utils/url-utils";
 import "@/styles/dynamic.css";
 import "@/styles/features/circle.css";
@@ -52,14 +49,14 @@ import "@/styles/components/home-digest.css";
 interface Props {
 	/** 已排序的文章集合（由 [...page].astro 传入） */
 	posts?: CollectionEntry<"posts">[];
-	/** 最新文章展示数量（网格模式；列表模式固定显示第 1 条） */
+	/** 最新文章展示数量（网格模式 6 条；列表模式固定显示前 3 条） */
 	postCount?: number;
 }
 
-const { posts, postCount = 3 } = Astro.props;
+const { posts, postCount = 6 } = Astro.props;
 
-// ── 我的动态：置顶优先、时间倒序，取第 1 条 ──
-const DYNAMIC_COUNT = 1;
+// ── 我的动态：置顶优先、时间倒序，取前 3 条 ──
+const DYNAMIC_COUNT = 3;
 const markdownProcessor = await createMarkdownProcessor();
 const dynamics = await Promise.all(
 	sortDynamics(await getCollection("dynamic"))
@@ -84,8 +81,8 @@ const dynamics = await Promise.all(
 		}),
 );
 
-// ── 朋友的动态：复用 /pengyou/ 页的 RSS 抓取，取最新 6 条 ──
-const FRIEND_COUNT = 6;
+// ── 朋友的动态：复用 /pengyou/ 页的 RSS 抓取，取最新 4 条 ──
+const FRIEND_COUNT = 4;
 const friendItems = (await fetchPengyouItems()).slice(0, FRIEND_COUNT);
 
 // ── 最新文章：数据整形逻辑与 /posts/ 页（ArticleVirtualList）保持一致 ──
@@ -98,7 +95,9 @@ const postDateFormatter = new Intl.DateTimeFormat(
 	{ year: "numeric", month: "2-digit", day: "2-digit" },
 );
 
-async function resolveArticleImage(entry: CollectionEntry<"posts">) {
+async function resolveArticleImage(
+	entry: CollectionEntry<"posts">,
+): Promise<{ imageUrl: string; imageReferrerPolicy: "no-referrer" | "" }> {
 	const processedImage = processCoverImageSync(entry.data.image, entry.id);
 
 	if (!processedImage) {
@@ -135,9 +134,24 @@ async function resolveArticleImage(entry: CollectionEntry<"posts">) {
 }
 
 const categoryColorPalette = [
-	"#fbbf24", "#fb7185", "#34d399", "#60a5fa", "#a78bfa", "#f472b6",
-	"#2dd4bf", "#fb923c", "#22d3ee", "#818cf8", "#e879f9", "#a3e635",
-	"#f87171", "#a78bfa", "#06b6d4", "#f59e0b", "#f43f5e", "#10b981",
+	"#fbbf24",
+	"#fb7185",
+	"#34d399",
+	"#60a5fa",
+	"#a78bfa",
+	"#f472b6",
+	"#2dd4bf",
+	"#fb923c",
+	"#22d3ee",
+	"#818cf8",
+	"#e879f9",
+	"#a3e635",
+	"#f87171",
+	"#a78bfa",
+	"#06b6d4",
+	"#f59e0b",
+	"#f43f5e",
+	"#10b981",
 ];
 
 function getCategoryColor(name: string): string {
@@ -160,7 +174,9 @@ const latestPosts = await Promise.all(
 			publishedIso: entry.data.published.toISOString(),
 			publishedText: postDateFormatter.format(entry.data.published),
 			category: rawCategory || i18n(I18nKey.uncategorized),
-			categoryStyle: getCategoryColor(rawCategory || i18n(I18nKey.uncategorized)),
+			categoryStyle: getCategoryColor(
+				rawCategory || i18n(I18nKey.uncategorized),
+			),
 			tags: (entry.data.tags || [])
 				.map((tag) => tag.trim())
 				.filter(Boolean)
@@ -234,25 +250,20 @@ const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
 
 				{/* 面板 1：文章（默认激活）。与 /posts/ 页同构的卡片体系，
 				    活跃视图直接渲染（无 JS 也正确），非活跃视图放入 <template>
-				    （inert，浏览器绝对不渲染）；列表 1 条 / 网格 3 条 */}
+				    （inert，浏览器绝对不渲染）；列表 3 条 / 网格 6 条，
+				    「查看更多」沉底与左侧栏高度对齐 */}
 				<div class="home-digest__panel" data-panel="posts">
 					<header class="home-digest__heading">
 						<div class="home-digest__heading-text">
 							<p class="home-digest__kicker">LATEST</p>
 							<h2 class="home-digest__title">最新文章</h2>
 						</div>
-						<div class="home-digest__heading-actions">
-							{allowLayoutSwitch && (
-								<LayoutSwitch
-									client:load
-									activeLayout={isListDefault ? "list" : "grid"}
-								/>
-							)}
-							<a class="home-digest__more" href={buildUrl("/posts/")}>
-								<span>查看更多</span>
-								<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
-							</a>
-						</div>
+						{allowLayoutSwitch && (
+							<LayoutSwitch
+								client:load
+								activeLayout={isListDefault ? "list" : "grid"}
+							/>
+						)}
 					</header>
 
 					<div
@@ -263,7 +274,7 @@ const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
 						<div class="article-list-view" data-digest-active>
 							{isListDefault ? (
 								<div class="article-list-vertical" aria-label="文章列表">
-									{latestPosts.slice(0, 1).map((post) => (
+									{latestPosts.slice(0, 3).map((post) => (
 										<HomeDigestPostCard mode="list" post={post} />
 									))}
 								</div>
@@ -286,7 +297,7 @@ const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
 									</div>
 								) : (
 									<div class="article-list-vertical" aria-label="文章列表">
-										{latestPosts.slice(0, 1).map((post) => (
+										{latestPosts.slice(0, 3).map((post) => (
 											<HomeDigestPostCard mode="list" post={post} />
 										))}
 									</div>
@@ -294,6 +305,13 @@ const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
 							</div>
 						</template>
 					</div>
+
+					<footer class="home-digest__footer">
+						<a class="home-digest__more" href={buildUrl("/posts/")}>
+							<span>查看更多</span>
+							<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
+						</a>
+					</footer>
 				</div>
 
 				{/* 面板 2：我的动态 */}
@@ -303,10 +321,6 @@ const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
 							<p class="home-digest__kicker">DYNAMICS</p>
 							<h2 class="home-digest__title">我的动态</h2>
 						</div>
-						<a class="home-digest__more" href={buildUrl("/dynamic/")}>
-							<span>查看全部</span>
-							<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
-						</a>
 					</header>
 
 					<div class="dynamic-feed home-digest__moments">
@@ -365,37 +379,55 @@ const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
 							</dynamic-entry>
 						))}
 					</div>
+
+					<footer class="home-digest__footer">
+						<a class="home-digest__more" href={buildUrl("/dynamic/")}>
+							<span>查看全部</span>
+							<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
+						</a>
+					</footer>
 				</div>
 
-				{/* 面板 3：朋友的动态（/pengyou/ 同款 circle 卡片） */}
+				{/* 面板 3：朋友的动态（卡片与文章列表卡同款体系） */}
 				<div class="home-digest__panel" data-panel="friends" hidden>
 					<header class="home-digest__heading">
 						<div class="home-digest__heading-text">
 							<p class="home-digest__kicker">FRIENDS</p>
 							<h2 class="home-digest__title">朋友的动态</h2>
 						</div>
-						<a class="home-digest__more" href={buildUrl("/pengyou/")}>
-							<span>查看全部</span>
-							<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
-						</a>
 					</header>
 
 					{friendItems.length > 0 ? (
-						<div class="home-digest__friends">
+						<div class="article-list-vertical home-digest__friends-list" aria-label="朋友动态列表">
 							{friendItems.map((item) => (
-								<a
-									href={item.link}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="circle-card"
-								>
-									<div class="card-avatar-watermark" data-initial={(item.author || "?").slice(0, 1)}>
-										<img src={getPengyouAvatar(item)} alt="" loading="lazy" />
-									</div>
-									<span class="card-date-overlay">{formatPengyouDate(item.date)}</span>
-									<h3 class="card-title">{item.title}</h3>
-									<span class="card-author-tag">{item.author}</span>
-								</a>
+								<article class="article-list-row-card no-cover">
+									<a
+										href={item.link}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="article-list-row-card__content"
+										aria-label={`查看朋友动态：${item.title}`}
+									>
+										<div class="article-list-row-card__layer-1">
+											<h3 class="article-list-row-card__title">{item.title}</h3>
+										</div>
+										<div class="article-list-row-card__layer-2">
+											<span class="al-meta-item al-category">
+												<Icon name="material-symbols:person-rounded" class="text-[0.9rem]" />
+												<span class="al-meta-text">{item.author}</span>
+											</span>
+											<span class="al-meta-item">
+												<Icon name="material-symbols:calendar-month-rounded" class="text-[0.9rem]" />
+												<span>{formatPengyouDate(item.date)}</span>
+											</span>
+										</div>
+										{item.content && (
+											<div class="article-list-row-card__layer-3">
+												<p class="article-list-row-card__description">{item.content}</p>
+											</div>
+										)}
+									</a>
+								</article>
 							))}
 						</div>
 					) : (
@@ -404,6 +436,13 @@ const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
 							<p class="error-text">暂无动态</p>
 						</div>
 					)}
+
+					<footer class="home-digest__footer">
+						<a class="home-digest__more" href={buildUrl("/pengyou/")}>
+							<span>查看全部</span>
+							<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
+						</a>
+					</footer>
 				</div>
 			</div>
 		</div>

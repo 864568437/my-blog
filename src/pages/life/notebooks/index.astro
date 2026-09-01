@@ -1,12 +1,9 @@
 ---
 import { Icon } from "astro-icon/components";
-import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import PageHeader from "@/components/common/PageHeader.astro";
 import NotebooksEditor from "@/components/edit/NotebooksEditor.svelte";
-import {
-	getEnabledFolders,
-	getFolderStats,
-} from "@/config/notebooksConfig";
+import { getEnabledFolders, getFolderStats } from "@/config/notebooksConfig";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
 
 const folders = getEnabledFolders();
 

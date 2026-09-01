@@ -101,7 +101,7 @@ async function signJwtServer(appId, privateKeyPem) {
 			.replace(/=+$/, "");
 	const data = `${b64url(header)}.${b64url(payload)}`;
 
-	let der = pemToArrayBuffer(privateKeyPem);
+	const der = pemToArrayBuffer(privateKeyPem);
 	// 尝试作为 PKCS#1 导入（需要转 PKCS#8）
 	let key;
 	try {

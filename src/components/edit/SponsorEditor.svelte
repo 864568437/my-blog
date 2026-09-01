@@ -1,14 +1,14 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { setupRepoDrafts } from "@/utils/draftHelpers";
 import {
-	showToast,
-	genId,
 	deepClone,
 	ensureIconify,
+	genId,
 	getRepoFile,
 	registerSubmitHandler,
+	showToast,
 } from "@/utils/editMode";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
 
 interface SponsorMethod {
 	id: string;
@@ -105,7 +105,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarAdd", handleSidebarAdd);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -159,7 +162,7 @@ function collectFromDOM() {
 	const methods: SponsorMethod[] = [];
 	const tabBtns = document.querySelectorAll("[data-sponsor-tab]");
 	tabBtns.forEach((btn) => {
-		const idx = parseInt((btn as HTMLElement).dataset.sponsorTab || "0");
+		const idx = Number.parseInt((btn as HTMLElement).dataset.sponsorTab || "0");
 		const name = btn.textContent?.trim() || "";
 		const iconEl = btn.querySelector("iconify-icon, [class*='icon']");
 		const icon = iconEl?.getAttribute("icon") || "";

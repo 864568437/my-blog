@@ -330,7 +330,8 @@ export const en: Translation = {
 	[Key.animeSubtitle]: "Tracking my favorite anime, movies and documentaries",
 	[Key.animeLastUpdated]: "Last updated: ",
 	[Key.animeNotConfigured]: "Not Configured",
-	[Key.animeNotConfiguredDesc]: "Please configure TMDB or Bilibili data source in siteConfig.ts",
+	[Key.animeNotConfiguredDesc]:
+		"Please configure TMDB or Bilibili data source in siteConfig.ts",
 	[Key.animeTotal]: "Total",
 	[Key.animeBilibiliAvg]: "Bilibili Avg",
 	[Key.animeTmdbAvg]: "TMDB Avg",
@@ -365,7 +366,8 @@ export const en: Translation = {
 
 	// Bangumi API
 	[Key.bangumiFetchError]: "Failed to Fetch Data",
-	[Key.bangumiFetchErrorDesc]: "Cannot connect to Bangumi API. Please try again later or check your network.",
+	[Key.bangumiFetchErrorDesc]:
+		"Cannot connect to Bangumi API. Please try again later or check your network.",
 
 	// 主题设置面板 Tab 标签
 	[Key.displayTabTheme]: "Theme",

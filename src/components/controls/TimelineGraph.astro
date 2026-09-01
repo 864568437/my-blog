@@ -1,4 +1,5 @@
 ---
+import { siteConfig } from "@/config";
 /**
  * TimelineGraph.astro —— 更新日志「图形化」视图
  * 参考 my-blog 关于页 ChangelogGraph：蛇形网格卡片 + 行间回环箭头 + 悬停 SVG 虚线关联 + 详情弹窗。
@@ -6,7 +7,6 @@
  * 因默认 hidden，需由页面在首次显示时派发 `timeline:show-graph` 触发初始化/重排。
  */
 import { commitType, type GitCommit } from "@/utils/git-log";
-import { siteConfig } from "@/config";
 
 interface Props {
 	commits: GitCommit[];
@@ -109,9 +109,7 @@ for (let i = 0; i < visible.length; i++) {
 			visible[j].files.includes(f),
 		);
 		if (sharedFiles.length < MIN_SHARED) continue;
-		const modules = [
-			...new Set(sharedFiles.map(moduleOf)),
-		];
+		const modules = [...new Set(sharedFiles.map(moduleOf))];
 		if (!linksMap.has(i)) linksMap.set(i, []);
 		if (!linksMap.has(j)) linksMap.set(j, []);
 		linksMap.get(i)?.push({ target: j, sharedFiles, modules });

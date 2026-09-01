@@ -107,7 +107,7 @@ function pemToDer(pem: string): ArrayBuffer {
 }
 
 async function importPrivateKey(pem: string): Promise<CryptoKey> {
-	let der = pemToDer(pem);
+	const der = pemToDer(pem);
 	const header = new Uint8Array(der, 0, 2);
 	let keyData: ArrayBuffer;
 	if (header[0] === 0x30 && header[1] === 0x82) {
@@ -189,9 +189,7 @@ async function getInstallationToken(
 	);
 	if (!resp.ok) {
 		const text = await resp.text().catch(() => "");
-		throw new Error(
-			`获取 Installation 列表失败 (${resp.status}): ${text}`,
-		);
+		throw new Error(`获取 Installation 列表失败 (${resp.status}): ${text}`);
 	}
 	const installations = await resp.json();
 	let installationId: number | null = null;
@@ -504,7 +502,7 @@ function repoPath(config: RepoConfig, path: string): string {
 function resolveBranch(config: RepoConfig): string {
 	return (
 		(typeof window !== "undefined" && (window as any).__DEPLOY_BRANCH__) ||
-			config.branch
+		config.branch
 	);
 }
 
@@ -759,7 +757,7 @@ export function deepClone<T>(obj: T): T {
 	return JSON.parse(JSON.stringify(obj));
 }
 
-export function genId(prefix: string = "id"): string {
+export function genId(prefix = "id"): string {
 	return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 

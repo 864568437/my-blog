@@ -3,16 +3,16 @@
  * 为各编辑器提供统一的草稿保存/恢复/提交逻辑
  */
 import {
-	saveDraft,
-	getDraftsByPage,
-	removeDraft,
 	clearDraftsByPage,
-	registerSubmitHandler,
-	updateRepoFile,
 	createRepoFile,
-	getRepoFile,
-	showToast,
 	type DraftChange,
+	getDraftsByPage,
+	getRepoFile,
+	registerSubmitHandler,
+	removeDraft,
+	saveDraft,
+	showToast,
+	updateRepoFile,
 } from "./editMode";
 
 // ============ Repo 文件类型编辑器草稿辅助 ============
@@ -93,7 +93,9 @@ export function setupRepoDrafts(ctx: RepoDraftContext) {
 		isEdit: boolean,
 	): Promise<boolean> {
 		const branch =
-			typeof window !== "undefined" ? (window as any).__DEPLOY_BRANCH__ : undefined;
+			typeof window !== "undefined"
+				? (window as any).__DEPLOY_BRANCH__
+				: undefined;
 		const commitMsg = ctx.getCommitMsg
 			? ctx.getCommitMsg(isEdit)
 			: isEdit

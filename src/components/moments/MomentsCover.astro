@@ -9,12 +9,21 @@ interface Props {
 	coverBio?: string;
 }
 
-const { class: className = "", coverImage, coverAvatar, coverName, coverBio } = Astro.props;
+const {
+	class: className = "",
+	coverImage,
+	coverAvatar,
+	coverName,
+	coverBio,
+} = Astro.props;
 
 const coverConfig = siteConfig.momentsCover;
 if (!coverConfig?.enable) return null;
 
-const avatar = coverAvatar || profileConfig.avatar || "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640";
+const avatar =
+	coverAvatar ||
+	profileConfig.avatar ||
+	"https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640";
 const name = coverName || profileConfig.name || "";
 const defaultBio = Array.isArray(profileConfig.bio)
 	? profileConfig.bio[1] || profileConfig.bio[0] || ""

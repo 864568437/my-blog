@@ -1,11 +1,35 @@
 ---
 import HomeBlindsScene from "@components/layout/HomeBlindsScene.astro";
-import { homeConfig } from "@/config";
+import { backgroundWallpaper, homeConfig } from "@/config";
 import type { HomeBlindsSceneItem } from "@/types/config";
 
 const config = homeConfig.homeBlinds;
 const background = config.reveal.backgroundImage;
 const isEnabled = config.enabled && Boolean(background);
+
+/** 衔接过渡带：与壁纸区共用同一套水波纹 / 渐变配置 */
+const wavesConfig = backgroundWallpaper.banner?.waves?.enable;
+const wavesSwitchable = backgroundWallpaper.banner?.waves?.switchable ?? false;
+const wavesEnabledOnDesktop =
+	typeof wavesConfig === "object" ? wavesConfig.desktop : wavesConfig;
+const wavesEnabledOnMobile =
+	typeof wavesConfig === "object" ? wavesConfig.mobile : wavesConfig;
+const shouldRenderWaves =
+	wavesEnabledOnDesktop || wavesEnabledOnMobile || wavesSwitchable;
+
+const gradientConfig = backgroundWallpaper.banner?.gradient?.enable;
+const gradientSwitchable =
+	backgroundWallpaper.banner?.gradient?.switchable ?? false;
+const gradientEnabledOnDesktop =
+	typeof gradientConfig === "object" ? gradientConfig.desktop : gradientConfig;
+const gradientEnabledOnMobile =
+	typeof gradientConfig === "object" ? gradientConfig.mobile : gradientConfig;
+const gradientHeight = backgroundWallpaper.banner?.gradient?.height ?? "30vh";
+const shouldRenderGradient =
+	gradientEnabledOnDesktop || gradientEnabledOnMobile || gradientSwitchable;
+// 带高：水波纹占位约 15vh，纯渐变时按配置的渐变高度
+const transitionHeight = shouldRenderWaves ? "15vh" : gradientHeight;
+
 // 第一层入场标题配置：时长节奏供控制器使用；标题文字已由中央圈内的
 // 主页文字组（data-hero-emblem）取代
 const headline = config.reveal.headline;
@@ -23,6 +47,8 @@ const standImages = config.scenes.standImages.slice(
 	0,
 	Math.min(4, Math.max(0, sceneItems.length - 1)),
 );
+// 终幕放大层用的图片：横向叙事的最后一幕
+const finaleImage = sceneItems[sceneItems.length - 1]?.image ?? background;
 /**
  * 背景跑马灯：单格宽度固定为 CYCLE_CELL_VW，先把列表重复到「一轮 ≥ 一屏宽」，
  * 再整轮复制一份首尾相接，控制器把 xPercent 从 0 走到 -50 即为无缝左移。
@@ -306,7 +332,102 @@ const runtimeConfig = {
 				}
 			</div>
 		</div>
+
 	</section>
+
+	<!-- 终幕放大过渡层：最后一幕从图框放大到全屏。与收缩过渡层同一套
+	     clip-path + 等比 scale 的几何算法，方向相反。挂在根层级并恒为
+	     position: fixed（与 fixed-stage 同款机制）：不能放进被 pin 的
+	     section——pin 释放后 section 残留的 transform 会把 fixed 退化成
+	     相对 section 定位，图片就会跟着滚动上移 -->
+	<div class="home-blinds__finale-portal" data-finale-portal aria-hidden="true">
+		<img
+			class="home-blinds__finale-image"
+			src={finaleImage}
+			alt=""
+			loading="lazy"
+			decoding="async"
+			data-finale-image
+		/>
+	</div>
+
+	<!-- 影像层与内容区的衔接带：水波纹 / 渐变过渡（与壁纸区共用设置与开关）。
+	     负 margin 上叠到终幕全屏图底缘；初始隐藏，控制器随终幕放大进度淡入 -->
+	{(shouldRenderWaves || shouldRenderGradient) && (
+		<div
+			class="home-blinds-transition"
+			data-home-blinds-transition
+			style={`height: ${transitionHeight}; margin-top: -${transitionHeight};`}
+			aria-hidden="true"
+		>
+			{shouldRenderGradient && (
+				<div
+					class:list={[
+						"home-blinds-transition__gradient",
+						// 水波纹默认优先：带内同时渲染两种过渡时先藏渐变，
+						// 用户在设置里关掉水波纹后由 CSS 属性规则接管显示
+						{ hidden: shouldRenderWaves },
+						{ hidden: !gradientEnabledOnMobile },
+						{ "md:hidden": !gradientEnabledOnDesktop },
+					]}
+				/>
+			)}
+			{shouldRenderWaves && (
+				<div
+					class:list={[
+						"home-blinds-transition__waves waves",
+						{ hidden: !wavesEnabledOnMobile },
+						{ "md:hidden": !wavesEnabledOnDesktop },
+						{ "md:block": wavesEnabledOnDesktop },
+					]}
+					id="home-blinds-waves"
+					style="transform: translateZ(0); will-change: fill;">
+					<svg
+						class="waves"
+						xmlns="http://www.w3.org/2000/svg"
+						xmlns:xlink="http://www.w3.org/1999/xlink"
+						viewBox="0 24 150 28"
+						preserveAspectRatio="none"
+						shape-rendering="geometricPrecision"
+					>
+						<defs>
+							<path
+								id="home-blinds-gentle-wave"
+								d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v48h-352z"
+							>
+							</path>
+						</defs>
+						<g class="parallax">
+							<use
+								xlink:href="#home-blinds-gentle-wave"
+								x="48"
+								y="0"
+								class="opacity-25 fill-(--page-bg)"
+							></use>
+							<use
+								xlink:href="#home-blinds-gentle-wave"
+								x="48"
+								y="3"
+								class="opacity-50 fill-(--page-bg)"
+							></use>
+							<use
+								xlink:href="#home-blinds-gentle-wave"
+								x="48"
+								y="5"
+								class="opacity-65 fill-(--page-bg)"
+							></use>
+							<use
+								xlink:href="#home-blinds-gentle-wave"
+								x="48"
+								y="7"
+								class="opacity-75 fill-(--page-bg)"
+							></use>
+						</g>
+					</svg>
+				</div>
+			)}
+		</div>
+	)}
 
 	<script
 		type="application/json"

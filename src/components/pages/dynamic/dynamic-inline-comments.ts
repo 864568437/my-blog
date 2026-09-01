@@ -27,7 +27,9 @@ declare global {
 }
 
 /** Waline init 函数类型 */
-type WalineInit = (options: Record<string, unknown>) => { destroy: () => void } | null;
+type WalineInit = (
+	options: Record<string, unknown>,
+) => { destroy: () => void } | null;
 
 let walineModule: Promise<{ init: WalineInit }> | null = null;
 
@@ -35,7 +37,9 @@ let walineModule: Promise<{ init: WalineInit }> | null = null;
 function loadWaline(): Promise<{ init: WalineInit }> {
 	if (!walineModule) {
 		const cdnUrl = "https://unpkg.com/@waline/client@v3/dist/waline.js";
-		walineModule = import(/* @vite-ignore */ cdnUrl) as Promise<{ init: WalineInit }>;
+		walineModule = import(/* @vite-ignore */ cdnUrl) as Promise<{
+			init: WalineInit;
+		}>;
 	}
 	return walineModule;
 }

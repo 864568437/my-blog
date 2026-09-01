@@ -1,11 +1,8 @@
 <script lang="ts">
-import { onMount, tick } from "svelte";
 import { marked } from "marked";
-import {
-	showToast,
-	ensureIconify,
-} from "@/utils/editMode";
+import { onMount, tick } from "svelte";
 import { setupRepoDrafts } from "@/utils/draftHelpers";
+import { ensureIconify, showToast } from "@/utils/editMode";
 
 let {
 	filePath,
@@ -65,7 +62,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarCancel", handleSidebarCancel);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -150,7 +150,7 @@ async function handleSubmit() {
 	}
 }
 
-function insertFormat(before: string, after: string = "") {
+function insertFormat(before: string, after = "") {
 	if (!textareaEl) return;
 	const start = textareaEl.selectionStart;
 	const end = textareaEl.selectionEnd;

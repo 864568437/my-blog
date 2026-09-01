@@ -1,16 +1,16 @@
 <script lang="ts">
-import { onMount } from "svelte";
 import { marked } from "marked";
+import { onMount } from "svelte";
+import { profileConfig } from "@/config";
+import { setupRepoDrafts } from "@/utils/draftHelpers";
 import {
+	deepClone,
+	ensureIconify,
+	genId,
+	getRepoFile,
 	hasValidToken,
 	showToast,
-	ensureIconify,
-	getRepoFile,
-	genId,
-	deepClone,
 } from "@/utils/editMode";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
-import { profileConfig } from "@/config";
 
 interface MomentItem {
 	id: string;
@@ -93,7 +93,7 @@ function parseObjectFromTS(tsContent: string, startMarker: string): any | null {
 	}
 	let objStr = tsContent.substring(braceStart, idx + 1).trim();
 	objStr = stripLineComments(objStr);
-	objStr = objStr.replace(/,(\s*[\]\}])/g, "$1");
+	objStr = objStr.replace(/,(\s*[\]}])/g, "$1");
 	objStr = objStr.replace(/,(\s*)$/, "$1");
 	objStr = objStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
 	try {
@@ -119,7 +119,7 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 	}
 	let arrayStr = tsContent.substring(bracketStart + 1, idx).trim();
 	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]\}])/g, "$1");
+	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
 	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
 	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
 	try {
@@ -131,7 +131,10 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 }
 
 function parseMomentsFromTS(tsContent: string): MomentItem[] {
-	const items = parseArrayFromTS(tsContent, "export const momentsConfig: MomentItem[] = [");
+	const items = parseArrayFromTS(
+		tsContent,
+		"export const momentsConfig: MomentItem[] = [",
+	);
 	return items.map((item: any, index: number) => ({
 		id: item.id || `moment-${index}`,
 		author: item.author || "",
@@ -148,7 +151,10 @@ function parseMomentsFromTS(tsContent: string): MomentItem[] {
 }
 
 function parseMomentsCoverFromTS(tsContent: string): MomentsCover | null {
-	const obj = parseObjectFromTS(tsContent, "export const momentsCover: MomentsCover = {");
+	const obj = parseObjectFromTS(
+		tsContent,
+		"export const momentsCover: MomentsCover = {",
+	);
 	if (!obj) return null;
 	return {
 		cover_image: obj.cover_image || "",
@@ -346,7 +352,12 @@ const drafts = setupRepoDrafts({
 	getContent: () =>
 		buildMomentsConfigTS(
 			moments.filter((m) => !m._deleted),
-			{ cover_image: coverImage, cover_avatar: coverAvatar, cover_name: coverName, cover_bio: coverBio },
+			{
+				cover_image: coverImage,
+				cover_avatar: coverAvatar,
+				cover_name: coverName,
+				cover_bio: coverBio,
+			},
 			originalTS,
 		),
 	setContent: (v) => {
@@ -368,7 +379,7 @@ const drafts = setupRepoDrafts({
 	getOriginalContent: () => originalTS,
 	setOriginalContent: (v) => (originalTS = v),
 	getCommitMsg: (isEdit) =>
-		isEdit ? `chore(moments): 更新说说` : `chore(moments): 创建说说配置`,
+		isEdit ? "chore(moments): 更新说说" : "chore(moments): 创建说说配置",
 	onSubmitted: () => {
 		setTimeout(() => window.location.reload(), 1200);
 	},
@@ -396,7 +407,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarAdd", handleSidebarAdd);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -473,15 +487,20 @@ function collectFromDOM() {
 	const feed = document.getElementById("moments-feed");
 	if (!feed) return;
 
-	const coverImgEl = document.querySelector(".wx-cover-img") as HTMLImageElement | null;
+	const coverImgEl = document.querySelector(
+		".wx-cover-img",
+	) as HTMLImageElement | null;
 	if (coverImgEl) {
 		coverImage = coverImgEl.src;
 	}
-	const avatarEl = document.querySelector(".wx-avatar") as HTMLImageElement | null;
+	const avatarEl = document.querySelector(
+		".wx-avatar",
+	) as HTMLImageElement | null;
 	if (avatarEl) {
 		coverAvatar = avatarEl.src;
 	} else {
-		coverAvatar = profileConfig.avatar || "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640";
+		coverAvatar =
+			profileConfig.avatar || "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640";
 	}
 	const nameEl = document.querySelector(".wx-name");
 	if (nameEl) {
@@ -499,7 +518,9 @@ function collectFromDOM() {
 		container.querySelectorAll<HTMLElement>(".moment-card").forEach((el) => {
 			const id = el.id || "";
 			const author = el.querySelector(".user-name")?.textContent?.trim() || "";
-			const avatarEl = el.querySelector(".card-avatar img") as HTMLImageElement | null;
+			const avatarEl = el.querySelector(
+				".card-avatar img",
+			) as HTMLImageElement | null;
 			const avatar = avatarEl?.src || "";
 			const timeEl = el.querySelector("time");
 			const published = (timeEl?.getAttribute("datetime") || "").slice(0, 10);
@@ -513,7 +534,8 @@ function collectFromDOM() {
 			const imageEls = el.querySelectorAll(".card-images img");
 			const images: string[] = [];
 			imageEls.forEach((img) => {
-				const src = img.getAttribute("data-src") || img.getAttribute("src") || "";
+				const src =
+					img.getAttribute("data-src") || img.getAttribute("src") || "";
 				if (src) images.push(src);
 			});
 
@@ -590,10 +612,12 @@ async function loadRepoData() {
 			console.error("Failed to parse repo moments:", e);
 		}
 	} else {
-		originalTS = buildMomentsConfigTS(
-			moments,
-			{ cover_image: coverImage, cover_avatar: coverAvatar, cover_name: coverName, cover_bio: coverBio },
-		);
+		originalTS = buildMomentsConfigTS(moments, {
+			cover_image: coverImage,
+			cover_avatar: coverAvatar,
+			cover_name: coverName,
+			cover_bio: coverBio,
+		});
 	}
 	repoLoaded = true;
 	drafts.restoreFromDrafts();

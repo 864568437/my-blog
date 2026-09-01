@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { WalineRootComment } from "@waline/api";
 import {
 	addComment,
 	deleteComment,
@@ -6,7 +7,6 @@ import {
 	login as loginWithWaline,
 	updateComment,
 } from "@waline/api";
-import type { WalineRootComment } from "@waline/api";
 import {
 	AlertCircle,
 	Bell,
@@ -336,7 +336,8 @@ function prunePendingAgainstServer(
 			const id = (entry as { objectId?: number }).objectId;
 			if (typeof id === "number") serverIds.add(id);
 			const children = (entry as { children?: WalineRootComment[] }).children;
-			if (Array.isArray(children)) children.forEach((child) => walk(child as WalineRootComment));
+			if (Array.isArray(children))
+				children.forEach((child) => walk(child as WalineRootComment));
 		};
 		server.forEach((entry) => walk(entry));
 	}
@@ -360,7 +361,8 @@ function mergePendingIntoServer(
 			.filter((id): id is number => typeof id === "number"),
 	);
 	const extras = pending.filter(
-		(item) => typeof item.objectId === "number" && !serverIds.has(item.objectId),
+		(item) =>
+			typeof item.objectId === "number" && !serverIds.has(item.objectId),
 	);
 	if (!extras.length) return serverMessages;
 	return mergeGuestbookMessages(serverMessages, extras);
@@ -948,7 +950,10 @@ async function sendMessage(
 		messages = mergeGuestbookMessages(messages, [normalized]);
 		// 当留言被服务端判定为"待审核"时，本地缓存一份用于在刷新后继续显示，
 		// 等到下次同步发现它已经出现在已审核列表中时再自动清除。
-		if (normalized.status === "waiting" && typeof normalized.objectId === "number") {
+		if (
+			normalized.status === "waiting" &&
+			typeof normalized.objectId === "number"
+		) {
 			const pendingSnapshot = readPendingMessages();
 			const nextPending = prunePendingAgainstServer(pendingSnapshot, messages);
 			if (!nextPending.some((item) => item.objectId === normalized.objectId)) {

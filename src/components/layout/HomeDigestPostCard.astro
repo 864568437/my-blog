@@ -23,7 +23,8 @@ interface Props {
 		tags: { name: string; url: string }[];
 		description: string;
 		imageUrl: string;
-		imageReferrerPolicy: string;
+		/** 仅 "" 或 "no-referrer"：与 referrerpolicy 属性的 HTML 类型对齐 */
+		imageReferrerPolicy: "no-referrer" | "";
 		pinned: boolean;
 		password: boolean;
 	};

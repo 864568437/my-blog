@@ -1,25 +1,25 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import EditToast from "@/components/edit/EditToast.svelte";
+import { repoConfig } from "@/config/editConfig";
 import {
-	setStoredAppId,
-	setStoredPrivateKey,
+	checkProxyConfigured,
+	clearAllDrafts,
 	clearStoredCredentials,
-	hasValidCredentials,
-	validateCredentials,
-	readFileAsText,
-	showToast,
 	ensureIconify,
-	invalidateToken,
 	getDraftCount,
 	getDraftsByPage,
-	removeDraft,
-	clearAllDrafts,
-	submitAllDrafts,
+	hasValidCredentials,
+	invalidateToken,
 	onDraftsChanged,
-	checkProxyConfigured,
+	readFileAsText,
+	removeDraft,
+	setStoredAppId,
+	setStoredPrivateKey,
+	showToast,
+	submitAllDrafts,
+	validateCredentials,
 } from "@/utils/editMode";
-import { repoConfig } from "@/config/editConfig";
 
 interface PageConfig {
 	pageName: string;
@@ -29,26 +29,87 @@ interface PageConfig {
 }
 
 const inlineEditPages: PageConfig[] = [
-	{ pageName: "网站导航", pageKey: "projects", isInlineEdit: true, match: (p) => p.startsWith("/projects") },
-	{ pageName: "关于", pageKey: "about", isInlineEdit: true, match: (p) => p.startsWith("/about") },
-	{ pageName: "友链", pageKey: "friends", isInlineEdit: true, match: (p) => p.startsWith("/friends") },
-	{ pageName: "朋友圈", pageKey: "pengyou", isInlineEdit: true, match: (p) => p.startsWith("/pengyou") },
-	{ pageName: "赞助", pageKey: "sponsor", isInlineEdit: true, match: (p) => p.startsWith("/sponsor") },
-	{ pageName: "留言板", pageKey: "guestbook", isInlineEdit: true, match: (p) => p.startsWith("/guestbook") },
-	{ pageName: "日常", pageKey: "routines", isInlineEdit: true, match: (p) => p.startsWith("/life/routines") },
-	{ pageName: "足迹", pageKey: "places", isInlineEdit: true, match: (p) => p.startsWith("/life/places") },
-	{ pageName: "笔记本", pageKey: "notebooks", isInlineEdit: true, match: (p) => p.startsWith("/life/notebooks") },
-	{ pageName: "说说", pageKey: "moments", isInlineEdit: true, match: (p) => p.startsWith("/moments") },
-	{ pageName: "动态", pageKey: "dynamic", isInlineEdit: true, match: (p) => p.startsWith("/dynamic") },
-	{ pageName: "音乐", pageKey: "music", isInlineEdit: true, match: (p) => p.startsWith("/music") },
-	{ pageName: "番剧", pageKey: "bangumi", isInlineEdit: true, match: (p) => p.startsWith("/bangumi") },
+	{
+		pageName: "网站导航",
+		pageKey: "projects",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/projects"),
+	},
+	{
+		pageName: "关于",
+		pageKey: "about",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/about"),
+	},
+	{
+		pageName: "友链",
+		pageKey: "friends",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/friends"),
+	},
+	{
+		pageName: "朋友圈",
+		pageKey: "pengyou",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/pengyou"),
+	},
+	{
+		pageName: "赞助",
+		pageKey: "sponsor",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/sponsor"),
+	},
+	{
+		pageName: "留言板",
+		pageKey: "guestbook",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/guestbook"),
+	},
+	{
+		pageName: "日常",
+		pageKey: "routines",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/life/routines"),
+	},
+	{
+		pageName: "足迹",
+		pageKey: "places",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/life/places"),
+	},
+	{
+		pageName: "笔记本",
+		pageKey: "notebooks",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/life/notebooks"),
+	},
+	{
+		pageName: "说说",
+		pageKey: "moments",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/moments"),
+	},
+	{
+		pageName: "动态",
+		pageKey: "dynamic",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/dynamic"),
+	},
+	{
+		pageName: "音乐",
+		pageKey: "music",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/music"),
+	},
+	{
+		pageName: "番剧",
+		pageKey: "bangumi",
+		isInlineEdit: true,
+		match: (p) => p.startsWith("/bangumi"),
+	},
 ];
 
-const writeOnlyPaths = [
-	/^\/posts\/?$/,
-	/^\/categories\//,
-	/^\/archive\//,
-];
+const writeOnlyPaths = [/^\/posts\/?$/, /^\/categories\//, /^\/archive\//];
 
 function isPostDetailPage(path: string): boolean {
 	return /^\/posts\/.+/.test(path) && !/^\/posts\/?$/.test(path);
@@ -70,7 +131,12 @@ function getPostSlug(path: string): string {
 	return match ? match[1] : "";
 }
 
-let currentPage = $state<{ type: "inline"; config: PageConfig } | { type: "postDetail"; slug: string } | { type: "writeOnly" } | { type: "none" }>({ type: "none" });
+let currentPage = $state<
+	| { type: "inline"; config: PageConfig }
+	| { type: "postDetail"; slug: string }
+	| { type: "writeOnly" }
+	| { type: "none" }
+>({ type: "none" });
 let editMode = $state(false);
 let authed = $state(false);
 let validating = $state(false);
@@ -88,7 +154,8 @@ let unsubscribeDrafts: (() => void) | null = null;
 function updatePageConfig() {
 	const path = window.location.pathname;
 	const prevType = currentPage.type;
-	const prevKey = currentPage.type === "inline" ? currentPage.config.pageKey : "";
+	const prevKey =
+		currentPage.type === "inline" ? currentPage.config.pageKey : "";
 
 	if (isPostDetailPage(path)) {
 		currentPage = { type: "postDetail", slug: getPostSlug(path) };
@@ -103,7 +170,12 @@ function updatePageConfig() {
 		}
 	}
 
-	const newKey = currentPage.type === "inline" ? currentPage.config.pageKey : currentPage.type === "postDetail" ? "posts" : "";
+	const newKey =
+		currentPage.type === "inline"
+			? currentPage.config.pageKey
+			: currentPage.type === "postDetail"
+				? "posts"
+				: "";
 	if (editMode && newKey !== prevKey) {
 		editMode = false;
 	}
@@ -119,7 +191,8 @@ onMount(async () => {
 	authed = proxyOk || hasValidCredentials();
 
 	totalDraftCount = getDraftCount();
-	const curKey = currentPage.type === "inline" ? currentPage.config.pageKey : "";
+	const curKey =
+		currentPage.type === "inline" ? currentPage.config.pageKey : "";
 	pageDraftCount = getDraftsByPage(curKey).length;
 
 	unsubscribeDrafts = onDraftsChanged(() => {
@@ -202,7 +275,10 @@ function enterEditMode() {
 }
 
 function handleCancel() {
-	if (hasChanges && !confirm("你有未保存的更改，确定要取消吗？所有修改将丢失。")) {
+	if (
+		hasChanges &&
+		!confirm("你有未保存的更改，确定要取消吗？所有修改将丢失。")
+	) {
 		return;
 	}
 	editMode = false;
@@ -281,7 +357,10 @@ async function confirmBatchSubmit() {
 		if (result.failed === 0) {
 			showToast(`批量提交成功！共 ${result.success} 项`, "success");
 		} else {
-			showToast(`提交完成：成功 ${result.success}，失败 ${result.failed}`, "warning");
+			showToast(
+				`提交完成：成功 ${result.success}，失败 ${result.failed}`,
+				"warning",
+			);
 		}
 		if (result.submittedPageKeys.has(currentPageKey())) {
 			setTimeout(() => window.location.reload(), 1200);
@@ -344,7 +423,8 @@ async function handleKeyFileSelect(e: Event) {
 }
 
 function handleLogout() {
-	if (!confirm("确定要清除已保存的私钥吗？清除后需要重新导入才能提交。")) return;
+	if (!confirm("确定要清除已保存的私钥吗？清除后需要重新导入才能提交。"))
+		return;
 	clearStoredCredentials();
 	invalidateToken();
 	authed = false;

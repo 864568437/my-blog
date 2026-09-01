@@ -15,7 +15,7 @@
 	position: relative;
 }
 
-/* ── 椭圆段通用样式：常驻磨砂玻璃 ── */
+/* ── 椭圆段通用样式：实底面板（参考 tblog，无色相、无模糊） ── */
 .navbar-seg {
 	display: flex;
 	align-items: center;
@@ -23,11 +23,8 @@
 	flex-shrink: 0;
 	border-radius: 9999px;
 	padding: 0.25rem 0.5rem;
-	background: color-mix(in oklch, var(--float-panel-bg) 72%, transparent);
-	backdrop-filter: blur(12px) saturate(1.2);
-	-webkit-backdrop-filter: blur(12px) saturate(1.2);
+	background-color: var(--navbar-bg);
 	border: none;
-	box-shadow: 0 2px 8px color-mix(in oklch, var(--deep-text) 4%, transparent);
 	will-change: max-width, padding, border-radius, left, transform;
 	transform: translateZ(0);
 	-webkit-transform: translateZ(0);
@@ -41,17 +38,6 @@
 		border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1),
 		left 0.4s cubic-bezier(0.4, 0, 0.2, 1),
 		transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-:root.dark .navbar-seg {
-	background: color-mix(in oklch, var(--float-panel-bg) 80%, transparent);
-	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
-}
-
-/* 首页影像揭示层：亮色主题下使用半透明白色磨砂玻璃，避免透明背景叠加深色背景图 */
-html:has(.home-blinds):not(.dark) .navbar-seg {
-	background: color-mix(in oklch, var(--float-panel-bg) 72%, transparent);
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* 左段：默认贴最左 */
@@ -303,13 +289,13 @@ html:has(.home-blinds):not(.dark) .navbar-seg {
 	}
 }
 
-/* ── hover 滑动高亮指示器（无边框，纯背景） ── */
+/* ── hover 滑动高亮指示器（参考 tblog：纯黑白反色胶囊） ── */
 .navbar-hover-highlight {
 	position: absolute;
 	height: 2.25rem;
 	border-radius: 9999px;
 	border: none;
-	background-color: color-mix(in oklch, var(--deep-text) 8%, transparent);
+	background-color: var(--navbar-highlight-bg);
 	opacity: 0;
 	transition:
 		left 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -322,9 +308,10 @@ html:has(.home-blinds):not(.dark) .navbar-seg {
 	z-index: -1;
 }
 
-/* 选中态：更深一层背景 */
-.navbar-nav.nav-has-active .navbar-hover-highlight {
-	background-color: color-mix(in oklch, var(--deep-text) 12%, transparent);
+/* 悬停/选中项文字随胶囊反色（黑白互换） */
+.navbar-nav .dropdown-container.is-highlighted > a,
+.navbar-nav .dropdown-container.is-highlighted > button {
+	color: var(--navbar-highlight-text) !important;
 }
 
 .navbar-nav:hover .navbar-hover-highlight,

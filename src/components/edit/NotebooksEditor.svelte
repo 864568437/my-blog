@@ -1,14 +1,14 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { setupRepoDrafts } from "@/utils/draftHelpers";
 import {
+	deepClone,
+	ensureIconify,
+	genId,
+	getRepoFile,
 	hasValidToken,
 	showToast,
-	ensureIconify,
-	getRepoFile,
-	genId,
-	deepClone,
 } from "@/utils/editMode";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
 
 interface NotebookFolder {
 	slug: string;
@@ -94,7 +94,7 @@ function parseObjectFromTS(tsContent: string, startMarker: string): any | null {
 	}
 	let objStr = tsContent.substring(braceStart, idx + 1).trim();
 	objStr = stripLineComments(objStr);
-	objStr = objStr.replace(/,(\s*[\]\}])/g, "$1");
+	objStr = objStr.replace(/,(\s*[\]}])/g, "$1");
 	objStr = objStr.replace(/,(\s*)$/, "$1");
 	objStr = objStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
 	try {
@@ -120,7 +120,7 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 	}
 	let arrayStr = tsContent.substring(bracketStart + 1, idx).trim();
 	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]\}])/g, "$1");
+	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
 	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
 	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
 	try {
@@ -132,7 +132,10 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 }
 
 function parseFoldersFromTS(tsContent: string): NotebookFolder[] {
-	const items = parseArrayFromTS(tsContent, "export const notebookFolders: NotebookFolder[] = [");
+	const items = parseArrayFromTS(
+		tsContent,
+		"export const notebookFolders: NotebookFolder[] = [",
+	);
 	return items.map((item: any, index: number) => ({
 		slug: item.slug || `folder-${index}`,
 		name: item.name || "未命名笔记本",
@@ -144,7 +147,10 @@ function parseFoldersFromTS(tsContent: string): NotebookFolder[] {
 }
 
 function parseNotesFromTS(tsContent: string): NotebookNote[] {
-	const items = parseArrayFromTS(tsContent, "export const notebookNotes: NotebookNote[] = [");
+	const items = parseArrayFromTS(
+		tsContent,
+		"export const notebookNotes: NotebookNote[] = [",
+	);
 	return items.map((item: any, index: number) => ({
 		id: item.id || `note-${index}`,
 		folder: item.folder || "",
@@ -362,7 +368,9 @@ const drafts = setupRepoDrafts({
 	getOriginalContent: () => originalTS,
 	setOriginalContent: (v) => (originalTS = v),
 	getCommitMsg: (isEdit) =>
-		isEdit ? `chore(notebooks): 更新笔记本` : `chore(notebooks): 创建笔记本配置`,
+		isEdit
+			? "chore(notebooks): 更新笔记本"
+			: "chore(notebooks): 创建笔记本配置",
 	onSubmitted: () => {
 		setTimeout(() => window.location.reload(), 1200);
 	},
@@ -390,7 +398,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarAdd", handleSidebarAdd);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -442,17 +453,33 @@ function collectFromDOM() {
 	const cards = grid.querySelectorAll(".diary-notebook, [data-notebook-item]");
 
 	cards.forEach((el) => {
-		const name = el.querySelector(".diary-cover-name, h3, .notebook-name")?.textContent?.trim() || "未命名";
-		const summary = el.querySelector(".diary-cover-desc, .notebook-summary")?.textContent?.trim() || "";
-		const img = el.querySelector(".diary-cover-img, img") as HTMLImageElement | null;
+		const name =
+			el
+				.querySelector(".diary-cover-name, h3, .notebook-name")
+				?.textContent?.trim() || "未命名";
+		const summary =
+			el
+				.querySelector(".diary-cover-desc, .notebook-summary")
+				?.textContent?.trim() || "";
+		const img = el.querySelector(
+			".diary-cover-img, img",
+		) as HTMLImageElement | null;
 		const cover = img?.src || "";
 		const link = el.querySelector("a")?.getAttribute("href") || "";
 		const folderMatch = link.match(/\/life\/notebooks\/([^/]+)\//);
-		const slug = folderMatch ? folderMatch[1] : name.toLowerCase().replace(/\s+/g, "-");
-		const entriesText = el.querySelector(".diary-cover-meta, .entries-count")?.textContent?.trim() || "";
+		const slug = folderMatch
+			? folderMatch[1]
+			: name.toLowerCase().replace(/\s+/g, "-");
+		const entriesText =
+			el
+				.querySelector(".diary-cover-meta, .entries-count")
+				?.textContent?.trim() || "";
 		const entriesMatch = entriesText.match(/(\d+)/);
-		const entries = entriesMatch ? parseInt(entriesMatch[1]) : 0;
-		const dateText = el.querySelector(".diary-notebook-footer span, .updated-at")?.textContent?.trim() || "";
+		const entries = entriesMatch ? Number.parseInt(entriesMatch[1]) : 0;
+		const dateText =
+			el
+				.querySelector(".diary-notebook-footer span, .updated-at")
+				?.textContent?.trim() || "";
 
 		result.push({
 			slug: slug || genId("nb"),
@@ -474,7 +501,9 @@ async function loadRepoData() {
 	const existing = await getRepoFile("src/config/notebooksConfig.ts");
 	if (existing && existing.content) {
 		try {
-			const repoFolders: NotebookFolder[] = parseFoldersFromTS(existing.content);
+			const repoFolders: NotebookFolder[] = parseFoldersFromTS(
+				existing.content,
+			);
 			const repoNotes: NotebookNote[] = parseNotesFromTS(existing.content);
 			originalTS = existing.content;
 			fileSha = existing.sha || null;
@@ -514,11 +543,7 @@ async function loadRepoData() {
 }
 
 function hideSSRContent() {
-	const selectors = [
-		".diary-grid",
-		".diary-empty",
-		"[data-notebooks-grid]",
-	];
+	const selectors = [".diary-grid", ".diary-empty", "[data-notebooks-grid]"];
 	selectors.forEach((sel) => {
 		document.querySelectorAll<HTMLElement>(sel).forEach((el) => {
 			el.style.display = "none";
@@ -527,11 +552,7 @@ function hideSSRContent() {
 }
 
 function showSSRContent() {
-	const selectors = [
-		".diary-grid",
-		".diary-empty",
-		"[data-notebooks-grid]",
-	];
+	const selectors = [".diary-grid", ".diary-empty", "[data-notebooks-grid]"];
 	selectors.forEach((sel) => {
 		document.querySelectorAll<HTMLElement>(sel).forEach((el) => {
 			el.style.display = "";
@@ -611,7 +632,9 @@ function openAddNoteModal(folderSlug: string) {
 }
 
 function openEditNoteModal(index: number, folderSlug: string) {
-	const folderNotes = notes.filter((n) => !n._deleted && n.folder === folderSlug);
+	const folderNotes = notes.filter(
+		(n) => !n._deleted && n.folder === folderSlug,
+	);
 	const item = folderNotes[index];
 	if (!item) return;
 	const realIndex = notes.findIndex((n) => n.id === item.id);
@@ -701,7 +724,8 @@ function deleteFolder(index: number) {
 	const realIndex = folders.findIndex((f) => f.slug === item.slug);
 	if (realIndex < 0) return;
 
-	if (!confirm(`确定要删除「${item.name}」吗？该分类下的所有笔记也将被删除。`)) return;
+	if (!confirm(`确定要删除「${item.name}」吗？该分类下的所有笔记也将被删除。`))
+		return;
 
 	if (item._draft) {
 		folders = folders.filter((_, i) => i !== realIndex);
@@ -728,7 +752,9 @@ function restoreFolder(index: number) {
 }
 
 function deleteNote(index: number, folderSlug: string) {
-	const folderNotes = notes.filter((n) => !n._deleted && n.folder === folderSlug);
+	const folderNotes = notes.filter(
+		(n) => !n._deleted && n.folder === folderSlug,
+	);
 	const item = folderNotes[index];
 	if (!item) return;
 	const realIndex = notes.findIndex((n) => n.id === item.id);
@@ -773,9 +799,7 @@ function updateNotePreview(content: string) {
 function getNotesForFolder(folderSlug: string): NotebookNote[] {
 	return notes
 		.filter((n) => !n._deleted && n.folder === folderSlug)
-		.sort(
-			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-		);
+		.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 function handleSaveDraft() {

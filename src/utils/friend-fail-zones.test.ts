@@ -4,9 +4,14 @@
  *
  * 也可纯 Node 跑（无 tsx 时手动改后缀 .mjs 并删 import type 注解）
  */
-import { describe, it } from "node:test";
+
 import assert from "node:assert/strict";
-import { inRange, groupByFailCount, partitionAll } from "./friend-fail-zones.ts";
+import { describe, it } from "node:test";
+import {
+	groupByFailCount,
+	inRange,
+	partitionAll,
+} from "./friend-fail-zones.ts";
 
 describe("inRange", () => {
 	it("returns true for n inside [min, max] (inclusive)", () => {
@@ -26,34 +31,58 @@ describe("inRange", () => {
 });
 
 describe("groupByFailCount", () => {
-	const ranges = { failWindow: [1, 6] as [number, number], tombstone: [7, 9999] as [number, number] };
+	const ranges = {
+		failWindow: [1, 6] as [number, number],
+		tombstone: [7, 9999] as [number, number],
+	};
 	const list = [
-		{ name: "a-ok",     link: "https://a/", fail_count: 0 },
-		{ name: "b-1",      link: "https://b/", fail_count: 1 },
-		{ name: "c-6",      link: "https://c/", fail_count: 6 },
-		{ name: "d-7",      link: "https://d/", fail_count: 7 },
-		{ name: "e-15",     link: "https://e/", fail_count: 15 },
-		{ name: "f-2",      link: "https://f/", fail_count: 2 },
+		{ name: "a-ok", link: "https://a/", fail_count: 0 },
+		{ name: "b-1", link: "https://b/", fail_count: 1 },
+		{ name: "c-6", link: "https://c/", fail_count: 6 },
+		{ name: "d-7", link: "https://d/", fail_count: 7 },
+		{ name: "e-15", link: "https://e/", fail_count: 15 },
+		{ name: "f-2", link: "https://f/", fail_count: 2 },
 	];
 
 	it("separates fail_window vs tombstone by fail_count", () => {
 		const { failWindow, tombstone } = groupByFailCount(list, ranges);
-		assert.equal(failWindow.map((x) => x.name).sort().join(","), "b-1,c-6,f-2");
-		assert.equal(tombstone.map((x) => x.name).sort().join(","), "d-7,e-15");
+		assert.equal(
+			failWindow
+				.map((x) => x.name)
+				.sort()
+				.join(","),
+			"b-1,c-6,f-2",
+		);
+		assert.equal(
+			tombstone
+				.map((x) => x.name)
+				.sort()
+				.join(","),
+			"d-7,e-15",
+		);
 	});
 	it("excludes fail_count = 0 from both buckets", () => {
 		const { failWindow, tombstone } = groupByFailCount(list, ranges);
-		assert.equal([...failWindow, ...tombstone].some((x) => x.name === "a-ok"), false);
+		assert.equal(
+			[...failWindow, ...tombstone].some((x) => x.name === "a-ok"),
+			false,
+		);
 	});
 	it("sorts each bucket by fail_count desc", () => {
 		const { failWindow, tombstone } = groupByFailCount(list, ranges);
-		assert.deepEqual(failWindow.map((x) => x.fail_count), [6, 2, 1]);
-		assert.deepEqual(tombstone.map((x) => x.fail_count), [15, 7]);
+		assert.deepEqual(
+			failWindow.map((x) => x.fail_count),
+			[6, 2, 1],
+		);
+		assert.deepEqual(
+			tombstone.map((x) => x.fail_count),
+			[15, 7],
+		);
 	});
 	it("treats missing fail_count as 0", () => {
 		const { failWindow, tombstone } = groupByFailCount(
 			[{ name: "x", link: "https://x/" } as any],
-			ranges
+			ranges,
 		);
 		assert.equal(failWindow.length, 0);
 		assert.equal(tombstone.length, 0);
@@ -71,7 +100,10 @@ describe("groupByFailCount", () => {
 });
 
 describe("partitionAll (three zones, mutually exclusive)", () => {
-	const ranges = { failWindow: [1, 6] as [number, number], tombstone: [7, 9999] as [number, number] };
+	const ranges = {
+		failWindow: [1, 6] as [number, number],
+		tombstone: [7, 9999] as [number, number],
+	};
 	const friends = [
 		{ name: "A", link: "https://a.com" },
 		{ name: "B", link: "https://b.com" },
@@ -88,7 +120,11 @@ describe("partitionAll (three zones, mutually exclusive)", () => {
 	]);
 
 	it("partitions each friend into exactly one zone", () => {
-		const { normal, failWindow, tombstone } = partitionAll(friends, failMap, ranges);
+		const { normal, failWindow, tombstone } = partitionAll(
+			friends,
+			failMap,
+			ranges,
+		);
 		const total = normal.length + failWindow.length + tombstone.length;
 		assert.equal(total, friends.length);
 		assert.deepEqual(normal.map((x) => x.name).sort(), ["A"]);
@@ -96,7 +132,11 @@ describe("partitionAll (three zones, mutually exclusive)", () => {
 		assert.deepEqual(tombstone.map((x) => x.name).sort(), ["D", "E"]);
 	});
 	it("zero fail_count → normal zone", () => {
-		const { normal, failWindow, tombstone } = partitionAll(friends, failMap, ranges);
+		const { normal, failWindow, tombstone } = partitionAll(
+			friends,
+			failMap,
+			ranges,
+		);
 		assert.ok(normal.every((x) => (x.fail_count || 0) === 0));
 		assert.equal(failWindow.length + tombstone.length, 4);
 	});
@@ -104,17 +144,23 @@ describe("partitionAll (three zones, mutually exclusive)", () => {
 		const { normal, failWindow, tombstone } = partitionAll(
 			[{ name: "X", link: "https://x.com" }],
 			new Map(),
-			ranges
+			ranges,
 		);
-		assert.deepEqual(normal.map((x) => x.name), ["X"]);
+		assert.deepEqual(
+			normal.map((x) => x.name),
+			["X"],
+		);
 		assert.equal(failWindow.length, 0);
 		assert.equal(tombstone.length, 0);
 	});
 	it("accepts plain object failMap (not just Map)", () => {
 		const { failWindow, tombstone } = partitionAll(
-			[{ name: "B", link: "https://b.com" }, { name: "D", link: "https://d.com" }],
+			[
+				{ name: "B", link: "https://b.com" },
+				{ name: "D", link: "https://d.com" },
+			],
 			{ "https://b.com": 3, "https://d.com": 9 } as any,
-			ranges
+			ranges,
 		);
 		assert.equal(failWindow.length, 1);
 		assert.equal(tombstone.length, 1);
@@ -123,13 +169,19 @@ describe("partitionAll (three zones, mutually exclusive)", () => {
 		const { failWindow } = partitionAll(
 			[{ name: "B", link: "https://b.com/" }],
 			new Map([["https://b.com", 3]]),
-			ranges
+			ranges,
 		);
 		assert.equal(failWindow.length, 1);
 	});
 	it("tags each item with its fail_count (sorted desc)", () => {
 		const { failWindow, tombstone } = partitionAll(friends, failMap, ranges);
-		assert.deepEqual(failWindow.map((x) => x.fail_count), [6, 3]); // 降序
-		assert.deepEqual(tombstone.map((x) => x.fail_count), [15, 7]); // 降序
+		assert.deepEqual(
+			failWindow.map((x) => x.fail_count),
+			[6, 3],
+		); // 降序
+		assert.deepEqual(
+			tombstone.map((x) => x.fail_count),
+			[15, 7],
+		); // 降序
 	});
 });

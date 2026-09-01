@@ -139,6 +139,11 @@ function pathMatches(currentPath: string, href: string): boolean {
 }
 
 function moveHighlight(navContainer: HTMLElement, hoverBorder: HTMLElement, item: HTMLElement | null) {
+	// is-highlighted 驱动文字反色：胶囊滑到哪一项，哪一项文字变成高亮色
+	navContainer.querySelectorAll<HTMLElement>(":scope > .dropdown-container").forEach((navItem) => {
+		navItem.classList.toggle("is-highlighted", navItem === item);
+	});
+
 	if (!item) {
 		hoverBorder.style.opacity = '0';
 		return;

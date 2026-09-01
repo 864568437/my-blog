@@ -1,7 +1,7 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
-import { getCategoryUrl, getTagUrl, getPostUrlBySlug } from "@utils/url-utils";
+import { getCategoryUrl, getPostUrlBySlug, getTagUrl } from "@utils/url-utils";
 import { siteConfig } from "@/config";
 import { getEnabledMoments } from "@/config/momentsConfig";
 import { buildTagGraphData, type TagGraphData } from "@/utils/tag-graph-data";

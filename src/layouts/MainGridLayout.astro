@@ -4,13 +4,13 @@ import Live2DWidget from "@components/features/Live2DWidget.astro";
 import SpineModel from "@components/features/SpineModel.astro";
 import Footer from "@components/layout/Footer.astro";
 import Navbar from "@components/layout/Navbar.astro";
+import NavMenuPanel from "@components/layout/NavMenuPanel.astro";
 import SideBar from "@components/layout/SideBar.astro";
 import type { MarkdownHeading } from "astro";
 import { Icon } from "astro-icon/components";
 import ImageWrapper from "@/components/common/ImageWrapper.astro";
 import FloatingDock from "@/components/controls/FloatingDock.astro";
 import ScrollDownIndicator from "@/components/controls/ScrollDownIndicator.astro";
-import NavMenuPanel from "@components/layout/NavMenuPanel.astro";
 import {
 	backgroundWallpaper,
 	live2dModelConfig,
@@ -132,10 +132,7 @@ const showBannerPostMeta =
 const showBannerDim = shouldRenderBannerOverlays;
 
 const showBannerPageTitle =
-	shouldRenderBannerOverlays &&
-	!isHomePageCheck &&
-	!isPostPage &&
-	!!title;
+	shouldRenderBannerOverlays && !isHomePageCheck && !isPostPage && !!title;
 // 手机端非首页不显示banner的CSS类
 const mobileNonHomeBannerClass = !isHomePageCheck ? "mobile-hide-banner" : "";
 

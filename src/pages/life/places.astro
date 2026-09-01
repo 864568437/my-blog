@@ -1,39 +1,46 @@
 ---
 import { Icon } from "astro-icon/components";
-import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import PageHeader from "@/components/common/PageHeader.astro";
 import PlacesEditor from "@/components/edit/PlacesEditor.svelte";
 import {
 	getEnabledPlaces,
-	getTotalVisitCount,
 	getThisYearVisitCount,
+	getTotalVisitCount,
 } from "@/config/placesConfig";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
 
 const sortedPlaces = getEnabledPlaces();
 
 const totalVisitCount = getTotalVisitCount(sortedPlaces);
 const thisYearVisitCount = getThisYearVisitCount(sortedPlaces);
 
-const MARKER_PRESETS = ['ocean', 'sunset', 'violet', 'forest', 'amber', 'citrus'];
+const MARKER_PRESETS = [
+	"ocean",
+	"sunset",
+	"violet",
+	"forest",
+	"amber",
+	"citrus",
+];
 
 const footprintLocations = sortedPlaces
 	.filter((p) => p.lat && p.lng)
 	.map((p, i) => ({
-		name: [p.province, p.city].filter(Boolean).join(' · ') || '未命名地点',
+		name: [p.province, p.city].filter(Boolean).join(" · ") || "未命名地点",
 		coordinates: `${p.lng},${p.lat}`,
-		date: p.date || '',
-		description: p.experience || '',
-		url: p.url || '',
-		urlLabel: p.urlLabel || '查看相关内容',
-		photos: (p.photos && p.photos.length > 0) ? p.photos : [],
-		categories: (p.tags && p.tags.length > 0) ? p.tags : ['去过'],
+		date: p.date || "",
+		description: p.experience || "",
+		url: p.url || "",
+		urlLabel: p.urlLabel || "查看相关内容",
+		photos: p.photos && p.photos.length > 0 ? p.photos : [],
+		categories: p.tags && p.tags.length > 0 ? p.tags : ["去过"],
 		markerColor: MARKER_PRESETS[i % MARKER_PRESETS.length],
 		visitCount: p.visitCount || 1,
 	}));
 
 const footprintData = JSON.stringify({ locations: footprintLocations });
 
-const AMAP_KEY = 'ffc18bba47161a9b5f20dd2bdb80b6fc';
+const AMAP_KEY = "ffc18bba47161a9b5f20dd2bdb80b6fc";
 ---
 
 <MainGridLayout title='去过的地方' description='足迹地图与旅行记录'>

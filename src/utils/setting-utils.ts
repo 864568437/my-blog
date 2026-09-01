@@ -382,7 +382,10 @@ function showBannerMode() {
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
 		// 移除其他模式类
-		wallpaperWrapper.classList.remove("wallpaper-overlay", "wallpaper-fullscreen");
+		wallpaperWrapper.classList.remove(
+			"wallpaper-overlay",
+			"wallpaper-fullscreen",
+		);
 
 		// 恢复 banner 模式的 top 定位
 		wallpaperWrapper.style.top = `-${BANNER_HEIGHT_EXTEND}vh`;
@@ -443,7 +446,9 @@ function showBannerMode() {
 	// 调整主内容位置
 	if (isHomeForBanner) {
 		// 首页：主内容从顶部开始（因为用影像揭示层）
-		const mainContent = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement;
+		const mainContent = document.querySelector(
+			".w-full.z-30.pointer-events-none",
+		) as HTMLElement;
 		if (mainContent) {
 			mainContent.classList.add("no-banner-layout");
 			mainContent.style.position = "";
@@ -456,7 +461,9 @@ function showBannerMode() {
 	}
 
 	// 处理移动端非首页主内容区域位置
-	const mainContentWrapper = document.querySelector(".w-full.z-30.pointer-events-none");
+	const mainContentWrapper = document.querySelector(
+		".w-full.z-30.pointer-events-none",
+	);
 	if (mainContentWrapper && !isHomeForBanner) {
 		const isMobile = window.innerWidth < 1024;
 		// 只在移动端非首页时调整主内容位置
@@ -540,7 +547,9 @@ function showOverlayMode() {
 	// 调整布局
 	if (isHomeForOverlay) {
 		// 首页：主内容从顶部开始（因为用影像揭示层）
-		const mainContent = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement;
+		const mainContent = document.querySelector(
+			".w-full.z-30.pointer-events-none",
+		) as HTMLElement;
 		if (mainContent) {
 			mainContent.classList.add("no-banner-layout");
 			mainContent.style.position = "";
@@ -556,7 +565,10 @@ function showOverlayMode() {
 
 function showFullscreenMode() {
 	// 首页时不显示 wallpaper-wrapper（首页用影像揭示层作为主视觉，不依赖壁纸）
-	const isHomeForFullscreenWallpaper = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
+	const isHomeForFullscreenWallpaper =
+		window.location.pathname === "/" ||
+		window.location.pathname === "" ||
+		window.location.pathname.endsWith("/index.html");
 	// 全屏壁纸模式：壁纸铺满全屏，内容正常显示（不透明）
 	const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
 	if (wallpaperWrapper) {
@@ -591,7 +603,10 @@ function showFullscreenMode() {
 	// 显示横幅首页文本（如果是首页且启用）
 	const bannerTextOverlay = document.querySelector(".banner-home-text-overlay");
 	if (bannerTextOverlay) {
-		const isHome = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
+		const isHome =
+			window.location.pathname === "/" ||
+			window.location.pathname === "" ||
+			window.location.pathname.endsWith("/index.html");
 		if (isHome) {
 			bannerTextOverlay.classList.remove("hidden");
 		} else {
@@ -718,11 +733,14 @@ function adjustMainContentPosition(
 			mainContent.style.marginTop = "";
 			mainContent.style.top = "5.5rem";
 			break;
-		case "fullscreen":
+		case "fullscreen": {
 			mainContent.classList.add("no-banner-layout");
 			// 首页时使用 absolute 定位以保证 HomeHero 正常全宽破出
 			// 非首页时使用 relative 避免与全屏壁纸重叠
-			const isHomeForFullscreen = window.location.pathname === "/" || window.location.pathname === "" || window.location.pathname.endsWith("/index.html");
+			const isHomeForFullscreen =
+				window.location.pathname === "/" ||
+				window.location.pathname === "" ||
+				window.location.pathname.endsWith("/index.html");
 			if (isHomeForFullscreen) {
 				mainContent.style.position = "";
 				mainContent.style.zIndex = "";
@@ -735,6 +753,7 @@ function adjustMainContentPosition(
 				mainContent.style.marginTop = "1rem";
 			}
 			break;
+		}
 		case "none":
 			// 无壁纸模式：主内容从导航栏下方开始
 			mainContent.classList.add("no-banner-layout");
@@ -753,7 +772,9 @@ function adjustMainContentPosition(
 }
 
 function adjustMainContentTransparency(enable: boolean) {
-	const mainContent = document.querySelector(".w-full.z-30.pointer-events-none");
+	const mainContent = document.querySelector(
+		".w-full.z-30.pointer-events-none",
+	);
 	const body = document.body;
 
 	if (!mainContent || !body) return;
@@ -980,7 +1001,10 @@ export function applyGradientEnabledToDocument(enabled: boolean): void {
 		return;
 	}
 	// 更新 html 属性，CSS 会立即生效
-	document.documentElement.setAttribute("data-gradient-enabled", String(enabled));
+	document.documentElement.setAttribute(
+		"data-gradient-enabled",
+		String(enabled),
+	);
 	// 同时更新元素样式（兼容性）
 	const gradientElement = document.getElementById("wallpaper-gradient");
 	if (gradientElement) {
@@ -1083,9 +1107,7 @@ export function getStoredOverlayCardOpacity(): number {
 		return getDefaultOverlayCardOpacity();
 	}
 	const stored = localStorage.getItem("overlayCardOpacity");
-	return stored
-		? Number.parseInt(stored, 10)
-		: getDefaultOverlayCardOpacity();
+	return stored ? Number.parseInt(stored, 10) : getDefaultOverlayCardOpacity();
 }
 
 export function setOverlayCardOpacity(opacity: number): void {
@@ -1119,7 +1141,9 @@ export function getStoredTextGlowStrength(): number {
 	const stored = localStorage.getItem("textGlowStrength");
 	if (stored === null) return getDefaultTextGlowStrength();
 	const parsed = Number.parseFloat(stored);
-	return Number.isFinite(parsed) ? Math.max(0, Math.min(1, parsed)) : getDefaultTextGlowStrength();
+	return Number.isFinite(parsed)
+		? Math.max(0, Math.min(1, parsed))
+		: getDefaultTextGlowStrength();
 }
 
 export function setTextGlowStrength(strength: number): void {

@@ -1,4 +1,5 @@
 ---
+import MainGridLayout from "@layouts/MainGridLayout.astro";
 /**
  * /dynamic/ 动态页面入口
  * --------------------------------------------------------------
@@ -35,12 +36,11 @@
  *         读取 JSON 的逻辑才能生效（当前 API 端点仅读取 markdown）。
  */
 import { Icon } from "astro-icon/components";
+import PageHeader from "@/components/common/PageHeader.astro";
+import DynamicEditor from "@/components/edit/DynamicEditor.svelte";
 import DynamicFeed from "@/components/pages/dynamic/DynamicFeed.svelte";
 import DynamicItemTemplate from "@/components/pages/dynamic/DynamicItemTemplate.astro";
-import DynamicEditor from "@/components/edit/DynamicEditor.svelte";
-import PageHeader from "@/components/common/PageHeader.astro";
-import MainGridLayout from "@layouts/MainGridLayout.astro";
-import { dynamicConfig, commentConfig } from "@/config";
+import { commentConfig, dynamicConfig } from "@/config";
 import { url } from "@/utils/url-utils";
 import "@/styles/dynamic.css";
 
@@ -55,25 +55,26 @@ const itemsPerPage = Math.max(1, dynamicConfig.itemsPerPage ?? 10);
 // 配置了非 'none' 的评论系统时启用。供 DynamicFeed 渲染 dynamic-inline-comments 节点
 const showInlineComments = Boolean(
 	dynamicConfig.showComment !== false &&
-	commentConfig.type &&
-	commentConfig.type !== "none",
+		commentConfig.type &&
+		commentConfig.type !== "none",
 );
 
 // Waline 配置（注入到 window.__WALINE_CONFIG__ 供客户端自定义元素读取）
-const walineConfig = showInlineComments && commentConfig.type === "waline"
-	? {
-			serverURL: commentConfig.waline?.serverURL || "",
-			lang: commentConfig.waline?.lang || "zh-CN",
-			emoji: commentConfig.waline?.emoji,
-			login: commentConfig.waline?.login || "enable",
-			dark: "html.dark",
-			wordLimit: ["2", "300"],
-			pageview: commentConfig.waline?.visitorCount || false,
-			// 图床上传配置（用于构造 imageUploader，解除默认 128KB 限制）
-			imageUploadURL: commentConfig.waline?.imageUploadURL || "",
-			imageUploadToken: commentConfig.waline?.imageUploadToken || "",
-		}
-	: null;
+const walineConfig =
+	showInlineComments && commentConfig.type === "waline"
+		? {
+				serverURL: commentConfig.waline?.serverURL || "",
+				lang: commentConfig.waline?.lang || "zh-CN",
+				emoji: commentConfig.waline?.emoji,
+				login: commentConfig.waline?.login || "enable",
+				dark: "html.dark",
+				wordLimit: ["2", "300"],
+				pageview: commentConfig.waline?.visitorCount || false,
+				// 图床上传配置（用于构造 imageUploader，解除默认 128KB 限制）
+				imageUploadURL: commentConfig.waline?.imageUploadURL || "",
+				imageUploadToken: commentConfig.waline?.imageUploadToken || "",
+			}
+		: null;
 
 // 动态数据源 URL：
 //   - 若 apiUrl 以 http 开头（外部 Memos 等 API），直接使用；

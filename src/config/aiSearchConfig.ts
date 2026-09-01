@@ -17,8 +17,6 @@ export const aiSearchConfig = {
 	/** AI 头像路径 */
 	aiAvatar: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
 
-
-
 	/** 建议问题 */
 	suggestions: ["博客的技术栈是什么？", "介绍一下自己"],
 

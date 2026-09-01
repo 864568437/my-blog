@@ -10,7 +10,9 @@
 import { friendsPageConfig } from "@/config";
 
 const cfg = friendsPageConfig.failZones || {};
-const contactLink = cfg.contactLink || "https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml";
+const contactLink =
+	cfg.contactLink ||
+	"https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml";
 ---
 
 <section id="friend-fail-tombstone" class="friend-zone hidden" aria-label="友链墓碑">

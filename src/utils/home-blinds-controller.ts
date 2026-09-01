@@ -37,11 +37,17 @@ type SetupContext = {
 /**
  * 固定舞台的可视阶段。
  * reveal = 全屏背景 + 透明前景；shrink = 全屏背景收缩成首幕图框；
- * scenes = 横向影像层；done = 影像层已滚过，舞台整体隐藏。
+ * scenes = 横向影像层（尾段为终幕放大）；done = 影像层已滚过，舞台整体隐藏。
  * 视口缩放会触发 ScrollTrigger.refresh()，而 onEnter/onLeave 这类回调在
  * refresh 时不会补发，所以阶段必须能随时从滚动位置反推出来（见 resolvePhase）。
  */
 type StagePhase = "reveal" | "shrink" | "scenes" | "done";
+
+/**
+ * 横移在 pin 进度到达该值时走完（最后一幕居中），
+ * 剩下的尾段全部留给「终幕从图框放大到全屏」的 scrub 动画。
+ */
+const FINALE_ENTER_PROGRESS = 0.82;
 
 const DESKTOP_MEDIA_QUERY = "(min-width: 769px)";
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -740,6 +746,21 @@ function setupScenes(context: SetupContext) {
 		root,
 		"[data-scenes-portal-edge]",
 	);
+	// 终幕放大层：最后一幕从图框放大回全屏，几何算法与 portal 收缩完全互逆。
+	// 挂在根层级（root 直下、section 之外），保证恒为视口 fixed 不被 pin 影响
+	const finalePortal = selectRequired<HTMLElement>(
+		root,
+		"[data-finale-portal]",
+	);
+	const finaleImage = selectRequired<HTMLImageElement>(
+		finalePortal,
+		"[data-finale-image]",
+	);
+	// 衔接过渡带（水波纹 / 渐变）：终幕放大尾段淡入，让全屏终幕与下方内容区衔接；
+	// 未配置任何过渡效果时该节点不存在，用可选查询避免整层搭建失败
+	const transitionBand = root.querySelector<HTMLElement>(
+		"[data-home-blinds-transition]",
+	);
 	const stage = selectRequired<HTMLElement>(root, "[data-blinds-stage]");
 	const stageBackground = selectRequired<HTMLImageElement>(
 		stage,
@@ -757,7 +778,8 @@ function setupScenes(context: SetupContext) {
 	);
 	// 迁移自 HomeHero 的身份信息层：与入场标题共用揭示阶段的显示窗口。
 	// 未启用 hero 配置时该节点不存在，用可选查询避免整层搭建失败。
-	const stageHeroWindow = stage.querySelector<HTMLElement>("[data-hero-window]");
+	const stageHeroWindow =
+		stage.querySelector<HTMLElement>("[data-hero-window]");
 	const scenes = Array.from(
 		section.querySelectorAll<HTMLElement>("[data-home-blinds-scene]"),
 	).map(collectScene);
@@ -828,6 +850,8 @@ function setupScenes(context: SetupContext) {
 	let cachedSceneStep = 0;
 	// 过渡层收缩的终点缩放比 = 图框 cover 缩放 / 视口 cover 缩放
 	let cachedPortalScale = 1;
+	// 终幕放大的起点缩放比：算法与 portal 相同，但图片是最后一幕，长宽比可能不同
+	let cachedFinaleScale = 1;
 	/** 把图片按 cover 铺满给定框所需的缩放比 */
 	const coverScale = (boxWidth: number, boxHeight: number) =>
 		Math.max(
@@ -848,14 +872,33 @@ function setupScenes(context: SetupContext) {
 		// 起点 scale=1 精确等于视口 cover，终点等于图框 cover，两端分别与 reveal 层
 		// 背景、首幕图框重合。等比缩放对任意长宽比都成立，无边界条件。
 		// 居中一律要写，自然尺寸没就绪时也得先摆正（此时尺寸走 CSS 的 100vw/100vh 兜底）
+		const viewportCover = coverScale(window.innerWidth, window.innerHeight);
+		const frameCoverRatio = Math.max(
+			cachedSceneWidth / finaleImage.naturalWidth,
+			cachedSceneHeight / finaleImage.naturalHeight,
+		);
 		gsap.set(portalImage, { xPercent: -50, yPercent: -50 });
 		if (portalImage.naturalWidth > 0 && portalImage.naturalHeight > 0) {
-			const viewportCover = coverScale(window.innerWidth, window.innerHeight);
 			const frameCover = coverScale(cachedSceneWidth, cachedSceneHeight);
 			cachedPortalScale = frameCover / viewportCover;
 			gsap.set(portalImage, {
 				width: portalImage.naturalWidth * viewportCover,
 				height: portalImage.naturalHeight * viewportCover,
+			});
+		}
+		// 终幕层与过渡层同一套几何：显式渲染尺寸 + 等比 scale，方向相反。
+		// 视口 cover 必须用终幕图自身的长宽比算：复用 portal 的比值时，
+		// 两张图长宽比不同会导致放大终点盖不满视口（左右露底）。
+		gsap.set(finaleImage, { xPercent: -50, yPercent: -50 });
+		if (finaleImage.naturalWidth > 0 && finaleImage.naturalHeight > 0) {
+			const finaleViewportCover = Math.max(
+				window.innerWidth / finaleImage.naturalWidth,
+				window.innerHeight / finaleImage.naturalHeight,
+			);
+			cachedFinaleScale = frameCoverRatio / finaleViewportCover;
+			gsap.set(finaleImage, {
+				width: finaleImage.naturalWidth * finaleViewportCover,
+				height: finaleImage.naturalHeight * finaleViewportCover,
 			});
 		}
 		// 边框只按图框布局尺寸定位，全程不参与缩放
@@ -869,15 +912,27 @@ function setupScenes(context: SetupContext) {
 	measureScene();
 	// 首次测量时图片可能尚未解码，naturalWidth 为 0、上面那个分支会被跳过；
 	// 就绪后补量一次，并让 ScrollTrigger 按新几何重算收缩终点。
-	if (!portalImage.complete || portalImage.naturalWidth === 0) {
-		portalImage.addEventListener(
-			"load",
-			() => {
-				measureScene();
-				ScrollTrigger.refresh();
-			},
-			{ once: true, signal },
-		);
+	if (
+		!portalImage.complete ||
+		portalImage.naturalWidth === 0 ||
+		!finaleImage.complete ||
+		finaleImage.naturalWidth === 0
+	) {
+		const pendingImages: HTMLImageElement[] = [];
+		if (!portalImage.complete || portalImage.naturalWidth === 0)
+			pendingImages.push(portalImage);
+		if (!finaleImage.complete || finaleImage.naturalWidth === 0)
+			pendingImages.push(finaleImage);
+		let settled = 0;
+		const onImageReady = () => {
+			settled += 1;
+			if (settled < pendingImages.length) return;
+			measureScene();
+			ScrollTrigger.refresh();
+		};
+		for (const image of pendingImages) {
+			image.addEventListener("load", onImageReady, { once: true, signal });
+		}
 	}
 
 	const stopBounce = () => {
@@ -1077,6 +1132,92 @@ function setupScenes(context: SetupContext) {
 		else hideAct();
 	};
 
+	/**
+	 * 终幕放大：clip-path 从图框扩到满屏（只触发 paint），图片同步做等比 scale
+	 * （走合成），与 portal 收缩共用同一套几何量，方向相反。
+	 * viewport 整体淡出让竖排题名、顶栏与进度条随放大一起退场。
+	 */
+	const renderFinale = (t: number) => {
+		const bounded = clamp(t, 0, 1);
+		gsap.set(viewport, { autoAlpha: 1 - bounded });
+		// 衔接带在放大尾段淡入：终幕接近满屏时水波纹 / 渐变从底缘浮现，
+		// 滚出 pin 后带体留在文档流里，与下方内容区自然衔接
+		if (transitionBand) {
+			gsap.set(transitionBand, {
+				autoAlpha: clamp((bounded - 0.72) / 0.28, 0, 1),
+			});
+		}
+		if (bounded <= 0) {
+			gsap.set(finalePortal, { autoAlpha: 0 });
+			return;
+		}
+		const insetX =
+			(Math.max(0, window.innerWidth - cachedSceneWidth) / 2) * (1 - bounded);
+		const insetY =
+			(Math.max(0, window.innerHeight - cachedSceneHeight) / 2) * (1 - bounded);
+		gsap.set(finalePortal, {
+			autoAlpha: Math.min(1, bounded * 4),
+			clipPath: `inset(${insetY}px ${insetX}px ${insetY}px ${insetX}px)`,
+		});
+		gsap.set(finaleImage, {
+			scale: cachedFinaleScale + (1 - cachedFinaleScale) * bounded,
+		});
+	};
+
+	/** pin 进度 → 横移进度 + 终幕放大进度：横移在尾段前走完，剩余全留给放大 */
+	const renderFromPinProgress = (progress: number) => {
+		const finaleT = clamp(
+			(progress - FINALE_ENTER_PROGRESS) / (1 - FINALE_ENTER_PROGRESS),
+			0,
+			1,
+		);
+		horizontalEnabled = finaleT === 0 && progress < 0.999;
+		viewport.classList.toggle("is-horizontal", horizontalEnabled);
+		renderScenes(
+			(Math.min(progress, FINALE_ENTER_PROGRESS) / FINALE_ENTER_PROGRESS) *
+				Math.max(0, sceneCount - 1),
+			true,
+		);
+		renderFinale(finaleT);
+	};
+
+	/**
+	 * 终幕退场：终幕层恒为 position: fixed（root 直下，无 transform 祖先），
+	 * 全屏图片钉在视口里一动不动，全程保持完全不透明、无模糊；下方内容区
+	 * 背景（不含文字，由 .home-digest::before 承担）初始全透明，随滚动通过
+	 * --home-afterglow-veil 从 0 渐变到 1，内容顶到视口顶（约一屏）时背景
+	 * 完全不透明，图片被完全盖住后随即隐藏（防止深处透明区域透出）。滚动
+	 * 回退按同一公式还原，无跳变。
+	 */
+	let exitActive = false;
+	const afterglowHost = document.getElementById("home-digest");
+	const renderExit = () => {
+		if (!pinTrigger) return;
+		const released = window.scrollY - pinTrigger.end;
+		if (released <= 0) {
+			// 未释放：仅在退场态下复位，避免每次滚动空转
+			if (!exitActive) return;
+			exitActive = false;
+			gsap.set(finalePortal, { autoAlpha: 1, filter: "none" });
+			// 衔接带恢复终幕满屏时的完全可见态（renderFinale(1) 的状态）
+			if (transitionBand) gsap.set(transitionBand, { autoAlpha: 1 });
+			if (afterglowHost)
+				gsap.set(afterglowHost, { "--home-afterglow-veil": "0" });
+			return;
+		}
+		exitActive = true;
+		const t = clamp(released / Math.max(1, window.innerHeight), 0, 1);
+		// 图片本身不动不淡；t=1 被背景盖满后整层隐藏，滚回即恢复
+		gsap.set(finalePortal, {
+			autoAlpha: t >= 1 ? 0 : 1,
+			filter: "none",
+		});
+		// 内容背景（衔接带渐变 + 内容区 ::before）与 veil 同步从透明淡入
+		if (transitionBand) gsap.set(transitionBand, { autoAlpha: t });
+		if (afterglowHost)
+			gsap.set(afterglowHost, { "--home-afterglow-veil": t.toFixed(4) });
+	};
+
 	function applyPhase() {
 		gsap.set(stage, { autoAlpha: rootInView && phase !== "done" ? 1 : 0 });
 		gsap.set(
@@ -1111,18 +1252,22 @@ function setupScenes(context: SetupContext) {
 		applyPhase();
 
 		if (phase === "scenes") {
-			const progress = pinTrigger?.progress ?? 0;
-			horizontalEnabled = progress < 0.999;
-			renderScenes(progress * Math.max(0, sceneCount - 1), true);
+			renderFromPinProgress(pinTrigger?.progress ?? 0);
 			return;
 		}
 
 		horizontalEnabled = false;
-		// 影像层滚过后保留最后一幕，随 section 一起离场
-		renderScenes(
-			phase === "done" ? Math.max(0, sceneCount - 1) : 0,
-			phase === "done",
-		);
+		viewport.classList.remove("is-horizontal");
+		if (phase === "done") {
+			// 影像层滚过后停在放大到位的终幕，随 section 一起离场；
+			// 若已进入退场段，renderExit 会立刻用钉住 + 渐隐态覆盖
+			renderScenes(Math.max(0, sceneCount - 1), false);
+			renderFinale(1);
+			renderExit();
+			return;
+		}
+		renderScenes(0, false);
+		renderFinale(0);
 	}
 
 	// 尺寸恒为满屏，收缩由 clip-path 收窗完成，故这里不再写 width / height
@@ -1135,6 +1280,14 @@ function setupScenes(context: SetupContext) {
 		autoAlpha: 0,
 	});
 	gsap.set(portalEdge, { opacity: 0, visibility: "hidden" });
+	// 终幕层初始态：满屏尺寸、clip 收到图框、隐藏；scale 起点在 measureScene 已写入
+	gsap.set(finalePortal, {
+		clipPath: "inset(0px 0px 0px 0px)",
+		autoAlpha: 0,
+	});
+	gsap.set(finaleImage, { scale: () => cachedFinaleScale });
+	// 衔接带初始隐藏，终幕放大尾段由 renderFinale 淡入
+	if (transitionBand) gsap.set(transitionBand, { autoAlpha: 0 });
 	gsap.set(cards, { autoAlpha: 0 });
 	// 立牌与背景跑马灯的初始姿态：以底边为铰链向后（远离视线）几乎平躺，入场时朝观众立起来
 	gsap.set(stands, {
@@ -1231,9 +1384,7 @@ function setupScenes(context: SetupContext) {
 			if (!self.isActive) return;
 			phase = "scenes";
 			applyPhase();
-			horizontalEnabled = self.progress < 0.999;
-			viewport.classList.toggle("is-horizontal", horizontalEnabled);
-			renderScenes(self.progress * Math.max(0, sceneCount - 1), true);
+			renderFromPinProgress(self.progress);
 		},
 	});
 
@@ -1243,8 +1394,12 @@ function setupScenes(context: SetupContext) {
 		start: "top bottom",
 		end: "bottom top",
 		invalidateOnRefresh: true,
+		// root 在视口内时的每一次滚动都驱动终幕退场补偿（未释放时按值短路）
+		onUpdate: () => renderExit(),
 		onToggle: (self) => {
 			rootInView = self.isActive;
+			// 从页面下方滚回时立即恢复正确的退场态，不等下一次滚动
+			if (self.isActive) renderExit();
 			applyPhase();
 		},
 	});
@@ -1922,7 +2077,7 @@ function setupEchoText(context: SetupContext) {
 				{ x: OFFSET * (0.6 + depth), autoAlpha: 0 },
 				{
 					x: 0,
-					autoAlpha: Math.pow(FADE, index + 1) * 0.9,
+					autoAlpha: FADE ** (index + 1) * 0.9,
 					duration: 0.9 - depth * 0.3,
 					delay: 0.32 + depth * 0.08,
 					ease: "power3.out",

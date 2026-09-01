@@ -359,7 +359,8 @@ export const zh_CN: Translation = {
 	[Key.animeSubtitle]: "记录我追过的番剧、电影和纪录片",
 	[Key.animeLastUpdated]: "上次更新：",
 	[Key.animeNotConfigured]: "未配置数据源",
-	[Key.animeNotConfiguredDesc]: "请在 siteConfig.ts 中配置 TMDB 或 Bilibili 数据源",
+	[Key.animeNotConfiguredDesc]:
+		"请在 siteConfig.ts 中配置 TMDB 或 Bilibili 数据源",
 	[Key.animeTotal]: "总计",
 	[Key.animeBilibiliAvg]: "B站均分",
 	[Key.animeTmdbAvg]: "TMDB均分",
@@ -394,7 +395,8 @@ export const zh_CN: Translation = {
 
 	// Bangumi API 相关
 	[Key.bangumiFetchError]: "数据获取失败",
-	[Key.bangumiFetchErrorDesc]: "无法连接到 Bangumi API，请稍后重试或检查网络连接",
+	[Key.bangumiFetchErrorDesc]:
+		"无法连接到 Bangumi API，请稍后重试或检查网络连接",
 
 	// 主题设置面板 Tab 标签
 	[Key.displayTabTheme]: "主题",

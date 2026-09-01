@@ -30,17 +30,14 @@
 
   .dropdown-item {
     @apply flex items-center justify-between px-4 py-2.5 text-black/75 dark:text-white/75
-      hover:text-(--primary) hover:bg-(--btn-plain-bg-hover) transition-colors duration-150 font-medium;
+      hover:text-(--primary) transition-colors duration-150 font-medium;
     border: 1.5px solid transparent;
-    background-color: transparent !important;
+    background-color: transparent;
   }
 
+  /* 悬停高亮与导航栏滑块同语言：浅灰圆角填充，无描边（参考 tblog） */
   .dropdown-item:hover {
-    border-color: oklch(0.2 0 0);
-    background-color: transparent !important;
-  }
-  :root.dark .dropdown-item:hover {
-    border-color: oklch(0.75 0 0);
+    background-color: color-mix(in oklch, var(--deep-text) 8%, transparent);
   }
 
   /* 移动端菜单 */

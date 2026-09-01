@@ -1,13 +1,18 @@
 ---
-import { render } from "astro:content";
 import type { CollectionEntry } from "astro:content";
+import { render } from "astro:content";
 import { Icon } from "astro-icon/components";
 import CoverImage from "@/components/common/CoverImage.astro";
 import { siteConfig } from "@/config";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import { getApiUrlList, processCoverImageSync } from "@/utils/image-utils";
-import { getCategoryUrl, getFileDirFromPath, getTagUrl, url } from "@/utils/url-utils";
+import {
+	getCategoryUrl,
+	getFileDirFromPath,
+	getTagUrl,
+	url,
+} from "@/utils/url-utils";
 
 interface Props {
 	class?: string;
@@ -50,17 +55,25 @@ const className = Astro.props.class;
 
 const processedImage = processCoverImageSync(image || "api", entry.id);
 const apiUrls = getApiUrlList(image || "api", entry.id);
-const hasCover = processedImage !== undefined && processedImage !== null && processedImage !== "";
+const hasCover =
+	processedImage !== undefined &&
+	processedImage !== null &&
+	processedImage !== "";
 
 const { remarkPluginFrontmatter } = await render(entry);
 const descriptionText =
-	description || remarkPluginFrontmatter.excerpt || "暂无文章简介，点击卡片查看完整内容。";
+	description ||
+	remarkPluginFrontmatter.excerpt ||
+	"暂无文章简介，点击卡片查看完整内容。";
 
-const dateFormatter = new Intl.DateTimeFormat(siteConfig.lang.replace("_", "-"), {
-	year: "numeric",
-	month: "2-digit",
-	day: "2-digit",
-});
+const dateFormatter = new Intl.DateTimeFormat(
+	siteConfig.lang.replace("_", "-"),
+	{
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	},
+);
 const publishedText = dateFormatter.format(published);
 const publishedIso = published.toISOString();
 

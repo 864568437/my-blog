@@ -1,10 +1,10 @@
 ---
-import { marked } from "marked";
 import { Icon } from "astro-icon/components";
-import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import { marked } from "marked";
+import PageHeader from "@/components/common/PageHeader.astro";
 import RoutinesEditor from "@/components/edit/RoutinesEditor.svelte";
 import { getEnabledRoutines } from "@/config/routinesConfig";
-import PageHeader from "@/components/common/PageHeader.astro";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
 
 const routinesList = getEnabledRoutines();
 

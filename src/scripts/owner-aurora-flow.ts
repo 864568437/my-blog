@@ -55,7 +55,9 @@ if (!customElements.get("owner-aurora-flow")) {
 		connectedCallback() {
 			if (this.initialized) return;
 			if (document.readyState === "loading") {
-				document.addEventListener("DOMContentLoaded", this.initialize, { once: true });
+				document.addEventListener("DOMContentLoaded", this.initialize, {
+					once: true,
+				});
 				return;
 			}
 			this.scheduleInitialize();
@@ -87,7 +89,10 @@ if (!customElements.get("owner-aurora-flow")) {
 			this.card?.addEventListener("pointerleave", this.handlePointerLeave);
 			this.card?.addEventListener("focusin", this.handleFocusIn);
 			this.card?.addEventListener("focusout", this.handleFocusOut);
-			document.addEventListener("visibilitychange", this.handleVisibilityChange);
+			document.addEventListener(
+				"visibilitychange",
+				this.handleVisibilityChange,
+			);
 
 			if (typeof ResizeObserver !== "undefined") {
 				this.resizeObserver = new ResizeObserver(this.handleResize);
@@ -110,7 +115,10 @@ if (!customElements.get("owner-aurora-flow")) {
 			cancelAnimationFrame(this.resizeFrame);
 			this.resizeObserver?.disconnect();
 			window.removeEventListener("resize", this.handleResize);
-			document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+			document.removeEventListener(
+				"visibilitychange",
+				this.handleVisibilityChange,
+			);
 			this.card?.removeEventListener("pointerenter", this.handlePointerEnter);
 			this.card?.removeEventListener("pointerleave", this.handlePointerLeave);
 			this.card?.removeEventListener("focusin", this.handleFocusIn);
@@ -125,11 +133,29 @@ if (!customElements.get("owner-aurora-flow")) {
 				return seed / 4294967296;
 			};
 			const layerPattern = [0, 1, 0, 2, 1, 0, 2, 1, 0, 1, 2, 0, 1, 2];
-			const xSlots = [0.08, 0.2, 0.33, 0.45, 0.57, 0.68, 0.8, 0.92, 0.14, 0.27, 0.4, 0.62, 0.74, 0.86];
+			const xSlots = [
+				0.08, 0.2, 0.33, 0.45, 0.57, 0.68, 0.8, 0.92, 0.14, 0.27, 0.4, 0.62,
+				0.74, 0.86,
+			];
 			const layers = [
-				{ radius: [2.4, 3.4], alpha: [0.38, 0.55], sway: [5, 10], glow: [3, 6] },
-				{ radius: [3.4, 4.8], alpha: [0.55, 0.75], sway: [8, 14], glow: [6, 10] },
-				{ radius: [4.8, 6.8], alpha: [0.75, 0.98], sway: [11, 19], glow: [10, 15] },
+				{
+					radius: [2.4, 3.4],
+					alpha: [0.38, 0.55],
+					sway: [5, 10],
+					glow: [3, 6],
+				},
+				{
+					radius: [3.4, 4.8],
+					alpha: [0.55, 0.75],
+					sway: [8, 14],
+					glow: [6, 10],
+				},
+				{
+					radius: [4.8, 6.8],
+					alpha: [0.75, 0.98],
+					sway: [11, 19],
+					glow: [10, 15],
+				},
 			];
 			const between = (range) => range[0] + (range[1] - range[0]) * random();
 
@@ -225,7 +251,10 @@ if (!customElements.get("owner-aurora-flow")) {
 				const edgeFade = enterFade * exitFade;
 
 				const rawY = this.height * (1.1 - progress * 1.2);
-				const y = Math.max(radius + 2, Math.min(this.height - radius - 2, rawY));
+				const y = Math.max(
+					radius + 2,
+					Math.min(this.height - radius - 2, rawY),
+				);
 				const rawX =
 					particle.baseX * this.width +
 					Math.sin(time * particle.swayFrequency + particle.swayPhase) *
@@ -250,10 +279,27 @@ if (!customElements.get("owner-aurora-flow")) {
 				const rotation = particle.rotation + time * particle.spinSpeed;
 
 				if (particle.hasTrail && alpha > 0.05) {
-					this.drawTrail(context, particle, x, y, radius * scale, alpha, bandBoost);
+					this.drawTrail(
+						context,
+						particle,
+						x,
+						y,
+						radius * scale,
+						alpha,
+						bandBoost,
+					);
 				}
 				if (alpha > 0.02) {
-					this.drawSparkle(context, particle, x, y, radius * scale, rotation, alpha, bandBoost);
+					this.drawSparkle(
+						context,
+						particle,
+						x,
+						y,
+						radius * scale,
+						rotation,
+						alpha,
+						bandBoost,
+					);
 				}
 			}
 		}
@@ -262,9 +308,16 @@ if (!customElements.get("owner-aurora-flow")) {
 			// 上升粒子身后的渐隐紫色尾迹
 			const tailLength = radius * particle.tailScale;
 			const swayOffset =
-				Math.sin((y / Math.max(this.height, 1)) * Math.PI * 2 + particle.swayPhase) *
+				Math.sin(
+					(y / Math.max(this.height, 1)) * Math.PI * 2 + particle.swayPhase,
+				) *
 				(tailLength * 0.22);
-			const gradient = context.createLinearGradient(x + swayOffset, y + tailLength, x, y);
+			const gradient = context.createLinearGradient(
+				x + swayOffset,
+				y + tailLength,
+				x,
+				y,
+			);
 			gradient.addColorStop(0, "rgba(165, 148, 255, 0)");
 			gradient.addColorStop(
 				1,
@@ -298,12 +351,16 @@ if (!customElements.get("owner-aurora-flow")) {
 			context.translate(x, y);
 			context.globalCompositeOperation = "source-over";
 			context.shadowColor = `rgba(141, 124, 255, ${0.5 + bandBoost * 0.34})`;
-			context.shadowBlur = particle.glow + bandBoost * 11 + this.hoverAmount * 3;
+			context.shadowBlur =
+				particle.glow + bandBoost * 11 + this.hoverAmount * 3;
 
 			// 四角星芒主体
 			this.traceRoundedStar(context, radius, rotation, 0.14, 4);
 			const gradient = context.createRadialGradient(0, 0, 0, 0, 0, radius);
-			gradient.addColorStop(0, `rgba(245, 242, 255, ${Math.min(1, alpha + 0.25)})`);
+			gradient.addColorStop(
+				0,
+				`rgba(245, 242, 255, ${Math.min(1, alpha + 0.25)})`,
+			);
 			gradient.addColorStop(0.55, `rgba(${fill}, ${alpha})`);
 			gradient.addColorStop(1, `rgba(${fill}, ${alpha * 0.72})`);
 			context.fillStyle = gradient;
@@ -349,7 +406,8 @@ if (!customElements.get("owner-aurora-flow")) {
 			);
 
 			vertices.forEach((point, index) => {
-				const previous = vertices[(index + vertices.length - 1) % vertices.length];
+				const previous =
+					vertices[(index + vertices.length - 1) % vertices.length];
 				const next = vertices[(index + 1) % vertices.length];
 				const beforeX = point.x + (previous.x - point.x) * rounding;
 				const beforeY = point.y + (previous.y - point.y) * rounding;

@@ -22,8 +22,8 @@ export interface ParsedFriend {
  */
 export function parseFriendsConfigFromTS(tsContent: string): ParsedFriend[] {
 	// 1) 找到数组起点
-	const startMarker = 'export const friendsConfig: FriendLink[] = [';
-	const altMarker = 'export const friendsConfig = [';
+	const startMarker = "export const friendsConfig: FriendLink[] = [";
+	const altMarker = "export const friendsConfig = [";
 
 	let startIdx = tsContent.indexOf(startMarker);
 	if (startIdx === -1) {
@@ -47,15 +47,15 @@ export function parseFriendsConfigFromTS(tsContent: string): ParsedFriend[] {
 
 	while (i < n) {
 		const ch = tsContent[i];
-		const nxt = tsContent[i + 1] || '';
+		const nxt = tsContent[i + 1] || "";
 
 		if (inLineComment) {
-			if (ch === '\n') inLineComment = false;
+			if (ch === "\n") inLineComment = false;
 			i++;
 			continue;
 		}
 		if (inBlockComment) {
-			if (ch === '*' && nxt === '/') {
+			if (ch === "*" && nxt === "/") {
 				inBlockComment = false;
 				i += 2;
 			} else {
@@ -64,8 +64,8 @@ export function parseFriendsConfigFromTS(tsContent: string): ParsedFriend[] {
 			continue;
 		}
 		if (inStr || inTpl) {
-			const quote = inStr || (inTpl ? '`' : null);
-			if (ch === '\\' && quote) {
+			const quote = inStr || (inTpl ? "`" : null);
+			if (ch === "\\" && quote) {
 				i += 2;
 				continue;
 			}
@@ -78,12 +78,12 @@ export function parseFriendsConfigFromTS(tsContent: string): ParsedFriend[] {
 		}
 
 		// 不在字符串中
-		if (ch === '/' && nxt === '/') {
+		if (ch === "/" && nxt === "/") {
 			inLineComment = true;
 			i += 2;
 			continue;
 		}
-		if (ch === '/' && nxt === '*') {
+		if (ch === "/" && nxt === "*") {
 			inBlockComment = true;
 			i += 2;
 			continue;
@@ -93,14 +93,14 @@ export function parseFriendsConfigFromTS(tsContent: string): ParsedFriend[] {
 			i++;
 			continue;
 		}
-		if (ch === '`') {
+		if (ch === "`") {
 			inTpl = true;
 			i++;
 			continue;
 		}
-		if (ch === '[' || ch === '{') {
+		if (ch === "[" || ch === "{") {
 			depth++;
-		} else if (ch === ']' || ch === '}') {
+		} else if (ch === "]" || ch === "}") {
 			depth--;
 			if (depth === 0) {
 				// 截取到整个数组（含括号）
@@ -120,8 +120,8 @@ export function parseFriendsConfigFromTS(tsContent: string): ParsedFriend[] {
 function parseRepairedArray(arrSrc: string): ParsedFriend[] {
 	// 1) 保护字符串内容：提取字符串并替换为占位符
 	const placeholderMap = new Map<string, string>();
-	const PREFIX = '@@@_STRPLACEHOLDER_';
-	const SUFFIX = '_@@@';
+	const PREFIX = "@@@_STRPLACEHOLDER_";
+	const SUFFIX = "_@@@";
 
 	function protectStrings(s: string): string {
 		const out: string[] = [];
@@ -134,11 +134,11 @@ function parseRepairedArray(arrSrc: string): ParsedFriend[] {
 
 		while (i < n) {
 			const ch = s[i];
-			const nxt = s[i + 1] || '';
+			const nxt = s[i + 1] || "";
 
 			if (inStr || inTpl) {
-				const q = inStr || (inTpl ? '`' : null);
-				if (ch === '\\' && q) {
+				const q = inStr || (inTpl ? "`" : null);
+				if (ch === "\\" && q) {
 					buf.push(ch);
 					if (i + 1 < n) buf.push(s[i + 1]);
 					i += 2;
@@ -148,7 +148,7 @@ function parseRepairedArray(arrSrc: string): ParsedFriend[] {
 					buf.push(ch);
 					const key = `${PREFIX}${pid}${SUFFIX}`;
 					pid++;
-					placeholderMap.set(key, buf.join(''));
+					placeholderMap.set(key, buf.join(""));
 					out.push(key);
 					buf.length = 0;
 					inStr = null;
@@ -167,7 +167,7 @@ function parseRepairedArray(arrSrc: string): ParsedFriend[] {
 				i++;
 				continue;
 			}
-			if (ch === '`') {
+			if (ch === "`") {
 				inTpl = true;
 				buf.push(ch);
 				i++;
@@ -175,13 +175,13 @@ function parseRepairedArray(arrSrc: string): ParsedFriend[] {
 			}
 
 			// 不在字符串中：处理注释
-			if (ch === '/' && nxt === '/') {
-				while (i < n && s[i] !== '\n') i++;
+			if (ch === "/" && nxt === "/") {
+				while (i < n && s[i] !== "\n") i++;
 				continue;
 			}
-			if (ch === '/' && nxt === '*') {
+			if (ch === "/" && nxt === "*") {
 				i += 2;
-				while (i + 1 < n && !(s[i] === '*' && s[i + 1] === '/')) i++;
+				while (i + 1 < n && !(s[i] === "*" && s[i + 1] === "/")) i++;
 				i += 2;
 				continue;
 			}
@@ -189,26 +189,26 @@ function parseRepairedArray(arrSrc: string): ParsedFriend[] {
 			out.push(ch);
 			i++;
 		}
-		return out.join('');
+		return out.join("");
 	}
 
 	let protected_s = protectStrings(arrSrc);
 
 	// 2) 去掉尾逗号：`,\s*]` → `]`, `,\s*}` → `}`
-	protected_s = protected_s.replace(/,\s*([\]}])/g, '$1');
+	protected_s = protected_s.replace(/,\s*([\]}])/g, "$1");
 
 	// 3) 给没有引号的对象键加双引号
 	protected_s = protected_s.replace(
-		/(?<=[\{\[,])\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*:/g,
+		/(?<=[{[,])\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*:/g,
 		(_m, key: string) => `"${key}":`,
 	);
 	protected_s = protected_s.replace(
-		/([\[\{])\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*:/g,
+		/([[{])\s*([A-Za-z_$][A-Za-z0-9_$]*)\s*:/g,
 		(_m, bracket: string, key: string) => `${bracket}"${key}":`,
 	);
 
 	// 4) 去除类型标注：`as const` / `as string[]` 等
-	protected_s = protected_s.replace(/\s+as\s+(?:const|[\w\[\]]+)/g, '');
+	protected_s = protected_s.replace(/\s+as\s+(?:const|[\w[\]]+)/g, "");
 
 	// 5) 恢复字符串占位
 	for (const [key, val] of placeholderMap) {

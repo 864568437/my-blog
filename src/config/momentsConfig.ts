@@ -50,9 +50,7 @@ export const momentsConfig: MomentItem[] = [
 		pinned: true,
 		published: "2026-07-06",
 		location: "杭州",
-		images: [
-			"https://tu.fqzlr.com/file/beijing/1777365393328_bkg__7_.png",
-		],
+		images: ["https://tu.fqzlr.com/file/beijing/1777365393328_bkg__7_.png"],
 		tags: ["测试"],
 		body: `**测试** 
 ## 测试
@@ -67,11 +65,9 @@ export const momentsConfig: MomentItem[] = [
 		pinned: true,
 		published: "2026-07-06",
 		location: "中国",
-		images: [
-			"https://tu.fqzlr.com/file/beijing/1777266325757_bk4__1_.webp",
-		],
+		images: ["https://tu.fqzlr.com/file/beijing/1777266325757_bk4__1_.webp"],
 		tags: ["测试"],
-		body: `测试`,
+		body: "测试",
 		enabled: true,
 	},
 	{

@@ -140,7 +140,8 @@ export async function GET({
 	}
 
 	let iconBase64: string;
-	const iconSrc = siteConfig.favicon.length > 0 ? siteConfig.favicon[0].src : "";
+	const iconSrc =
+		siteConfig.favicon.length > 0 ? siteConfig.favicon[0].src : "";
 	if (iconSrc.startsWith("http")) {
 		// 远程 URL 直接使用
 		iconBase64 = iconSrc;

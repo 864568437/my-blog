@@ -10,33 +10,27 @@ import { i18n } from "@i18n/translation";
 import {
 	getDefaultBannerTitleEnabled,
 	getDefaultGradientEnabled,
-	getDefaultHue,
 	getDefaultOverlayBlur,
 	getDefaultOverlayCardOpacity,
 	getDefaultOverlayOpacity,
 	getDefaultSakuraEnabled,
-	getDefaultTextGlowStrength,
 	getDefaultWallpaperCarouselEnabled,
 	getDefaultWavesEnabled,
-	getHue,
 	getStoredBannerTitleEnabled,
 	getStoredGradientEnabled,
 	getStoredOverlayBlur,
 	getStoredOverlayCardOpacity,
 	getStoredOverlayOpacity,
 	getStoredSakuraEnabled,
-	getStoredTextGlowStrength,
 	getStoredWallpaperCarouselEnabled,
 	getStoredWallpaperMode,
 	getStoredWavesEnabled,
 	setBannerTitleEnabled,
 	setGradientEnabled,
-	setHue,
 	setOverlayBlur,
 	setOverlayCardOpacity,
 	setOverlayOpacity,
 	setSakuraEnabled,
-	setTextGlowStrength,
 	setWallpaperCarouselEnabled,
 	setWallpaperMode,
 	setWavesEnabled,
@@ -46,8 +40,6 @@ import Icon from "@/components/common/Icon.svelte";
 import { backgroundWallpaper, siteConfig } from "@/config";
 import type { WALLPAPER_MODE } from "@/types/config";
 
-let hue = $state(getHue());
-const defaultHue = getDefaultHue();
 let wallpaperMode: WALLPAPER_MODE = $state(backgroundWallpaper.mode);
 const defaultWallpaperMode = backgroundWallpaper.mode;
 let currentLayout: "list" | "grid" = $state("list");
@@ -55,8 +47,6 @@ const defaultLayout = siteConfig.postListLayout.defaultMode;
 let mounted = $state(false);
 let isSmallScreen = $state(false);
 let isSwitching = $state(false);
-let textGlowStrength = $state(getStoredTextGlowStrength());
-const defaultTextGlowStrength = getDefaultTextGlowStrength();
 let wavesEnabled = $state(true);
 const defaultWavesEnabled = getDefaultWavesEnabled();
 let gradientEnabled = $state(true);
@@ -79,7 +69,6 @@ type TabKey = "theme" | "wallpaper";
 let activeTab: TabKey = $state("theme");
 
 // 默认所有子区块均展开（用户可手动折叠）
-let themeColorCollapsed = $state(false);
 let effectsCollapsed = $state(false);
 let wallpaperModeCollapsed = $state(false);
 let overlayCollapsed = $state(false);
@@ -93,9 +82,6 @@ function switchTab(tab: TabKey) {
 
 function toggleSection(section: string) {
 	switch (section) {
-		case "themeColor":
-			themeColorCollapsed = !themeColorCollapsed;
-			break;
 		case "wallpaperMode":
 			wallpaperModeCollapsed = !wallpaperModeCollapsed;
 			break;
@@ -116,7 +102,6 @@ function toggleSection(section: string) {
 
 const isWallpaperSwitchable = backgroundWallpaper.switchable ?? true;
 const allowLayoutSwitch = siteConfig.postListLayout.allowSwitch;
-const showThemeColor = !siteConfig.themeColor.fixed;
 // 是否允许用户切换水波纹动画（只看 switchable 配置）
 const isWavesSwitchable =
 	backgroundWallpaper.banner?.waves?.switchable ?? false;
@@ -156,7 +141,6 @@ let overlaySettingsIsDefault = $derived(
 let effectsSettingsIsDefault = $derived(sakuraEnabled === defaultSakuraEnabled);
 
 const hasAnyContent =
-	showThemeColor ||
 	isWallpaperSwitchable ||
 	allowLayoutSwitch ||
 	isWavesSwitchable ||
@@ -164,11 +148,6 @@ const hasAnyContent =
 	isCarouselSwitchable ||
 	isOverlaySwitchable ||
 	isSakuraSwitchable;
-
-function resetHue() {
-	hue = getDefaultHue();
-	requestAnimationFrame(refreshAllRangeProgress);
-}
 
 function resetWallpaperMode() {
 	wallpaperMode = defaultWallpaperMode;
@@ -306,7 +285,6 @@ onMount(() => {
 	isSmallScreen = window.innerWidth < 1200;
 	checkScreenSize();
 
-	hue = getHue();
 	wallpaperMode = getStoredWallpaperMode();
 	wavesEnabled = getStoredWavesEnabled();
 	gradientEnabled = getStoredGradientEnabled();
@@ -380,12 +358,6 @@ onMount(() => {
 });
 
 $effect(() => {
-	if (hue || hue === 0) {
-		setHue(hue);
-	}
-});
-
-$effect(() => {
 	if (wallpaperMode === WALLPAPER_OVERLAY) {
 		setOverlayOpacity(overlayOpacity);
 		setOverlayBlur(overlayBlur);
@@ -394,15 +366,13 @@ $effect(() => {
 });
 
 // 当前 Tab 是否有可见内容
-let hasThemeTabContent = $derived(showThemeColor);
+let hasThemeTabContent = $derived(allowLayoutSwitch || isSakuraSwitchable);
 let hasWallpaperTabContent = $derived(
 	isWallpaperSwitchable ||
 		(wallpaperMode === WALLPAPER_OVERLAY && isOverlaySwitchable) ||
 		((wallpaperMode === WALLPAPER_BANNER ||
 			wallpaperMode === WALLPAPER_FULLSCREEN) &&
-			(isBannerTitleSwitchable ||
-				isCarouselSwitchable ||
-				isWavesSwitchable)) ||
+			(isBannerTitleSwitchable || isCarouselSwitchable || isWavesSwitchable)) ||
 		isSakuraSwitchable,
 );
 
@@ -410,7 +380,11 @@ let hasWallpaperTabContent = $derived(
 $effect(() => {
 	if (activeTab === "theme" && !hasThemeTabContent && hasWallpaperTabContent) {
 		activeTab = "wallpaper";
-	} else if (activeTab === "wallpaper" && !hasWallpaperTabContent && hasThemeTabContent) {
+	} else if (
+		activeTab === "wallpaper" &&
+		!hasWallpaperTabContent &&
+		hasThemeTabContent
+	) {
 		activeTab = "theme";
 	}
 });
@@ -447,63 +421,6 @@ $effect(() => {
         <!-- ====== Theme Tab ====== -->
         {#if activeTab === "theme" && hasThemeTabContent}
         <div class="display-tab-panel">
-            <!-- Theme Color Section -->
-            {#if showThemeColor}
-            <div class="display-section">
-                <div
-                    class="display-section-header"
-                    role="button"
-                    tabindex="0"
-                    onclick={(e) => { if ((e.target as HTMLElement).tagName !== 'BUTTON') toggleSection('themeColor'); }}
-                    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSection('themeColor'); } }}
-                >
-                    <div class="flex gap-1.5 font-bold text-[0.9rem] items-center text-neutral-900 dark:text-neutral-100 transition relative ml-2.5
-                        before:w-1 before:h-3.5 before:rounded-md before:bg-(--primary)
-                        before:absolute before:-left-2.5 before:top-1/2 before:-translate-y-1/2"
-                    >
-                        {i18n(I18nKey.themeColor)}
-                        <button aria-label="Reset to Default" class="btn-regular w-5 h-5 rounded-md active:scale-90"
-                                class:opacity-0={hue === defaultHue} class:pointer-events-none={hue === defaultHue}
-                                onclick={(e) => { e.stopPropagation(); resetHue(); }}>
-                            <div class="text-(--btn-content)">
-                                <Icon icon="fa7-solid:arrow-rotate-left" class="text-[0.7rem]"></Icon>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <div id="hueValue" class="transition bg-(--btn-regular-bg) w-9 h-6 rounded-md flex justify-center
-                            font-bold text-[0.7rem] items-center text-(--btn-content)">
-                            {hue}
-                        </div>
-                        <Icon icon="material-symbols:expand-more-rounded"
-                              class={`display-caret text-[1.1rem] text-neutral-500 dark:text-neutral-400 transition-transform duration-200 ${!themeColorCollapsed ? 'rotated' : ''}`}></Icon>
-                    </div>
-                </div>
-                <div class="display-section-body" class:collapsed={themeColorCollapsed}>
-                    <div class="w-full h-6 px-1 bg-[oklch(0.80_0.10_0)] dark:bg-[oklch(0.70_0.10_0)] rounded-sm select-none">
-                        <input aria-label={i18n(I18nKey.themeColor)} type="range" min="0" max="360" bind:value={hue}
-                               class="slider" id="colorSlider" step="5" style="width: 100%">
-                    </div>
-                    <!-- 夜晚文字发光亮度（仅在夜晚模式生效） -->
-                    <div class="mt-2 flex items-center gap-2">
-                        <div class="flex items-center gap-1.5 text-xs font-medium text-(--btn-content) opacity-80 min-w-16">
-                            <Icon icon="material-symbols:wb-twilight-outline" class="text-[0.95rem]"></Icon>
-                            <span>文字发光</span>
-                        </div>
-                        <div class="flex-1 h-5 px-1 bg-[oklch(0.85_0.05_var(--hue))] dark:bg-[oklch(0.30_0.06_var(--hue))] rounded-sm select-none">
-                            <input aria-label="文字发光亮度" type="range" min="0" max="100" step="1"
-                                   value={Math.round(textGlowStrength * 100)}
-                                   oninput={(e) => { textGlowStrength = Number((e.currentTarget as HTMLInputElement).value) / 100; setTextGlowStrength(textGlowStrength); }}
-                                   class="slider w-full" />
-                        </div>
-                        <div class="w-9 h-6 bg-(--btn-regular-bg) rounded-md flex justify-center font-bold text-[0.7rem] items-center text-(--btn-content)">
-                            {Math.round(textGlowStrength * 100)}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {/if}
-
             <!-- Post List Layout Section (从布局 Tab 整合到主题 Tab) -->
             {#if allowLayoutSwitch}
             <div class="display-section">
@@ -882,7 +799,7 @@ $effect(() => {
             -webkit-appearance none
             height 1.5rem
             border-radius 999px
-            background-image unquote("linear-gradient(90deg, var(--primary) 0 var(--range-progress, 50%), hsla(var(--hue), 22%, 28%, 0.18) var(--range-progress, 50%) 100%)")
+            background-image unquote("linear-gradient(90deg, var(--primary) 0 var(--range-progress, 50%), oklch(0.20 0 0 / 0.18) var(--range-progress, 50%) 100%)")
             transition background-image 0.15s ease-in-out
 
         input[type="range"].overlay-slider
@@ -914,53 +831,6 @@ $effect(() => {
                 border-radius 0
                 background transparent
                 box-shadow none
-
-        #colorSlider
-            background-image var(--color-selection-bar)
-            transition background-image 0.15s ease-in-out
-
-            &::-webkit-slider-thumb
-                -webkit-appearance none
-                height 1rem
-                width 0.5rem
-                border-radius 0.125rem
-                background rgba(255, 255, 255, 0.7)
-                box-shadow none
-
-                &:hover
-                    background rgba(255, 255, 255, 0.8)
-
-                &:active
-                    background rgba(255, 255, 255, 0.6)
-
-            &::-moz-range-thumb
-                -webkit-appearance none
-                height 1rem
-                width 0.5rem
-                border-radius 0.125rem
-                border-width 0
-                background rgba(255, 255, 255, 0.7)
-                box-shadow none
-
-                &:hover
-                    background rgba(255, 255, 255, 0.8)
-
-                &:active
-                    background rgba(255, 255, 255, 0.6)
-
-            &::-ms-thumb
-                -webkit-appearance none
-                height 1rem
-                width 0.5rem
-                border-radius 0.125rem
-                background rgba(255, 255, 255, 0.7)
-                box-shadow none
-
-                &:hover
-                    background rgba(255, 255, 255, 0.8)
-
-                &:active
-                    background rgba(255, 255, 255, 0.6)
 
         /* ========== 折叠 / Tab 层级样式 ========== */
         .display-tabs

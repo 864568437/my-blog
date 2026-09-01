@@ -1,14 +1,14 @@
 <script lang="ts">
 import { onMount } from "svelte";
+import { setupRepoDrafts } from "@/utils/draftHelpers";
 import {
-	hasValidToken,
-	showToast,
-	genId,
 	deepClone,
 	ensureIconify,
+	genId,
 	getRepoFile,
+	hasValidToken,
+	showToast,
 } from "@/utils/editMode";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
 
 interface DaohangItem {
 	id: string;
@@ -68,9 +68,15 @@ let repoLoaded = $state(false);
 let originalTS = $state<string>("");
 
 const pageKey = $derived(propPageKey);
-const pageName = $derived(customPageName || (propPageKey === "projects" ? "网站导航" : "导航"));
+const pageName = $derived(
+	customPageName || (propPageKey === "projects" ? "网站导航" : "导航"),
+);
 const isCollectionApi = $derived(propPageKey === "projects");
-const configFilePath = $derived(isCollectionApi ? "src/config/projectsConfig.ts" : "src/config/daohangConfig.ts");
+const configFilePath = $derived(
+	isCollectionApi
+		? "src/config/projectsConfig.ts"
+		: "src/config/daohangConfig.ts",
+);
 
 function stripLineComments(code: string): string {
 	const lines = code.split("\n");
@@ -109,7 +115,7 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 	}
 	let arrayStr = tsContent.substring(bracketStart + 1, idx).trim();
 	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]\}])/g, "$1");
+	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
 	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
 	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
 	try {
@@ -121,7 +127,10 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 }
 
 function parseDaohangFromTS(tsContent: string): DaohangItem[] {
-	const items = parseArrayFromTS(tsContent, "export const daohangConfig: DaohangItem[] = [");
+	const items = parseArrayFromTS(
+		tsContent,
+		"export const daohangConfig: DaohangItem[] = [",
+	);
 	return items.map((item: any, index: number) => ({
 		id: item.id || `dh-${index}`,
 		name: item.name || "",
@@ -311,7 +320,11 @@ export function getCategoryIcon(category: string): string {
 
 // ============ CollectionApi 模式（projects 页面）============
 
-function collectionItemId(item: { name: string; url: string; category: string }): string {
+function collectionItemId(item: {
+	name: string;
+	url: string;
+	category: string;
+}): string {
 	const key = `${item.category}::${item.name}::${item.url}`;
 	let h = 0;
 	for (let i = 0; i < key.length; i++) {
@@ -321,14 +334,26 @@ function collectionItemId(item: { name: string; url: string; category: string })
 }
 
 function parseCollectionApiFromTS(tsContent: string): CollectionApiItem[] {
-	const groups = parseArrayFromTS(tsContent, "export const projectsPageConfig: CollectionsApiConfig = {");
+	const groups = parseArrayFromTS(
+		tsContent,
+		"export const projectsPageConfig: CollectionsApiConfig = {",
+	);
 	const result: CollectionApiItem[] = [];
-	if (groups && Array.isArray(groups) && groups[0] && Array.isArray(groups[0].apis)) {
+	if (
+		groups &&
+		Array.isArray(groups) &&
+		groups[0] &&
+		Array.isArray(groups[0].apis)
+	) {
 		for (const g of groups[0].apis) {
 			const cat = g.category || "未分类";
 			for (const item of g.items || []) {
 				result.push({
-					id: collectionItemId({ name: item.name, url: item.url, category: cat }),
+					id: collectionItemId({
+						name: item.name,
+						url: item.url,
+						category: cat,
+					}),
 					name: item.name || "",
 					url: item.url || "",
 					description: item.description || "",
@@ -459,7 +484,9 @@ const drafts = setupRepoDrafts({
 	getCommitMsg: (isEdit) => {
 		const prefix = isCollectionApi ? "projects" : "daohang";
 		const label = isCollectionApi ? "网站导航" : "导航";
-		return isEdit ? `chore(${prefix}): 更新${label}` : `chore(${prefix}): 创建${label}配置`;
+		return isEdit
+			? `chore(${prefix}): 更新${label}`
+			: `chore(${prefix}): 创建${label}配置`;
 	},
 	onSubmitted: () => {
 		setTimeout(() => window.location.reload(), 1200);
@@ -487,7 +514,11 @@ onMount(() => {
 				const cat = g.category || "未分类";
 				for (const item of g.items || []) {
 					flat.push({
-						id: collectionItemId({ name: item.name || "", url: item.url || "", category: cat }),
+						id: collectionItemId({
+							name: item.name || "",
+							url: item.url || "",
+							category: cat,
+						}),
 						name: item.name || "",
 						url: item.url || "",
 						description: item.description || "",
@@ -528,7 +559,10 @@ onMount(() => {
 	window.addEventListener("edit:sidebarAdd", handleSidebarAdd);
 
 	return () => {
-		window.removeEventListener("edit:sidebarModeChange", handleSidebarModeChange);
+		window.removeEventListener(
+			"edit:sidebarModeChange",
+			handleSidebarModeChange,
+		);
 		window.removeEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
 		window.removeEventListener("edit:sidebarSubmit", handleSidebarSubmit);
 		window.removeEventListener("edit:sidebarCancel", handleSidebarCancel);
@@ -584,7 +618,8 @@ function collectFromDOM() {
 		const link = card.querySelector("a") || card;
 		const href = card.getAttribute("href") || link.getAttribute("href") || "";
 		const name = card.querySelector("h3")?.textContent?.trim() || "";
-		const desc = card.querySelector(".tools-card-desc")?.textContent?.trim() || "";
+		const desc =
+			card.querySelector(".tools-card-desc")?.textContent?.trim() || "";
 		const category = card.dataset.category || "";
 		const iconEl = card.querySelector("img") as HTMLImageElement | null;
 		const icon = iconEl?.src || "";
@@ -652,9 +687,16 @@ async function loadRepoData() {
 	drafts.restoreFromDrafts();
 }
 
-const enabledItems = $derived(items.filter((i) => i.enabled !== false && !i._deleted));
+const enabledItems = $derived(
+	items.filter((i) => i.enabled !== false && !i._deleted),
+);
 const allCategories = $derived([
-	...new Set(items.filter((i) => !i._deleted).map((i) => i.category).filter(Boolean)),
+	...new Set(
+		items
+			.filter((i) => !i._deleted)
+			.map((i) => i.category)
+			.filter(Boolean),
+	),
 ]);
 const enabledCategories = $derived([
 	...new Set(enabledItems.map((i) => i.category).filter(Boolean)),
@@ -668,7 +710,9 @@ const categoryCounts = $derived.by(() => {
 	}
 	return counts;
 });
-const sourceItems = $derived(editMode ? items.filter((i) => !i._deleted) : enabledItems);
+const sourceItems = $derived(
+	editMode ? items.filter((i) => !i._deleted) : enabledItems,
+);
 const displayItems = $derived(
 	activeTab === "all"
 		? sourceItems

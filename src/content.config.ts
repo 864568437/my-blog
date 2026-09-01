@@ -136,13 +136,19 @@ const lifeCollection = defineCollection({
 
 // notebooks 集合：src/content/life/notebooks/（`_index.json` 定义笔记本，其余 .md 为条目）
 const notebooksCollection = defineCollection({
-	loader: glob({ pattern: "**/*.{md,mdx,json}", base: "./src/content/life/notebooks" }),
+	loader: glob({
+		pattern: "**/*.{md,mdx,json}",
+		base: "./src/content/life/notebooks",
+	}),
 	schema: lifeEntrySchema,
 });
 
 // routines 集合：src/content/life/routines/
 const routinesCollection = defineCollection({
-	loader: glob({ pattern: "**/*.{md,mdx,json}", base: "./src/content/life/routines" }),
+	loader: glob({
+		pattern: "**/*.{md,mdx,json}",
+		base: "./src/content/life/routines",
+	}),
 	schema: lifeEntrySchema,
 });
 
@@ -207,7 +213,10 @@ const bangumiCollection = defineCollection({
 		title: z.string(),
 		category: z.string(),
 		status: z.number().optional().default(0),
-		image: z.union([z.string(), z.object({ src: z.string() })]).optional().default(""),
+		image: z
+			.union([z.string(), z.object({ src: z.string() })])
+			.optional()
+			.default(""),
 		score: z.number().optional().default(0),
 		tags: z.array(z.string()).optional().default([]),
 		published: z.date().optional(),

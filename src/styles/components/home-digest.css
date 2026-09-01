@@ -11,6 +11,22 @@
 	padding-block: 1.5rem 3rem;
 }
 
+/* 终幕退场的内容背景层（不含文字）：初始全透明，随滚动由控制器写入
+   --home-afterglow-veil 0→1，渐变到不透明后连同下方内容一起盖住 fixed 终幕图。
+   水平 full-bleed：即使父级有宽度约束也能铺满视口。z-index -1 垫在文字/卡片之下。 */
+.home-digest::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: calc(50% - 50vw);
+	right: calc(50% - 50vw);
+	z-index: -1;
+	background: var(--page-bg);
+	opacity: var(--home-afterglow-veil, 0);
+	pointer-events: none;
+}
+
 .home-digest__inner {
 	width: 100%;
 	max-width: var(--page-width);
@@ -22,7 +38,9 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1fr);
 	gap: 1rem;
-	align-items: start;
+	/* 默认 stretch：主内容列拉伸到与左侧组件栏等高，
+	   面板内的「查看更多」沉底正好压在侧栏底缘线上 */
+	align-items: stretch;
 }
 
 /* 平板（≥768px）：左栏 + 主内容区 */
@@ -100,7 +118,45 @@
 }
 
 .home-digest__panel {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
 	min-width: 0;
+}
+
+/* 面板改 flex 后需显式抵消，否则会盖过 UA 的 [hidden] 隐藏 */
+.home-digest__panel[hidden] {
+	display: none;
+}
+
+/* 面板主体（卡片列表区）撑满剩余高度，让底部链接压到与侧栏对齐 */
+.home-digest__posts,
+.home-digest__moments,
+.home-digest__friends-list {
+	flex: 1 1 auto;
+}
+
+/* ── 面板沉底链接：与 Tab 胶囊同一套视觉，统一三个面板的收尾 ── */
+.home-digest__footer {
+	display: flex;
+	justify-content: center;
+	margin-top: auto;
+	padding-top: 1.5rem;
+}
+
+.home-digest__footer .home-digest__more {
+	margin-bottom: 0;
+	padding: 0.5rem 1.5rem;
+	border: 1px solid var(--line-color);
+	border-radius: 9999px;
+	background: var(--page-bg);
+	font-weight: 500;
+}
+
+.home-digest__footer .home-digest__more:hover {
+	border-color: var(--primary);
+	transform: translateX(0);
+	box-shadow: 0 2px 10px color-mix(in oklch, var(--primary) 14%, transparent);
 }
 
 /* ── 区块标题：英文眼眉 + 中文大标题 + 右侧跳转 ── */
@@ -135,18 +191,6 @@
 	font-weight: 700;
 	line-height: 1.2;
 	color: var(--deep-text);
-}
-
-.home-digest__heading-actions {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	flex-shrink: 0;
-	margin-bottom: 0.2rem;
-}
-
-.home-digest__heading-actions .home-digest__more {
-	margin-bottom: 0;
 }
 
 .home-digest__more {
@@ -186,7 +230,7 @@
 
 /* ── 文章面板：与 /posts/ 页同款卡片体系 ──
    活跃视图直接渲染，非活跃视图常驻 <template>（inert，浏览器绝对不渲染），
-   列表模式显示第 1 条，网格模式显示 3 条 */
+   列表模式显示前 3 条，网格模式显示 6 条 */
 .home-digest__posts {
 	min-width: 0;
 }
@@ -216,26 +260,8 @@
 	}
 }
 
-/* ── 朋友的动态面板：复用 /pengyou/ 页 circle 卡片体系 ── */
-.home-digest__friends {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 1.25rem;
-	width: 100%;
-}
-
-@media (max-width: 1023.98px) {
-	.home-digest__friends {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-}
-
-@media (max-width: 639.98px) {
-	.home-digest__friends {
-		grid-template-columns: minmax(0, 1fr);
-	}
-}
-
+/* ── 朋友的动态面板：卡片复用文章列表卡体系（.article-list-vertical），
+   这里只补空态样式 ── */
 .home-digest__friends-empty {
 	display: flex;
 	flex-direction: column;

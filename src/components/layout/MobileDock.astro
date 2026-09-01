@@ -92,7 +92,7 @@ const showAnnouncement = !!announcementConfig.content;
 </div>
 
 <script>
-import { getHue, setHue, setTheme, getStoredTheme } from "@utils/setting-utils";
+import { setTheme, getStoredTheme } from "@utils/setting-utils";
 
 (function initMobileDock() {
 	const dockEl = document.getElementById("mobile-dock");
@@ -252,17 +252,14 @@ import { getHue, setHue, setTheme, getStoredTheme } from "@utils/setting-utils";
 		window.dispatchEvent(new CustomEvent("toggle-ai-search"));
 	});
 
-	// 主题色：优先复用桌面端 #display-setting 面板（与电脑端一致体验），
-	// 若面板不存在（如仅 Layout.astro 的页面），则直接轮换 hue 值
+	// 主题色：复用桌面端 #display-setting 面板（与电脑端一致体验）；
+	// 色相调节功能已移除，面板不存在时不再轮换 hue
 	document.getElementById("md-hue-btn")?.addEventListener("click", (e) => {
 		e.stopPropagation();
 		const panel = document.getElementById("display-setting");
 		if (panel) {
 			closeSheet();
 			panel.classList.toggle("float-panel-closed");
-		} else {
-			const next = (getHue() + 30) % 360;
-			setHue(next);
 		}
 	});
 

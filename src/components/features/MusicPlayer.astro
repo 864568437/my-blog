@@ -11,7 +11,13 @@ interface Props {
 	lazy?: boolean;
 	externalPlaylist?: string;
 }
-const { class: className, style, id, lazy = false, externalPlaylist } = Astro.props;
+const {
+	class: className,
+	style,
+	id,
+	lazy = false,
+	externalPlaylist,
+} = Astro.props;
 
 const config = musicPlayerConfig;
 

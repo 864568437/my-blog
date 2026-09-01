@@ -3,11 +3,8 @@ import Comment from "@components/comment/index.astro";
 import Markdown from "@components/common/Markdown.astro";
 import { Icon } from "astro-icon/components";
 import { marked } from "marked";
+import { getEnabledFolders, getNotesByFolder } from "@/config/notebooksConfig";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
-import {
-	getNotesByFolder,
-	getEnabledFolders,
-} from "@/config/notebooksConfig";
 
 export async function getStaticPaths() {
 	const paths: any[] = [];
@@ -44,7 +41,11 @@ const { folder, notes, note, isNotebookIndex } = Astro.props;
 const folderName = folder?.slug || "";
 
 let coverSrc: string | null = folder?.cover || null;
-if (coverSrc && !coverSrc.startsWith("http://") && !coverSrc.startsWith("https://")) {
+if (
+	coverSrc &&
+	!coverSrc.startsWith("http://") &&
+	!coverSrc.startsWith("https://")
+) {
 	coverSrc = null;
 }
 
