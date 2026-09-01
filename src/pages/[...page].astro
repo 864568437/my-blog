@@ -1,6 +1,8 @@
 ---
 import HomeBlinds from "@components/layout/HomeBlinds.astro";
-import HomeDigest from "@components/layout/HomeDigest.astro";
+import HomeCompass from "@components/layout/HomeCompass.astro";
+import HomeNotice from "@components/layout/HomeNotice.astro";
+import HomeRecent from "@components/layout/HomeRecent.astro";
 import type { GetStaticPaths } from "astro";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import { getSortedPosts } from "@/utils/content-utils";
@@ -18,7 +20,12 @@ const { page } = Astro.props;
 		<!-- 首屏：双层影像揭示层（已承载原 HomeHero 的文字内容），
 		     终幕放大到全屏后经水波纹 / 渐变衔接带过渡到资讯聚合层 -->
 		<HomeBlinds />
-		<!-- 资讯聚合层：左右组件栏 + 最新动态 + 最新文章 -->
-		<HomeDigest posts={page.data} />
+		<!-- 内容区：快速导航 + 近期文章 / 我的动态（容器承载 afterglow veil 背景） -->
+		<div class="home-content" id="home-afterglow">
+			<HomeCompass />
+			<!-- 线条公告：内容源与侧边栏公告共用（content/ziyuan/announcement.md） -->
+			<HomeNotice />
+			<HomeRecent posts={page.data} />
+		</div>
 	</div>
 </MainGridLayout>

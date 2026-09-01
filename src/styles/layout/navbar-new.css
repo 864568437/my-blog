@@ -330,17 +330,12 @@
 }
 
 /* ============================================
- * navbar-wrapper：滚动后背景变透明
+ * navbar-wrapper：常驻显示
+ * 旧版「滚动后背景变透明」规则已移除 ——
+ * 导航栏滚动后不再隐入背景，始终以磨砂玻璃底呈现
  * ============================================ */
 #navbar-wrapper {
-	will-change: background-color;
 	transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1) 0.15s;
-}
-
-#navbar.scrolled ~ #navbar-wrapper,
-#navbar-wrapper:has(#navbar.scrolled),
-#navbar-wrapper.navbar-scrolled {
-	background-color: transparent !important;
 }
 
 /* ============================================

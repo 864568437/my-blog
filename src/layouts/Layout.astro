@@ -911,7 +911,7 @@ function disableAnimation() {
         }
       }
     });
-    window.swup.hooks.on("content:replace", () => {
+    window.swup.hooks.on("content:replace", (visit: any) => {
       // 修复 Swup 过渡：在此处切换布局类，避免 visit:start 时切换导致 Banner 高度跳动
       const bodyElement = document.querySelector("body");
       const isHome = pathsEqual(window.location.pathname, url("/"));
@@ -999,14 +999,36 @@ function disableAnimation() {
         try { applyWallpaperModeToDocument(currentMode); } catch (e) { /* ignore */ }
       });
 
-      // 首页 / 非首页的主内容位置复位（首页首屏为影像揭示层）
+      // ===== 主内容包裹层定位与壁纸区显隐的双向同步 =====
+      // .w-full.z-30 主内容包裹层与 #wallpaper-wrapper 都不在任何 Swup 容器内
+      // （跨页面持久存在），其 top 定位/显隐由各页 SSR 按页面类型计算，
+      // Swup 换内容后必须手动双向同步，否则首页⇄其他页切换时内容区会停在错误的 top 上，
+      // 壁纸区也会在离开首页后保持隐藏（或进入首页后仍显示），表现为"首次切换页面背景错乱"。
+      // 新页面的 SSR 定位值直接从 Swup 解析好的目标文档读取，避免手写布局常量。
+      const newDoc = visit?.to?.document as Document | undefined;
+      const mainShell = document.querySelector(
+        ".w-full.z-30.pointer-events-none",
+      ) as HTMLElement | null;
+      const wallpaperWrapper = document.getElementById("wallpaper-wrapper");
+      const wallpaperMode = document.documentElement.getAttribute("data-wallpaper-mode");
       if (isHome) {
-        const mainContentEl = document.querySelector(".w-full.z-30.pointer-events-none") as HTMLElement | null;
-        if (mainContentEl) {
-          mainContentEl.style.position = "";
-          mainContentEl.style.top = "";
-          mainContentEl.style.marginTop = "";
-          mainContentEl.style.zIndex = "";
+        // 进入首页：首屏由影像揭示层承接，主内容区从视口顶部开始，壁纸区隐藏
+        if (mainShell) {
+          mainShell.style.top = "0";
+          mainShell.style.marginTop = "";
+          mainShell.style.zIndex = "";
+        }
+        wallpaperWrapper?.classList.add("hidden");
+      } else {
+        // 离开首页：恢复非首页的 SSR top 定位，并显示壁纸区（none 模式除外，由 hideAllWallpapers 管控）
+        const newShell = newDoc?.querySelector(
+          ".w-full.z-30.pointer-events-none",
+        ) as HTMLElement | null;
+        if (mainShell && newShell?.style.top) {
+          mainShell.style.top = newShell.style.top;
+        }
+        if (wallpaperWrapper && wallpaperMode !== "none") {
+          wallpaperWrapper.classList.remove("hidden");
         }
       }
 

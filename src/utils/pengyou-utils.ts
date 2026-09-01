@@ -1,6 +1,6 @@
 /**
  * 朋友圈（/pengyou/）数据抓取与整形工具
- * 供 pengyou.astro 与首页 HomeDigest.astro 共用
+ * 供 pengyou.astro 页面使用
  */
 import { type PengyouItem, pengyouConfig } from "@/config/pengyouConfig";
 

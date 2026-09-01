@@ -1,0 +1,139 @@
+/* ============================================
+   首页内容区（home-content）+ 快速导航（HomeCompass）
+   home-content 承接 HomeBlinds 终幕退场的 afterglow veil：
+   初始全透明，随滚动由控制器写入 --home-afterglow-veil 0→1，
+   渐变到不透明后连同下方内容一起盖住 fixed 终幕图。
+   ============================================ */
+
+.home-content {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	/* 首页内容统一容器令牌：与参考页 --max-width:1200px / padding 24px 对齐，
+	   供 compass / notice / recent 三个模块共用，保证宽度一致 */
+	--home-container-w: 75rem;
+	--home-container-pad: 1.5rem;
+}
+
+/* 终幕退场的内容背景层（不含文字）：水平 full-bleed，
+   z-index -1 垫在文字/卡片之下（原 .home-digest::before 的职责迁移） */
+.home-content::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: calc(50% - 50vw);
+	right: calc(50% - 50vw);
+	z-index: -1;
+	background: var(--page-bg);
+	opacity: var(--home-afterglow-veil, 0);
+	pointer-events: none;
+}
+
+/* ── 快速带你前往（HomeCompass） ── */
+.home-compass {
+	position: relative;
+	padding-block: 3.5rem 2.5rem;
+}
+
+.home-compass__inner {
+	width: 100%;
+	max-width: var(--home-container-w, 1200px);
+	margin-inline: auto;
+	padding-inline: var(--home-container-pad, 1.5rem);
+}
+
+.home-compass__header {
+	text-align: center;
+	margin-bottom: 2.25rem;
+}
+
+.home-compass__title {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: var(--deep-text);
+	letter-spacing: 0.05em;
+}
+
+.home-compass__subtitle {
+	margin-top: 0.4rem;
+	font-size: 0.9rem;
+	color: var(--content-meta);
+}
+
+/* 导航条目：flex 居中换行（参考 .compass-grid max-width 900px + gap 16px） */
+.home-compass__grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+	max-width: 900px;
+	margin-inline: auto;
+}
+
+/* 导航条目（参考 .compass-item）：
+   12×16px 内边距、14px 字号、条目最大 160px、gap 12px —— 拉开间距 */
+.home-compass__item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	width: 100%;
+	min-width: 6.5rem;
+	max-width: 160px;
+	border: 1px solid transparent;
+	border-radius: 1rem;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--deep-text);
+	white-space: nowrap;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+/* hover：上浮 + 阴影 + 底部渐变下划线展开（参考 ::after 效果） */
+.home-compass__item::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	width: 0;
+	height: 2px;
+	background: linear-gradient(
+		90deg,
+		var(--primary),
+		color-mix(in oklch, var(--primary) 55%, #fff 10%)
+	);
+	transform: translateX(-50%);
+	transition: width 0.3s ease;
+}
+
+.home-compass__item:hover {
+	color: var(--primary);
+	transform: translateY(-4px);
+	box-shadow: 0 8px 24px color-mix(in oklch, var(--primary) 18%, transparent);
+}
+
+.home-compass__item:hover::after {
+	width: 60%;
+}
+
+.home-compass__icon {
+	flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+	color: var(--primary);
+	transition: transform 0.3s ease;
+}
+
+.home-compass__item:hover .home-compass__icon {
+	transform: scale(1.15) rotate(-5deg);
+}
+
+.home-compass__label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

@@ -1,0 +1,223 @@
+---
+/**
+ * HomeRecent.astro —— 首页「近期文章 / 我的动态」双栏内容区
+ * --------------------------------------------------------------
+ * 参考布局（适配现有内容）：
+ *   左栏「近期文章」：最新 5 篇，序号（01-05）+ 封面缩略图 + 标题 +
+ *                    日期与摘要 + 右侧分类；「更多」入口在栏头右侧
+ *   右栏「我的动态」：dynamic 集合最新 6 条时间线（圆点 + 摘要 + 日期），
+ *                    栏头右侧为「文章 N · 动态 M」统计 + 更多入口
+ * 数据源与 HomeDigest 一致：posts 由 [...page].astro 传入，
+ * 动态经 sortDynamics（置顶优先、时间倒序）排序。
+ */
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+import { Icon } from "astro-icon/components";
+import CoverImage from "@/components/common/CoverImage.astro";
+import { profileConfig, siteConfig } from "@/config";
+import { sortDynamics } from "@/utils/dynamic-utils";
+import {
+	getApiUrlList,
+	processCoverImageSync,
+	shouldAddNoReferrer,
+} from "@/utils/image-utils";
+import {
+	url as buildUrl,
+	getFileDirFromPath,
+	getPostUrlBySlug,
+} from "@/utils/url-utils";
+import "@/styles/components/home-recent.css";
+
+interface Props {
+	/** 已排序的文章集合（由 [...page].astro 传入） */
+	posts?: CollectionEntry<"posts">[];
+}
+
+const { posts } = Astro.props;
+const POST_COUNT = 5;
+const DYNAMIC_COUNT = 6;
+
+const dateFormatter = new Intl.DateTimeFormat(siteConfig.lang.replace("_", "-"), {
+	year: "numeric",
+	month: "2-digit",
+	day: "2-digit",
+});
+
+// ── 近期文章：封面解析复用 CoverImage 组件机制（与 PostCard 一致） ──
+// 无封面时兜底随机图（image || "api"）；CoverImage 内部处理：
+// 本地图片 glob 导入 / API 失败依次重试 / 全部失败显示 fallback 图
+
+const recentPosts = await Promise.all(
+	(posts ?? []).slice(0, POST_COUNT).map(async (entry) => {
+		const { remarkPluginFrontmatter } = await render(entry);
+		const image = entry.data.image || "api";
+		const processedImage = processCoverImageSync(image, entry.id);
+		return {
+			title: entry.data.title,
+			url: getPostUrlBySlug(entry.id),
+			dateText: dateFormatter.format(entry.data.published),
+			description:
+				entry.data.description ||
+				remarkPluginFrontmatter?.excerpt ||
+				"暂无文章简介，点击查看完整内容。",
+			category: entry.data.category?.trim() || "未分类",
+			cover: processedImage
+				? {
+						src: processedImage,
+						apiUrls: getApiUrlList(image, entry.id),
+						basePath: getFileDirFromPath(entry.filePath || ""),
+					}
+				: null,
+		};
+	}),
+);
+
+// ── 我的动态：时间线摘要（纯文本）+ 正文图片缩略图 ──
+const markdownProcessor = await createMarkdownProcessor();
+
+// 从动态 markdown 正文提取最多 3 张图片（图床 markdown 图片 / 内联 img）
+function extractDynamicImages(body: string): string[] {
+	const images: string[] = [];
+	const re =
+		/!\[[^\]]*\]\(([^)\s]+)[^)]*\)|<img[^>]+src=["']([^"'\s]+)["']/g;
+	let m: RegExpExecArray | null;
+	while ((m = re.exec(body)) !== null && images.length < 3) {
+		const raw = m[1] || m[2];
+		if (!raw) continue;
+		if (raw.startsWith("http")) {
+			images.push(raw);
+		} else if (raw.startsWith("/")) {
+			// 站内 public 资源
+			images.push(buildUrl(raw));
+		}
+	}
+	return images;
+}
+
+const allDynamics = sortDynamics(await getCollection("dynamic"));
+const recentDynamics = await Promise.all(
+	allDynamics.slice(0, DYNAMIC_COUNT).map(async (entry) => {
+		const body = entry.body || "";
+		const rendered = await markdownProcessor.render(body);
+		const text = rendered.code
+			.replace(/<[^>]*>/g, "")
+			.replace(/\s+/g, " ")
+			.trim();
+		const images = extractDynamicImages(body).map((img) => ({
+			src: img,
+			referrerPolicy: shouldAddNoReferrer(img) ? ("no-referrer" as const) : "",
+		}));
+		return {
+			excerpt: text || "分享了一条动态",
+			images,
+			dateText: dateFormatter.format(entry.data.published),
+			dateIso: entry.data.published.toISOString(),
+		};
+	}),
+);
+
+const postTotal = (posts ?? []).length;
+const dynamicTotal = allDynamics.length;
+const profileName = profileConfig.name || "博主";
+---
+
+<section class="home-recent" aria-label="近期内容">
+	<div class="home-recent__inner">
+		<div class="home-recent__grid">
+			{/* 左栏：近期文章 */}
+			<div class="home-recent__col">
+				<header class="home-recent__header">
+					<h2 class="home-recent__title">近期文章</h2>
+					<a class="home-recent__more" href={buildUrl("/posts/")}>
+						<span>更多</span>
+						<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
+					</a>
+				</header>
+				<!-- 线条块包裹 + 固定高度内部滚动（参考页 article-wrapper/article-feed 结构） -->
+				<div class="home-recent__wrapper">
+					<ul class="home-recent__scroll">
+						{recentPosts.map((post, index) => (
+							<li class="recent-row">
+								<a
+									href={post.url}
+									aria-label={`阅读文章：${post.title}`}
+									class="recent-row__link"
+								>
+									<span class="recent-row__index">
+										{(index + 1).toString().padStart(2, "0")}
+									</span>
+									{post.cover && (
+										<CoverImage
+											src={post.cover.src}
+											basePath={post.cover.basePath}
+											class="recent-row__thumb"
+											alt={`文章配图：${post.title}`}
+											loading="lazy"
+											preview={true}
+											apiUrls={post.cover.apiUrls}
+										/>
+									)}
+									<span class="recent-row__body">
+										<span class="recent-row__title">{post.title}</span>
+										<span class="recent-row__meta">
+											<time datetime={post.dateText}>{post.dateText}</time>
+											<span class="recent-row__desc">{post.description}</span>
+										</span>
+									</span>
+									<span class="recent-row__category">{post.category}</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+
+			{/* 右栏：我的动态（时间线，结构与左栏对称：栏头 + 包裹滚动） */}
+			<div class="home-recent__col">
+				<header class="home-recent__header">
+					<h2 class="home-recent__title">我的动态</h2>
+					<span class="home-recent__stats">
+						{postTotal} 篇文章 · {dynamicTotal} 条动态
+					</span>
+					<a class="home-recent__more" href={buildUrl("/dynamic/")} aria-label={`查看${profileName}的全部动态`}>
+						<span>更多</span>
+						<Icon name="material-symbols:arrow-forward-rounded" style="width:1em;height:1em;" />
+					</a>
+				</header>
+				<div class="home-recent__wrapper">
+					<ul class="home-recent__scroll">
+						{recentDynamics.map((d) => (
+							<li class="timeline-row">
+								<a href={buildUrl("/dynamic/")} class="timeline-row__link">
+									<span class="timeline-row__marker" aria-hidden="true"></span>
+									<span class="timeline-row__content">
+										<span class="timeline-row__top">
+											<span class="timeline-row__excerpt">{d.excerpt}</span>
+											<time class="timeline-row__date" datetime={d.dateIso}>
+												{d.dateText}
+											</time>
+										</span>
+										{d.images.length > 0 && (
+											<span class="timeline-row__images">
+												{d.images.map((img) => (
+													<img
+														class="timeline-row__img"
+														src={img.src}
+														alt="动态图片"
+														loading="lazy"
+														decoding="async"
+														referrerpolicy={img.referrerPolicy || undefined}
+													/>
+												))}
+											</span>
+										)}
+									</span>
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

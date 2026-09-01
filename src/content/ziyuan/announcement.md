@@ -1,6 +1,6 @@
 ---
 title: "公告"
-content: "疯狂修改中"
+content: " 公告 : 疯狂修改中"
 closable: true
 link:
   enable: true

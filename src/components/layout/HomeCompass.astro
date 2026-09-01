@@ -1,0 +1,118 @@
+---
+/**
+ * HomeCompass.astro —— 首页「快速带你前往」导航区
+ * --------------------------------------------------------------
+ * 参考布局：居中主标题 + 副标题 + 多列图标导航网格（桌面 5 列，移动端自适应）。
+ * 条目按站点实际页面组织，且随 siteConfig.pages 开关自动增减：
+ * 关闭的页面不再出现（与导航栏 navBarConfig 的开关逻辑同源）。
+ */
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "@/config";
+import { url as buildUrl } from "@/utils/url-utils";
+import "@/styles/components/home-compass.css";
+
+interface CompassItem {
+	name: string;
+	url: string;
+	icon: string;
+}
+
+const pages = siteConfig.pages;
+
+// 基础条目（无页面开关，始终展示）
+const baseItems: CompassItem[] = [
+	{ name: "文章", url: buildUrl("/posts/"), icon: "material-symbols:article" },
+	{ name: "归档", url: buildUrl("/archive/"), icon: "material-symbols:archive" },
+	{
+		name: "分类",
+		url: buildUrl("/categories/"),
+		icon: "material-symbols:folder-open",
+	},
+	// 站点无独立标签页，标签筛选由归档页承载
+	{ name: "标签", url: buildUrl("/archive/"), icon: "material-symbols:tag-rounded" },
+	{
+		name: "动态",
+		url: buildUrl("/dynamic/"),
+		icon: "material-symbols:dynamic-feed-rounded",
+	},
+	{
+		name: "项目",
+		url: buildUrl("/projects/"),
+		icon: "material-symbols:public",
+	},
+	{
+		name: "朋友的动态",
+		url: buildUrl("/pengyou/"),
+		icon: "material-symbols:group",
+	},
+	{ name: "友链", url: buildUrl("/friends/"), icon: "material-symbols:link-rounded" },
+	{
+		name: "留言板",
+		url: buildUrl("/guestbook/"),
+		icon: "material-symbols:edit-outline",
+	},
+	{ name: "关于", url: buildUrl("/about/"), icon: "material-symbols:info" },
+];
+
+// 受开关控制的条目：关闭时自动消失（关了就干净消失）
+const switchedItems: (CompassItem | null)[] = [
+	pages.gallery
+		? {
+				name: "相册",
+				url: buildUrl("/gallery/"),
+				icon: "material-symbols:photo-library",
+			}
+		: null,
+	pages.musicPage
+		? {
+				name: "音乐",
+				url: buildUrl("/music/"),
+				icon: "material-symbols:music-note",
+			}
+		: null,
+	pages.anime
+		? { name: "追番", url: buildUrl("/anime/"), icon: "material-symbols:live-tv" }
+		: null,
+	pages.bangumi
+		? { name: "番组", url: buildUrl("/bangumi/"), icon: "material-symbols:movie" }
+		: null,
+	pages.timeline
+		? {
+				name: "时间轴",
+				url: buildUrl("/timeline/"),
+				icon: "material-symbols:history",
+			}
+		: null,
+	pages.sponsor
+		? {
+				name: "赞助",
+				url: buildUrl("/sponsor/"),
+				icon: "material-symbols:payments-outline-rounded",
+			}
+		: null,
+];
+
+// 插入到「朋友的动态」之前，保持记录类条目聚在一起
+const items: CompassItem[] = [
+	...baseItems.slice(0, 6),
+	...switchedItems.filter((it): it is CompassItem => it !== null),
+	...baseItems.slice(6),
+];
+---
+
+<section class="home-compass" aria-label="快速导航">
+	<div class="home-compass__inner">
+		<header class="home-compass__header">
+			<h2 class="home-compass__title">快速带你前往</h2>
+			<p class="home-compass__subtitle">你想去的地方</p>
+		</header>
+		<nav class="home-compass__grid" aria-label="站点页面导航">
+			{items.map((item) => (
+				<a class="home-compass__item" href={item.url} aria-label={item.name}>
+					<Icon name={item.icon} class="home-compass__icon" />
+					<span class="home-compass__label">{item.name}</span>
+				</a>
+			))}
+		</nav>
+	</div>
+</section>

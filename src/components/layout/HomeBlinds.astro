@@ -7,16 +7,8 @@ const config = homeConfig.homeBlinds;
 const background = config.reveal.backgroundImage;
 const isEnabled = config.enabled && Boolean(background);
 
-/** 衔接过渡带：与壁纸区共用同一套水波纹 / 渐变配置 */
-const wavesConfig = backgroundWallpaper.banner?.waves?.enable;
-const wavesSwitchable = backgroundWallpaper.banner?.waves?.switchable ?? false;
-const wavesEnabledOnDesktop =
-	typeof wavesConfig === "object" ? wavesConfig.desktop : wavesConfig;
-const wavesEnabledOnMobile =
-	typeof wavesConfig === "object" ? wavesConfig.mobile : wavesConfig;
-const shouldRenderWaves =
-	wavesEnabledOnDesktop || wavesEnabledOnMobile || wavesSwitchable;
-
+/** 衔接过渡带：参考页式纯线性渐变（transparent → --page-bg），
+ * 不再渲染水波纹；显隐仍跟随壁纸区的渐变开关联动 */
 const gradientConfig = backgroundWallpaper.banner?.gradient?.enable;
 const gradientSwitchable =
 	backgroundWallpaper.banner?.gradient?.switchable ?? false;
@@ -27,8 +19,8 @@ const gradientEnabledOnMobile =
 const gradientHeight = backgroundWallpaper.banner?.gradient?.height ?? "30vh";
 const shouldRenderGradient =
 	gradientEnabledOnDesktop || gradientEnabledOnMobile || gradientSwitchable;
-// 带高：水波纹占位约 15vh，纯渐变时按配置的渐变高度
-const transitionHeight = shouldRenderWaves ? "15vh" : gradientHeight;
+// 过渡带高度：直接采用渐变配置的高度
+const transitionHeight = gradientHeight;
 
 // 第一层入场标题配置：时长节奏供控制器使用；标题文字已由中央圈内的
 // 主页文字组（data-hero-emblem）取代
@@ -351,81 +343,22 @@ const runtimeConfig = {
 		/>
 	</div>
 
-	<!-- 影像层与内容区的衔接带：水波纹 / 渐变过渡（与壁纸区共用设置与开关）。
+	<!-- 影像层与内容区的衔接带：参考页式纯线性渐变（transparent → --page-bg）。
 	     负 margin 上叠到终幕全屏图底缘；初始隐藏，控制器随终幕放大进度淡入 -->
-	{(shouldRenderWaves || shouldRenderGradient) && (
+	{shouldRenderGradient && (
 		<div
 			class="home-blinds-transition"
 			data-home-blinds-transition
 			style={`height: ${transitionHeight}; margin-top: -${transitionHeight};`}
 			aria-hidden="true"
 		>
-			{shouldRenderGradient && (
-				<div
-					class:list={[
-						"home-blinds-transition__gradient",
-						// 水波纹默认优先：带内同时渲染两种过渡时先藏渐变，
-						// 用户在设置里关掉水波纹后由 CSS 属性规则接管显示
-						{ hidden: shouldRenderWaves },
-						{ hidden: !gradientEnabledOnMobile },
-						{ "md:hidden": !gradientEnabledOnDesktop },
-					]}
-				/>
-			)}
-			{shouldRenderWaves && (
-				<div
-					class:list={[
-						"home-blinds-transition__waves waves",
-						{ hidden: !wavesEnabledOnMobile },
-						{ "md:hidden": !wavesEnabledOnDesktop },
-						{ "md:block": wavesEnabledOnDesktop },
-					]}
-					id="home-blinds-waves"
-					style="transform: translateZ(0); will-change: fill;">
-					<svg
-						class="waves"
-						xmlns="http://www.w3.org/2000/svg"
-						xmlns:xlink="http://www.w3.org/1999/xlink"
-						viewBox="0 24 150 28"
-						preserveAspectRatio="none"
-						shape-rendering="geometricPrecision"
-					>
-						<defs>
-							<path
-								id="home-blinds-gentle-wave"
-								d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v48h-352z"
-							>
-							</path>
-						</defs>
-						<g class="parallax">
-							<use
-								xlink:href="#home-blinds-gentle-wave"
-								x="48"
-								y="0"
-								class="opacity-25 fill-(--page-bg)"
-							></use>
-							<use
-								xlink:href="#home-blinds-gentle-wave"
-								x="48"
-								y="3"
-								class="opacity-50 fill-(--page-bg)"
-							></use>
-							<use
-								xlink:href="#home-blinds-gentle-wave"
-								x="48"
-								y="5"
-								class="opacity-65 fill-(--page-bg)"
-							></use>
-							<use
-								xlink:href="#home-blinds-gentle-wave"
-								x="48"
-								y="7"
-								class="opacity-75 fill-(--page-bg)"
-							></use>
-						</g>
-					</svg>
-				</div>
-			)}
+			<div
+				class:list={[
+					"home-blinds-transition__gradient",
+					{ hidden: !gradientEnabledOnMobile },
+					{ "md:hidden": !gradientEnabledOnDesktop },
+				]}
+			/>
 		</div>
 	)}
 

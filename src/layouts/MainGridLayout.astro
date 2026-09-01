@@ -283,10 +283,15 @@ const mobileQuality = Math.round(configQuality * 0.9);
 
 <NavMenuPanel links={navBarConfig.links} />
 
-<!-- Wallpaper - 首页不渲染壁纸区（首屏由影像揭示层全屏承接），其余页面照常 -->
-{!isHomePageCheck && (isWallpaperSwitchable || isBannerMode || isFullscreenMode || isOverlayMode) && (
+<!-- Wallpaper - 首页渲染但以 hidden 占位（首屏由影像揭示层全屏承接）：
+     该节点不在任何 Swup 容器内、跨页面持久存在，且 #banner-dim/#banner-overlay 两个
+     Swup 容器位于其内部——若首页不渲染，导航到其他页面时壁纸区凭空消失、
+     两个容器被换到错误的 DOM 位置（占位 div 不在壁纸区内），表现为"首次切换页面背景错乱"。
+     首页的显隐由 setting-utils 的 showBannerMode/showFullscreenMode 首页分支接管 -->
+{(isWallpaperSwitchable || isBannerMode || isFullscreenMode || isOverlayMode) && (
 <div id="wallpaper-wrapper" class:list={[
 	`z-10 w-full transition duration-700 overflow-hidden ${mobileNonHomeBannerClass}`,
+	isHomePageCheck ? 'hidden' : '',
 	isFullscreenMode ? 'wallpaper-fullscreen' : '',
 	(isOverlayMode && !isWallpaperSwitchable) || (isWallpaperSwitchable && !isBannerMode && !isFullscreenMode) ? 'wallpaper-overlay' : '',
 	!isFullscreenMode && !isOverlayMode ? 'absolute' : ''
@@ -531,8 +536,9 @@ const mobileQuality = Math.round(configQuality * 0.9);
 </div>
 )}
 
-{/* 当壁纸未渲染时（壁纸全关 或 首页），添加空的 Swup 占位容器，避免 Swup 找不到容器而回退为整页加载 */}
-{(!(isWallpaperSwitchable || isBannerMode || isOverlayMode) || isHomePageCheck) && (
+{/* 仅当壁纸区完全不渲染时（壁纸全关），才需要独立的空 Swup 占位容器，
+    避免 Swup 找不到 #banner-dim/#banner-overlay 容器而回退为整页加载 */}
+{!(isWallpaperSwitchable || isBannerMode || isOverlayMode || isFullscreenMode) && (
 <>
     <div id="banner-overlay-container" class="hidden"></div>
     <div id="banner-dim-container" class="hidden"></div>

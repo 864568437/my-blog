@@ -1184,13 +1184,13 @@ function setupScenes(context: SetupContext) {
 	/**
 	 * 终幕退场：终幕层恒为 position: fixed（root 直下，无 transform 祖先），
 	 * 全屏图片钉在视口里一动不动，全程保持完全不透明、无模糊；下方内容区
-	 * 背景（不含文字，由 .home-digest::before 承担）初始全透明，随滚动通过
+	 * 背景（不含文字，由 .home-content::before 承担）初始全透明，随滚动通过
 	 * --home-afterglow-veil 从 0 渐变到 1，内容顶到视口顶（约一屏）时背景
 	 * 完全不透明，图片被完全盖住后随即隐藏（防止深处透明区域透出）。滚动
 	 * 回退按同一公式还原，无跳变。
 	 */
 	let exitActive = false;
-	const afterglowHost = document.getElementById("home-digest");
+	const afterglowHost = document.getElementById("home-afterglow");
 	const renderExit = () => {
 		if (!pinTrigger) return;
 		const released = window.scrollY - pinTrigger.end;
