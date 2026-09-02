@@ -8,9 +8,11 @@ const ROUTE = "/sponsor/";
 
 export async function onRequest(context) {
 	const geo = context.request.eo && context.request.eo.geo;
-	const code = String(
-		(geo && (geo.countrycode || geo.countryCode)) || "",
-	).toUpperCase();
+		// 字段名 countryCodeAlpha2 由 EdgeOne 边缘函数 GEO 属性定义（ISO 3166-1 alpha-2）
+		// 参考：https://cloud.tencent.com/document/product/1552/81902
+		const code = String(
+			(geo && geo.countryCodeAlpha2) || "",
+		).toUpperCase();
 	if (BLOCKED_COUNTRY_CODES.indexOf(code) >= 0) {
 		return new Response("404 Not Found", { status: 404 });
 	}
