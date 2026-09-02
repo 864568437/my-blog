@@ -1,9 +1,31 @@
 import type { SiteConfig } from "@/types/config";
 import { fontConfig } from "./fontConfig";
+import { resolvePageToggles } from "../utils/page-toggle-utils";
 
 // 定义站点语言
 // 语言代码，例如：'zh_CN', 'zh_TW', 'en', 'ja', 'ru'。
 const SITE_LANG = "zh_CN";
+
+// 页面开关配置 - 控制特定页面的访问权限，设为false会返回404并自动隐藏对应的导航栏菜单项
+// 部署平台可用环境变量 PUBLIC_PAGES_<键名大写>=true/false 覆盖，无需修改配置文件
+const pages = resolvePageToggles({
+	// 赞助页面开关
+	sponsor: true,
+	// 留言板页面开关，需要配置评论系统
+	guestbook: true,
+	// 番组计划页面开关
+	bangumi: true,
+	// 追番页面开关
+	anime: true,
+	// 相册页面开关
+	gallery: true,
+	// 音乐页面开关
+	musicPage: true,
+	// 更新日志页面开关
+	timeline: true,
+	// 日历页面开关
+	calendar: true,
+});
 
 export const siteConfig: SiteConfig = {
 	// 站点标题
@@ -177,24 +199,8 @@ export const siteConfig: SiteConfig = {
 	},
 
 	// 页面开关配置 - 控制特定页面的访问权限，设为false会返回404
-	pages: {
-		// 赞助页面开关
-		sponsor: true,
-		// 留言板页面开关，需要配置评论系统
-		guestbook: true,
-		// 番组计划页面开关
-		bangumi: true,
-		// 追番页面开关
-		anime: true,
-		// 相册页面开关
-		gallery: true,
-		// 音乐页面开关
-		musicPage: true,
-		// 更新日志页面开关
-		timeline: true,
-		// 日历页面开关
-		calendar: true,
-	},
+	// 在本配置文件顶部pages定义，支持 PUBLIC_PAGES_<键名大写> 环境变量覆盖
+	pages,
 
 	// 归档页面内容开关 - 控制归档页面显示哪些类型的内容
 	archive: {
