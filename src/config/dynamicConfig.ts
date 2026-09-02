@@ -9,7 +9,7 @@ export const dynamicConfig: DynamicConfig = {
 	// 页面描述：用于 <meta name="description">
 	description: momentsPageConfig.description || "记录生活中的点点滴滴",
 	// 是否为每条动态启用评论，需要先在 commentConfig.ts 启用评论系统
-	showComment: true,
+	showComment: false,
 	// 每页条数：至少 1，传 0 会被钳制
 	itemsPerPage: 10,
 	// 数据源 URL：站内相对路径或以 http 开头的绝对 URL（外部 Memos 等）
