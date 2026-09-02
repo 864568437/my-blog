@@ -18,7 +18,7 @@ export const REGION_BLOCK_ROUTES: Record<string, boolean> = {
 	// 关于
 	"/about/": false,
 	// 动态
-	"/dynamic/": true,
+	"/dynamic/": false,
 	// 相册
 	"/gallery/": false,
 	// 音乐

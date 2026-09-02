@@ -58,14 +58,36 @@ export async function onRequest(context) {
 		).toUpperCase();
 	if (BLOCKED_COUNTRY_CODES.indexOf(code) >= 0) {
 		// 大陆访问：静默重定向回首页（不展示 404 错误页，不缓存该响应）
+		// 注意 Response.redirect 返回的 headers 不可变，用标准 Response 构造
 		const home = new URL("/", context.request.url).toString();
-		const res = Response.redirect(home, 302);
-		res.headers.set("Cache-Control", "no-store");
-		return res;
+		return new Response(null, {
+			status: 302,
+			headers: { Location: home, "Cache-Control": "no-store" },
+		});
 	}
 	// 非拦截地区：fetch(request) 访问 EdgeOne 节点缓存/回源获取 Pages 静态资源
 	// （HOST 与客户端请求一致，符合回源条件；CLI 本地调试不支持该特性，线上可用）
 	return fetch(context.request);
+}
+`;
+
+// 区域探测接口：返回访问者国家码，供前端按真实 IP 校准入口的显示/隐藏
+const regionProbe = `${MARKER}
+// EdgeOne Pages 边缘函数：区域探测接口
+// 由 scripts/sync-region-functions.mjs 生成，请勿直接编辑本文件
+
+export function onRequest(context) {
+	const geo = context.request.eo && context.request.eo.geo;
+	// 字段名 countryCodeAlpha2 由 EdgeOne 边缘函数 GEO 属性定义（ISO 3166-1 alpha-2）
+	const code = String(
+		(geo && geo.countryCodeAlpha2) || "",
+	).toUpperCase();
+	return new Response(JSON.stringify({ region: code }), {
+		headers: {
+			"content-type": "application/json; charset=utf-8",
+			"cache-control": "no-store",
+		},
+	});
 }
 `;
 
@@ -74,6 +96,9 @@ for (const route of routes) {
 	mkdirSync(dirname(file), { recursive: true });
 	writeFileSync(file, template(route));
 }
+
+// 固定生成区域探测接口
+writeFileSync(join(FUNCTIONS_DIR, "region.js"), regionProbe);
 
 console.log(
 	`[sync-region-functions] 已同步 ${routes.length} 个屏蔽路由: ${routes.join(", ") || "(无)"}`,

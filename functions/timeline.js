@@ -15,10 +15,12 @@ export async function onRequest(context) {
 		).toUpperCase();
 	if (BLOCKED_COUNTRY_CODES.indexOf(code) >= 0) {
 		// 大陆访问：静默重定向回首页（不展示 404 错误页，不缓存该响应）
+		// 注意 Response.redirect 返回的 headers 不可变，用标准 Response 构造
 		const home = new URL("/", context.request.url).toString();
-		const res = Response.redirect(home, 302);
-		res.headers.set("Cache-Control", "no-store");
-		return res;
+		return new Response(null, {
+			status: 302,
+			headers: { Location: home, "Cache-Control": "no-store" },
+		});
 	}
 	// 非拦截地区：fetch(request) 访问 EdgeOne 节点缓存/回源获取 Pages 静态资源
 	// （HOST 与客户端请求一致，符合回源条件；CLI 本地调试不支持该特性，线上可用）

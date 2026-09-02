@@ -182,27 +182,55 @@ const siteLang = lang.replace("_", "-");
       }}
     >
       (function () {
+        // 先按浏览器时区预判，避免闪烁；随后用边缘探测接口按真实 IP 校准
+        var styleInjected = false;
+        function markRegion(isBlocked) {
+          if (isBlocked) {
+            document.documentElement.setAttribute("data-region-cn", "1");
+            if (!styleInjected) {
+              styleInjected = true;
+              var css = regionPages
+                .map(function (page) {
+                  return 'html[data-region-cn="1"] a[href*="/' + page + '"]';
+                })
+                .join(",");
+              document.head.insertAdjacentHTML(
+                "beforeend",
+                "<style>" + css + "{display:none!important}</style>",
+              );
+            }
+          } else {
+            document.documentElement.removeAttribute("data-region-cn");
+          }
+        }
         try {
-          // 按浏览器时区识别中国大陆访问者（边缘层按 IP Geo 精准拦截）
           var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-          var isCN =
+          var tzHit =
             regionCountries.indexOf("CN") >= 0 &&
             /^Asia\/(Shanghai|Chongqing|Harbin|Urumqi|Kashgar)$/i.test(tz);
-          if (isCN) {
-            document.documentElement.setAttribute("data-region-cn", "1");
-            // 动态注入样式：隐藏全站指向被隐藏页面的链接（导航/快捷坞/页脚）
-            var css = regionPages
-              .map(function (page) {
-                return 'html[data-region-cn="1"] a[href*="/' + page + '"]';
-              })
-              .join(",");
-            document.head.insertAdjacentHTML(
-              "beforeend",
-              "<style>" + css + "{display:none!important}</style>",
-            );
-          }
+          if (tzHit) markRegion(true);
         } catch (e) {
           /* 忽略不支持时区 API 的环境 */
+        }
+        // IP 精确校准：探测接口返回访问者真实国家码（挂代理/时区不符的
+        // 访问者也会被纠正）；接口不可用时保留时区预判结果
+        try {
+          fetch(new URL("region", document.baseURI).toString(), {
+            cache: "no-store",
+          })
+            .then(function (r) {
+              return r.ok ? r.json() : null;
+            })
+            .then(function (d) {
+              if (d && d.region) {
+                markRegion(regionCountries.indexOf(d.region) >= 0);
+              }
+            })
+            .catch(function () {
+              /* 探测失败保持时区预判 */
+            });
+        } catch (e) {
+          /* 忽略 */
         }
       })();
     </script>
