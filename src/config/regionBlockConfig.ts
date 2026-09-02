@@ -33,7 +33,7 @@ export const REGION_BLOCKED_COUNTRY_CODES = ["CN"];
 // ─────────────────────────────────────────────────────────────
 // 以下为派生值，一般不需要改动
 
-// 站内链接隐藏片段（"/guestbook/" → "/guestbook"，匹配 href）
+// 站内链接隐藏片段（"/guestbook/" → "guestbook"，供 CSS 选择器拼接 href*="/guestbook"）
 export const REGION_BLOCKED_PAGES = Object.keys(REGION_BLOCK_ROUTES)
 	.filter((route) => REGION_BLOCK_ROUTES[route])
-	.map((route) => route.replace(/\/$/, ""));
+	.map((route) => route.replace(/^\/|\/$/g, ""));
