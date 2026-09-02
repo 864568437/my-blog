@@ -6,7 +6,7 @@
 const BLOCKED_COUNTRY_CODES = ["CN"];
 const ROUTE = "/sponsor/";
 
-export function onRequest(context) {
+export async function onRequest(context) {
 	const geo = context.request.eo && context.request.eo.geo;
 	const code = String(
 		(geo && (geo.countrycode || geo.countryCode)) || "",
@@ -14,6 +14,7 @@ export function onRequest(context) {
 	if (BLOCKED_COUNTRY_CODES.indexOf(code) >= 0) {
 		return new Response("404 Not Found", { status: 404 });
 	}
-	// 非拦截地区：透传 Pages 静态资源
-	return context.env.assts.fetch(context.request);
+	// 非拦截地区：fetch(request) 访问 EdgeOne 节点缓存/回源获取 Pages 静态资源
+	// （HOST 与客户端请求一致，符合回源条件；CLI 本地调试不支持该特性，线上可用）
+	return fetch(context.request);
 }
