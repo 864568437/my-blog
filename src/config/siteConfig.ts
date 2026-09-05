@@ -27,6 +27,29 @@ const pages = resolvePageToggles({
 	calendar: true,
 });
 
+// 区域屏蔽配置 - 选择哪些页面对指定国家/地区的访问者屏蔽，设为 true 后：
+// · 边缘层：构建时自动生成 EdgeOne 边缘函数，该地区访问者访问会被静默 302 回首页
+// · 前端：自动隐藏全站指向该页面的入口链接（导航栏/快速前往/快捷坞/页脚）
+// 构建由 scripts/sync-region-functions.mjs 自动同步，无需手动管理 functions/
+const regionBlockRoutes: Record<string, boolean> = {
+	// 留言板
+	"/guestbook/": false,
+	// 生活的留言板
+	"/life/guestbook/": false,
+	// 赞助
+	"/sponsor/": false,
+	// 关于
+	"/about/": false,
+	// 动态
+	"/dynamic/": false,
+	// 相册
+	"/gallery/": false,
+	// 音乐
+	"/music/": false,
+	// 更新日志
+	"/timeline/": false,
+};
+
 export const siteConfig: SiteConfig = {
 	// 站点标题
 	title: "Fqzlr的博客",
@@ -43,6 +66,13 @@ export const siteConfig: SiteConfig = {
 
 	// 项目仓库地址（时间线页面 commit 链接使用）
 	repoUrl: "https://github.com/fqzlr/fqzlr-bk",
+
+	// 区域屏蔽配置：路由开关在文件顶部 regionBlockRoutes 定义
+	// countryCodes 为屏蔽的国家/地区码（ISO 3166-1 alpha-2）
+	regionBlock: {
+		routes: regionBlockRoutes,
+		countryCodes: ["CN"],
+	},
 
 	// 站点关键词
 	keywords: [

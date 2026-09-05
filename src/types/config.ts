@@ -134,6 +134,15 @@ export type SiteConfig = {
 	// 项目仓库地址，用于时间线页面生成 commit 链接
 	repoUrl?: string;
 
+	// 区域屏蔽配置：指定国家/地区的访问者无法访问 routes 中设为 true 的页面
+	// （边缘函数 302 静默拦截 + 前端自动隐藏全站对应入口链接）
+	regionBlock: {
+		// 页面路由 → 是否屏蔽，路径带首尾斜杠，如 "/guestbook/"
+		routes: Record<string, boolean>;
+		// 屏蔽的国家/地区码（ISO 3166-1 alpha-2），如 ["CN"]
+		countryCodes: string[];
+	};
+
 	themeColor: {
 		hue: number;
 		fixed: boolean;
