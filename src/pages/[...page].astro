@@ -1,18 +1,12 @@
 ---
 import HomeBlinds from "@components/layout/HomeBlinds.astro";
-import HomeCompass from "@components/layout/HomeCompass.astro";
-import HomeNotice from "@components/layout/HomeNotice.astro";
-import HomeRecent from "@components/layout/HomeRecent.astro";
 import type { GetStaticPaths } from "astro";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
-import { getSortedPosts } from "@/utils/content-utils";
 
-export const getStaticPaths = (async ({ paginate }) => {
-	const allBlogPosts = await getSortedPosts();
-	return paginate(allBlogPosts, { pageSize: allBlogPosts.length });
+// 首页为单页路由：rest 参数返回 undefined 生成根路径
+export const getStaticPaths = (() => {
+	return [{ params: { page: undefined } }];
 }) satisfies GetStaticPaths;
-
-const { page } = Astro.props;
 ---
 
 <MainGridLayout>
@@ -20,12 +14,8 @@ const { page } = Astro.props;
 		<!-- 首屏：双层影像揭示层（已承载原 HomeHero 的文字内容），
 		     终幕放大到全屏后经水波纹 / 渐变衔接带过渡到资讯聚合层 -->
 		<HomeBlinds />
-		<!-- 内容区：快速导航 + 近期文章 / 我的动态（容器承载 afterglow veil 背景） -->
-		<div class="home-content" id="home-afterglow">
-			<HomeCompass />
-			<!-- 线条公告：内容源与侧边栏公告共用（content/ziyuan/announcement.md） -->
-			<HomeNotice />
-			<HomeRecent posts={page.data} />
-		</div>
+		<!-- 终幕退场跑道：随滚动拉起 page-bg 幕布盖住 fixed 终幕图，
+		     跑道走完页脚才可见（见 home-content.css 注释） -->
+		<div class="home-content" id="home-afterglow" aria-hidden="true"></div>
 	</div>
 </MainGridLayout>

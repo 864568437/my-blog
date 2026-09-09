@@ -8,7 +8,7 @@ export const profileConfig: ProfileConfig = {
 	// 1. public 目录（以 "/" 开头，不优化）："/assets/images/avatar.webp"
 	// 2. src 目录（不以 "/"开头，自动优化但会增加构建时间，推荐）："assets/images/avatar.webp"
 	// 3. 远程 URL："https://example.com/avatar.jpg"
-	avatar: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
+	avatar: "assets/images/touxiang.webp",
 
 	// 下班时间头像（为空则始终使用上方 avatar）
 	avatarOffWork: "assets/images/xiaban.gif",
@@ -19,7 +19,7 @@ export const profileConfig: ProfileConfig = {
 	displayName: "Xiaozhuのblog",
 
 	// 职业/身份标签
-	occupation: "[啥都不会 / 无技术博主]",
+	occupation: "[全靠AI]",
 
 	// ============================================================
 	// 个人签名设置
@@ -35,28 +35,28 @@ export const profileConfig: ProfileConfig = {
 	// showName: true 显示图标和名称，false 只显示图标
 	// ============================================================
 	links: [
-		{
-			name: "QQ群",
-			icon: "simple-icons:tencentqq",
-			url: "https://qm.qq.com/q/wrmF4FI9pu",
-			showName: false,
-		},
+		// {
+		// 	name: "QQ群",
+		// 	icon: "simple-icons:tencentqq",
+		// 	url: "https://qm.qq.com/q/wrmF4FI9pu",
+		// 	showName: false,
+		// },
 		{
 			name: "Bilibili",
 			icon: "simple-icons:bilibili",
-			url: "https://space.bilibili.com/2017273493",
+			url: "https://space.bilibili.com/3711065",
 			showName: false,
 		},
 		{
 			name: "GitHub",
 			icon: "simple-icons:github",
-			url: "https://github.com/fqzlr",
+			url: "https://github.com/864568437",
 			showName: false,
 		},
 		{
 			name: "Email",
 			icon: "material-symbols:mail-outline",
-			url: "mailto:fqzlr@outlook.com",
+			url: "mailto:i864568437@outlook.com",
 			showName: false,
 		},
 		{

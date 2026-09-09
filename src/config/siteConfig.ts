@@ -58,7 +58,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "Xiaozhu",
 
 	// 站点 URL
-	site_url: "",
+	site_url: "https://xiaozhu.one",
 
 	// 站点描述
 	description:
@@ -110,7 +110,7 @@ export const siteConfig: SiteConfig = {
 	// Favicon 配置
 	favicon: [
 		{
-			src: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
+			src: "assets/images/touxiang.webp",
 			sizes: "any",
 		},
 	],
@@ -125,7 +125,7 @@ export const siteConfig: SiteConfig = {
 		// 4. 网络图片: { type: "url", value: "https://example.com/logo.png", alt: "Logo" }
 		logo: {
 			type: "url",
-			value: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
+			value: "assets/images/touxiang.webp",
 			alt: "logo",
 		},
 		// 导航栏标题

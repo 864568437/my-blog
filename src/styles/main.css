@@ -46,9 +46,7 @@
 @import './components/post-card.css';
 @import './components/page-title.css';
 @import './components/home-blinds.css';
-@import './components/home-compass.css';
-@import './components/home-notice.css';
-@import './components/home-recent.css';
+@import './components/home-content.css';
 @import './components/animated-tabs.css';
 @import './components/article-catalog.css';
 @import './components/page-loader.css';

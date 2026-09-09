@@ -1,0 +1,31 @@
+/* ============================================
+   首页终幕退场跑道（#home-afterglow）
+   终幕层恒为 fixed 全屏图，pin 结束后随滚动由控制器写入
+   --home-afterglow-veil 0→1，::before 的 page-bg 幕布逐渐盖住图片，
+   滚满一屏（t=1）后整层隐藏。
+   跑道高度必须 ≥ 100vh：否则 t 到不了 1，终幕图永远盖住
+   下方的页脚（页脚高度不足一屏，独木难支）。
+   ============================================ */
+
+.home-content {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	min-height: 100vh;
+}
+
+/* 退场幕布（不含文字）：水平 full-bleed，z-index -1 垫在跑道内容之下；
+   .home-content 整体 z-index 2 高于 .home-blinds（z-index 1），
+   故幕布能盖住 fixed 终幕图 */
+.home-content::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: calc(50% - 50vw);
+	right: calc(50% - 50vw);
+	z-index: -1;
+	background: var(--page-bg);
+	opacity: var(--home-afterglow-veil, 0);
+	pointer-events: none;
+}
