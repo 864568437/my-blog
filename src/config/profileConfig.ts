@@ -13,10 +13,10 @@ export const profileConfig: ProfileConfig = {
 	// 下班时间头像（为空则始终使用上方 avatar）
 	avatarOffWork: "assets/images/xiaban.gif",
 
-	name: "Fqzlr", // 名字
+	name: "Xiaozhu", // 名字
 
 	// 首页展示名字（留空则使用 name）
-	displayName: "Fqzlrの博客",
+	displayName: "Xiaozhuのblog",
 
 	// 职业/身份标签
 	occupation: "[啥都不会 / 无技术博主]",
@@ -116,7 +116,7 @@ export const profileConfig: ProfileConfig = {
 
 		// ---------- 角色对话气泡 ----------
 		showSpeech: true,
-		speechChinese: "B站：番茄煮理人？",
+		speechChinese: "B站：伊卡洛斯コ",
 		speechEnglish: "Welcome to my blog, enjoy your stay!",
 	},
 };

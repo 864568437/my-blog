@@ -37,7 +37,7 @@ import {
 } from "@utils/setting-utils";
 import { onMount } from "svelte";
 import Icon from "@/components/common/Icon.svelte";
-import { backgroundWallpaper, siteConfig } from "@/config";
+import { backgroundWallpaper, sakuraConfig, siteConfig } from "@/config";
 import type { WALLPAPER_MODE } from "@/types/config";
 
 let wallpaperMode: WALLPAPER_MODE = $state(backgroundWallpaper.mode);
@@ -119,8 +119,8 @@ const isCarouselSwitchable =
 	backgroundWallpaper.banner?.carousel?.switchable ?? false;
 // 是否允许用户切换全屏透明模式
 const isOverlaySwitchable = backgroundWallpaper.overlay?.switchable ?? true;
-// 是否允许用户切换樱花特效
-const isSakuraSwitchable = true;
+// 是否允许用户切换樱花特效（跟随 sakuraConfig.enable，关闭时特效与开关一并隐藏）
+const isSakuraSwitchable = sakuraConfig.enable;
 
 // 横幅设置是否全部为默认值
 let bannerSettingsIsDefault = $derived(

@@ -13,6 +13,7 @@ import type { LIGHT_DARK_MODE, WALLPAPER_MODE } from "@/types/config";
 import {
 	backgroundWallpaper,
 	expressiveCodeConfig,
+	sakuraConfig,
 	siteConfig,
 } from "../config";
 import { isHomePage as checkIsHomePage } from "./layout-utils";
@@ -22,6 +23,7 @@ declare global {
 	interface Window {
 		initSemifullScrollDetection?: () => void;
 		semifullScrollHandler?: () => void;
+		setSakuraEnabled?: (enabled: boolean) => boolean;
 	}
 }
 
@@ -1175,7 +1177,7 @@ export function applyStoredOverlayValues(): void {
 
 // Sakura effect functions
 export function getDefaultSakuraEnabled(): boolean {
-	return false;
+	return sakuraConfig.enable;
 }
 
 export function getStoredSakuraEnabled(): boolean {
@@ -1200,4 +1202,13 @@ export function setSakuraEnabled(enabled: boolean): void {
 		return;
 	}
 	localStorage.setItem("sakuraEnabled", String(enabled));
+	applySakuraEnabledToDocument(enabled);
+}
+
+export function applySakuraEnabledToDocument(enabled: boolean): void {
+	if (typeof window === "undefined") {
+		return;
+	}
+	// 调用 SakuraEffect.astro 内联脚本暴露的全局接口，立即启动/停止动画
+	window.setSakuraEnabled?.(enabled);
 }

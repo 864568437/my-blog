@@ -10,15 +10,15 @@ const SITE_LANG = "zh_CN";
 // 部署平台可用环境变量 PUBLIC_PAGES_<键名大写>=true/false 覆盖，无需修改配置文件
 const pages = resolvePageToggles({
 	// 赞助页面开关
-	sponsor: true,
+	sponsor: false,
 	// 留言板页面开关，需要配置评论系统
-	guestbook: true,
+	guestbook: false,
 	// 番组计划页面开关
-	bangumi: true,
+	bangumi: false,
 	// 追番页面开关
-	anime: true,
+	anime: false,
 	// 相册页面开关
-	gallery: true,
+	gallery: false,
 	// 音乐页面开关
 	musicPage: true,
 	// 更新日志页面开关
@@ -52,20 +52,20 @@ const regionBlockRoutes: Record<string, boolean> = {
 
 export const siteConfig: SiteConfig = {
 	// 站点标题
-	title: "Fqzlr的博客",
+	title: "Xiaozhu的博客",
 
 	// 站点副标题
-	subtitle: "Fqzlr",
+	subtitle: "Xiaozhu",
 
 	// 站点 URL
-	site_url: "https://blog.fqzlr.top/",
+	site_url: "",
 
 	// 站点描述
 	description:
-		"fqzlr的个人技术博客，专注NAS分享、AI实践、学习笔记与技术总结，与个人成长分享。",
+		"xiaozhu的个人技术博客，专注NAS分享、AI实践、学习笔记与技术总结，与个人成长分享。",
 
 	// 项目仓库地址（时间线页面 commit 链接使用）
-	repoUrl: "https://github.com/fqzlr/fqzlr-bk",
+	repoUrl: "https://github.com/864568437/",
 
 	// 区域屏蔽配置：路由开关在文件顶部 regionBlockRoutes 定义
 	// countryCodes 为屏蔽的国家/地区码（ISO 3166-1 alpha-2）
@@ -76,7 +76,7 @@ export const siteConfig: SiteConfig = {
 
 	// 站点关键词
 	keywords: [
-		"fqzlr",
+		"xiaozhu",
 		"JAVA",
 		"AI",
 		"Astro",
@@ -129,7 +129,7 @@ export const siteConfig: SiteConfig = {
 			alt: "logo",
 		},
 		// 导航栏标题
-		title: "Fqzlr的博客",
+		title: "Xiaozhu的博客",
 		// 悬停时显示的互动颜文字
 		hoverTitle: "w(ﾟДﾟ)w 不要走！再看看嘛！",
 		// 全宽导航栏，导航栏是否占满屏幕宽度，true：占满，false：不占满
@@ -139,18 +139,18 @@ export const siteConfig: SiteConfig = {
 	},
 
 	// 站点开始日期，用于统计运行天数
-	siteStartDate: "2026-04-12",
+	siteStartDate: "2026-09-09",
 
 	// 门户区配置
 	portal: {
 		announcement: {
 			enable: true,
-			text: "欢迎来到Fqzlr的博客！专注NAS分享、AI实践、学习笔记与技术总结。",
+			text: "欢迎来到Xiaozhu的博客！专注NAS分享、AI实践、学习笔记与技术总结。",
 		},
 		dailyQuote: {
 			enable: true,
 			quotes: [
-				{ text: "躬身入局，心为主理，行有尺度，自持本心", source: "Fqzlr" },
+				{ text: "躬身入局，心为主理，行有尺度，自持本心", source: "Xiaozhu" },
 			],
 		},
 		recentPostsCount: 3,
@@ -251,7 +251,7 @@ export const siteConfig: SiteConfig = {
 	},
 
 	// 分类导航栏开关，在首页和归档页顶部显示分类快捷导航
-	categoryBar: true,
+	categoryBar: false,
 
 	// 文章列表布局配置
 	postListLayout: {
