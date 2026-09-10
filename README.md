@@ -3,7 +3,7 @@
 <div align="center">
 
 # Xiaozhu 的博客
-> 基于 Xiaozhu 主题的个人博客网站，构建于 Astro 框架之上
+> 基于 Firefly 主题的个人博客网站，构建于 Astro 框架之上
 >
 > ![Node.js >= 22](https://img.shields.io/badge/node.js-%3E%3D22-brightgreen)
 ![pnpm >= 9](https://img.shields.io/badge/pnpm-%3E%3D9-blue)
