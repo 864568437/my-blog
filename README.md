@@ -2,7 +2,7 @@
 
 <div align="center">
 
-# Fqzlr 的博客
+# Xiaozhu 的博客
 > 基于 Firefly 主题的个人博客网站，构建于 Astro 框架之上
 >
 > ![Node.js >= 22](https://img.shields.io/badge/node.js-%3E%3D22-brightgreen)
@@ -20,11 +20,11 @@
 **[简体中文](README.md)** | **[English](_backup/README.en.md)**
 
 🚀 在线站点：
-[**🌐 Fqzlr的博客**](https://blog.fqzlr.top/)
+[**🌐 Xiaozhu的博客**](https://blog.zhujs.dpdns.org/)
 
 >[!TIP]
 >
->这是 Fqzlr 的个人技术博客，基于 Firefly 主题模板二次开发。专注 NAS 分享、AI 实践、学习笔记与技术总结，以及个人成长分享。
+>这是 Xiaozhu 的个人技术博客，基于 Firefly 主题模板二次开发。专注 NAS 分享、AI 实践、学习笔记与技术总结，以及个人成长分享。
 
 ## ✨ 功能特性
 
