@@ -12,8 +12,8 @@
  * 与 src/components/edit/MomentsEditor.svelte 等保持实现风格一致：
  *   - pageKey 必须与 src/config/sidebarConfig.ts 中对应侧边栏按钮
  *     配置的 pageKey 一致（此处为 "dynamic"）；
- *   - 任何 modify 行为都通过 _draft / _deleted 软标记，最终在 submit
- *     阶段过滤并序列化为 JSON 提交到 src/content/dynamic.json。
+ *   - 任何 modify 行为都通过 _draft / _deleted 软标记，提交时由 cleanItems
+ *     过滤已删条目、剥离内部标记后序列化为 JSON 提交到 src/content/dynamic.json。
  *
  * ⚠️ 当前提交目标为 JSON 文件，而 /api/dynamic.json.ts 端点目前仅
  *    读取 src/content/dynamic/*.md。如需启用本编辑器落库，请同步
@@ -121,10 +121,25 @@ function sortDynamics(items: DynamicItem[]): DynamicItem[] {
  * - sha 在 loadDynamics 时通过 getRepoFileMeta 从 GitHub 获取；
  *   dynamic.json 已存在于仓库中，缺失 sha 的 PUT 会被 GitHub 以 422 拒绝。
  */
+/**
+ * 提交/草稿共用的净化工件：剔除已软删除条目、剥离 _draft/_deleted 内部标记。
+ * 不净化会把删除标记连同条目一起写进 dynamic.json（前台虽不显示，文件里残留尸体）。
+ */
+function cleanItems(items: DynamicItem[]): DynamicItem[] {
+	return items
+		.filter((d) => !d._deleted)
+		.map((d) => {
+			const copy: DynamicItem = { ...d };
+			delete copy._draft;
+			delete copy._deleted;
+			return copy;
+		});
+}
+
 const drafts = setupRepoDrafts({
 	pageKey,
 	pageName,
-	getContent: () => JSON.stringify(dynamics, null, 2),
+	getContent: () => JSON.stringify(cleanItems(dynamics), null, 2),
 	setContent: (v) => {
 		try {
 			dynamics = JSON.parse(v);
@@ -367,8 +382,9 @@ async function submitChanges() {
 		const ok = await drafts.submitDrafts();
 		if (ok) {
 			showToast("提交成功！页面稍后将刷新", "success");
-			originalDynamics = deepClone(dynamics.filter((d) => !d._deleted));
-			dynamics = deepClone(originalDynamics);
+			const cleaned = cleanItems(dynamics);
+			originalDynamics = deepClone(cleaned);
+			dynamics = deepClone(cleaned);
 			editingIndex = -1;
 			setTimeout(() => window.location.reload(), 1500);
 		} else {
