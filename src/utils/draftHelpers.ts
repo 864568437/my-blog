@@ -9,7 +9,6 @@ import {
 	getDraftsByPage,
 	getRepoFile,
 	registerSubmitHandler,
-	removeDraft,
 	saveDraft,
 	showToast,
 	updateRepoFile,
@@ -92,25 +91,24 @@ export function setupRepoDrafts(ctx: RepoDraftContext) {
 		path: string,
 		isEdit: boolean,
 	): Promise<boolean> {
-		const branch =
-			typeof window !== "undefined"
-				? (window as any).__DEPLOY_BRANCH__
-				: undefined;
-		const commitMsg = ctx.getCommitMsg
-			? ctx.getCommitMsg(isEdit)
-			: isEdit
-				? `chore: update ${pageName}`
-				: `chore: create ${pageName}`;
 		let ok = false;
 		try {
 			let actualSha = sha;
-			if (isEdit && !actualSha) {
+			if (!actualSha) {
+				// sha 缺失时先探测远端文件：已存在的文件不带 sha 直接 PUT 会被
+				// GitHub 以 422 拒绝，必须改走 update
 				const existing = await getRepoFile(path);
-				if (existing && existing.sha) {
+				if (existing?.sha) {
 					actualSha = existing.sha;
 				}
 			}
-			if (isEdit && actualSha) {
+			const effectiveIsEdit = isEdit || !!actualSha;
+			const commitMsg = ctx.getCommitMsg
+				? ctx.getCommitMsg(effectiveIsEdit)
+				: effectiveIsEdit
+					? `chore: update ${pageName}`
+					: `chore: create ${pageName}`;
+			if (actualSha) {
 				ok = await updateRepoFile(path, content, actualSha, commitMsg);
 			} else {
 				ok = await createRepoFile(path, content, commitMsg);

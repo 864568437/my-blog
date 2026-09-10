@@ -37,6 +37,49 @@ import rehypeFigure from "./src/plugins/rehype-figure.mjs";
 import { remarkWikiLink } from "./src/plugins/remark-wiki-link.js";
 
 // https://astro.build/config
+
+/**
+ * dev 下接管 /api/github 的 Vite 中间件。
+ *
+ * 为什么需要：静态输出模式下 src/pages/api/github.ts 默认按预渲染路由处理，
+ * astro dev 的静态路由中间件会丢弃 POST body 和 Content-Type，导致在线编辑
+ * 代理全部报 "Invalid JSON body"。构建不受影响（apply: "serve" 仅 dev 生效），
+ * 线上由 Cloudflare Worker 的 run_worker_first 接管该路径。
+ */
+function githubProxyDevPlugin() {
+	return {
+		name: "github-proxy-dev",
+		apply: "serve",
+		configureServer(server) {
+			server.middlewares.use("/api/github", async (req, res, next) => {
+				try {
+					const chunks = [];
+					for await (const chunk of req) chunks.push(chunk);
+					const rawBody = Buffer.concat(chunks).toString("utf-8");
+					const hasBody = !["GET", "HEAD", "OPTIONS"].includes(req.method);
+					const request = new Request(new URL(req.url, "http://localhost"), {
+						method: req.method,
+						headers: req.headers,
+						body: hasBody && rawBody ? rawBody : undefined,
+					});
+					const mod = await server.ssrLoadModule("/src/pages/api/github.ts");
+					const handler = mod[req.method] || mod.GET;
+					if (!handler) {
+						next();
+						return;
+					}
+					const response = await handler({ request });
+					res.statusCode = response.status;
+					response.headers.forEach((value, key) => res.setHeader(key, value));
+					res.end(Buffer.from(await response.arrayBuffer()));
+				} catch (err) {
+					next(err);
+				}
+			});
+		},
+	};
+}
+
 export default defineConfig({
 	site: siteConfig.site_url,
 
@@ -284,6 +327,7 @@ export default defineConfig({
 	vite: {
 		plugins: [
 			tailwindcss(),
+			githubProxyDevPlugin(),
 		],
 		optimizeDeps: {
 			include: [

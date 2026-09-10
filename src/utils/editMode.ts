@@ -9,7 +9,9 @@
 
 import { repoConfig } from "@/config/editConfig";
 
-const PROXY_URL = "/api/github";
+// 带尾斜杠：astro.config 的 trailingSlash:"always" 会把无斜杠的 /api/github
+// 在 dev/preview 下 404；Worker 端已做归一化，两种写法线上等价
+const PROXY_URL = "/api/github/";
 const STORAGE_APP_ID = "gh_app_id";
 const STORAGE_PRIVATE_KEY = "gh_private_key";
 const STORAGE_DRAFTS = "gh_drafts";

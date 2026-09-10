@@ -25,7 +25,13 @@ import { marked } from "marked";
 import { onMount } from "svelte";
 import { dynamicConfig, profileConfig } from "@/config";
 import { setupRepoDrafts } from "@/utils/draftHelpers";
-import { deepClone, ensureIconify, genId, showToast } from "@/utils/editMode";
+import {
+	deepClone,
+	ensureIconify,
+	genId,
+	getRepoFileMeta,
+	showToast,
+} from "@/utils/editMode";
 
 /** 单条动态的内部数据模型（与 API 层略有差异：published 为 ISO 字符串） */
 interface DynamicItem {
@@ -65,6 +71,8 @@ let showAuthorInput = $state(false);
 let repoLoaded = $state(false);
 /** 初始加载完成标记：避免 onMount 多次触发 loadDynamics */
 let initialLoaded = $state(false);
+/** 仓库中 src/content/dynamic.json 的 blob sha：提交时必须携带，否则 GitHub 返回 422 */
+let fileSha = $state<string | null>(null);
 
 // 侧边栏事件 pageKey：必须与 sidebarConfig.ts 中 dynamic 按钮配置一致
 const pageKey = "dynamic";
@@ -110,10 +118,8 @@ function sortDynamics(items: DynamicItem[]): DynamicItem[] {
  * - getPath 返回仓库目标文件路径（src/content/dynamic.json）；
  * - getOriginalContent/setOriginalContent 用于 cancelEdit 时回滚；
  * - getCommitMsg 在新建/编辑场景下返回不同的 commit 文本。
- *
- * ⚠️ 当前实现不传 sha（getSha 返回 null），由 draftHelpers 内部决定
- *    使用 createRepoFile 还是 updateRepoFile。如未来需要支持多人协作，
- *    应改为读取 .pages.yml 中的 fileSha 字段。
+ * - sha 在 loadDynamics 时通过 getRepoFileMeta 从 GitHub 获取；
+ *   dynamic.json 已存在于仓库中，缺失 sha 的 PUT 会被 GitHub 以 422 拒绝。
  */
 const drafts = setupRepoDrafts({
 	pageKey,
@@ -127,8 +133,8 @@ const drafts = setupRepoDrafts({
 		}
 	},
 	getPath: () => "src/content/dynamic.json",
-	getSha: () => null,
-	setSha: () => {},
+	getSha: () => fileSha,
+	setSha: (v) => (fileSha = v),
 	getOriginalContent: () => JSON.stringify(originalDynamics, null, 2),
 	setOriginalContent: (v) => {
 		try {
@@ -219,6 +225,9 @@ async function loadDynamics() {
 		console.error("Failed to load dynamics", e);
 		showToast("加载动态失败", "error");
 	}
+	// 无论站点 API 结果如何，都取一次仓库文件 sha 供提交使用
+	const meta = await getRepoFileMeta("src/content/dynamic.json");
+	if (meta) fileSha = meta.sha;
 }
 
 /* ========== 侧边栏事件处理 ==========

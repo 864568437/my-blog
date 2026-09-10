@@ -108,8 +108,9 @@ function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
 	tsContent = tsContent.replace(/\r\n/g, "\n");
 	const startIdx = tsContent.indexOf(startMarker);
 	if (startIdx === -1) return [];
-	let bracketStart = tsContent.indexOf("[", startIdx);
-	if (bracketStart === -1) return [];
+	// marker 以 "[" 结尾（数组开括号）。不能用 indexOf("[") 向后搜索，
+	// 会命中类型注解 MomentItem[] 的括号导致解析出空数组
+	let bracketStart = startIdx + startMarker.length - 1;
 	let depth = 1;
 	let idx = bracketStart + 1;
 	while (idx < tsContent.length && depth > 0) {
@@ -195,8 +196,8 @@ function replaceArrayInTS(
 ): string {
 	const startIdx = originalContent.indexOf(startMarker);
 	if (startIdx === -1) return originalContent;
-	let bracketStart = originalContent.indexOf("[", startIdx);
-	if (bracketStart === -1) return originalContent;
+	// 同 parseArrayFromTS：marker 以 "[" 结尾，避免 indexOf 命中类型注解括号
+	let bracketStart = startIdx + startMarker.length - 1;
 	let depth = 1;
 	let idx = bracketStart + 1;
 	while (idx < originalContent.length && depth > 0) {

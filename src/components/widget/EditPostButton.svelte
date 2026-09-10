@@ -1,7 +1,6 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import EditToast from "@/components/edit/EditToast.svelte";
-import { repoConfig } from "@/config/editConfig";
 import {
 	checkProxyConfigured,
 	clearAllDrafts,
@@ -9,6 +8,7 @@ import {
 	ensureIconify,
 	getDraftCount,
 	getDraftsByPage,
+	getStoredAppId,
 	hasValidCredentials,
 	invalidateToken,
 	onDraftsChanged,
@@ -396,7 +396,9 @@ async function handleKeyFileSelect(e: Event) {
 	}
 	try {
 		const pem = await readFileAsText(file);
-		const appId = repoConfig.appId;
+		// 优先用构建时注入的 App ID，缺失时回退 localStorage
+		// （代理状态检测会把服务端配置的 App ID 存进去）
+		const appId = getStoredAppId();
 		if (!appId) {
 			showToast("请先配置 PUBLIC_GITHUB_APP_ID 环境变量", "error");
 			input.value = "";
