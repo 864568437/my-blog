@@ -8,8 +8,8 @@ const FRIENDS_CONFIG_RELATIVE_PATH = 'src/config/friendsConfig.ts';
 
 // 站点信息 - 请根据你的实际站点信息修改
 const SITE_INFO = {
-	name: 'fqzlr',
-	url: 'https://fqzlr.com',
+	name: 'Xiaozhu',
+	url: 'zhujs.dpdns.org',
 	avatar: 'https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640',
 	desc: '躬身入局，心为主理，行有尺度，自持本心.',
 	

@@ -222,7 +222,7 @@ fqzlr-bk/
 
 ### 环境变量
 
-本地开发在项目根目录创建 `.env`（已被 git 忽略）；生产环境在 Vercel → Settings → Environment Variables 配置：
+本地开发在项目根目录创建 `.env`（已被 git 忽略）；生产环境在 Cloudflare Workers → Settings → Variables（运行时）及构建配置的 Build Variables（构建时）配置：
 
 | 变量 | 用途 | 必需 |
 |------|------|------|
@@ -295,16 +295,32 @@ pnpm install
 pnpm dev   # http://localhost:4321
 ```
 
-### Vercel 部署
+### Cloudflare Workers 部署（主）
 
-仓库已连接 Vercel，推送 `main` 分支自动构建部署。`vercel.json` 已配置：
+站点为纯静态构建（`dist/`），`/api/github` 在线编辑代理由 Cloudflare Worker 处理（`src/workers/index.js`），认证逻辑复用 `src/workers/github-proxy.js`。
 
-- 构建命令：`node scripts/ensure-git-history.mjs && pnpm build`
-- 输出目录：`dist`，框架预设：`astro`
-- 安全响应头（nosniff / X-Frame-Options / Referrer-Policy）
-- `/_astro/*` 静态资源一年强缓存（immutable）
+**一次性配置：**
 
-部署前需在 Vercel 配置上方环境变量表格中的变量。
+1. Cloudflare Dashboard → Workers & Pages → Create → 导入本仓库（或本地 `wrangler login` 后执行 `pnpm deploy`）
+2. 构建配置（连接仓库时）：
+   - 构建命令：`node scripts/ensure-git-history.mjs && pnpm build`（保留完整 git 历史供时间线页面使用）
+   - 部署命令：`npx wrangler deploy`
+3. Build Variables（构建时注入客户端 bundle，三个 `PUBLIC_*` 变量都要配）
+4. 运行时变量（`wrangler.jsonc` 的 `vars` 或控制台）：`PUBLIC_GITHUB_APP_ID`
+5. 运行时机密：`wrangler secret put GH_PRIVATE_KEY < 私钥.pem`，配置后浏览器端无需导入 `.pem`（服务端代理认证）
+
+`public/_headers` 已配置安全响应头与 `/_astro/*` 一年强缓存（等价原 `vercel.json`）。
+
+**本地验证：**
+
+```bash
+cp .dev.vars.example .dev.vars   # 填入 App ID 等
+pnpm cf:preview                  # 构建产物 + Worker 本地运行（默认 :8787）
+```
+
+### Vercel 部署（备）
+
+仓库保留 `vercel.json` 与 `api/github.js`（Edge Function 代理），仍可按原方式部署，与 Cloudflare 配置互不影响。
 
 ### GitHub Actions
 

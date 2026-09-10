@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "my-blog",
+  "main": "src/workers/index.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // 未命中资源时返回 Astro 生成的 404 页面
+    "not_found_handling": "404-page",
+    // /api/github* 永远先走 Worker：dist/api/github 是 Astro 构建时预渲染的死文件，
+    // 不能让它拦截代理请求
+    "run_worker_first": ["/api/github*"]
+  },
+  "vars": {
+    // 在线编辑目标仓库（公开值；构建时也会注入客户端 bundle）
+    "PUBLIC_GITHUB_OWNER": "864568437",
+    "PUBLIC_GITHUB_REPO": "my-blog",
+    // GitHub App ID（数字，App 设置页可见）——部署前必填，填错会导致在线编辑无法认证
+    "PUBLIC_GITHUB_APP_ID": "4899171"
+    // GH_PRIVATE_KEY 是机密，不要写在这里：
+    // 用 `wrangler secret put GH_PRIVATE_KEY < 私钥.pem` 或控制台 Settings → Variables 添加
+  }
+}

@@ -16,7 +16,9 @@
     "lint": "biome check --write ./src",
     "preinstall": "npx only-allow pnpm",
     "icons": "node scripts/generate-icons/index.js",
-    "cli": "node scripts/cli.js"
+    "cli": "node scripts/cli.js",
+    "cf:preview": "wrangler dev",
+    "deploy": "pnpm build && wrangler deploy"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
@@ -103,7 +105,8 @@
     "postcss-nesting": "^13.0.2",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.22.4",
-    "vercel": "^54.14.0"
+    "vercel": "^54.14.0",
+    "wrangler": "^4.130.0"
   },
   "packageManager": "pnpm@9.14.4"
 }

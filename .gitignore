@@ -26,6 +26,10 @@ pnpm-debug.log*
 
 .vercel
 
+# Cloudflare
+.wrangler/
+.dev.vars
+
 package-lock.json
 bun.lockb
 yarn.lock

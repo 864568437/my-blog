@@ -62,7 +62,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "Xiaozhu",
 
 	// 站点 URL
-	site_url: "https://xiaozhu.one",
+	site_url: "https://zhujs.dpdns.org",
 
 	// 站点描述
 	description:

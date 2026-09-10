@@ -27,13 +27,14 @@ const { futureDays, maxItems } = overview;
 const now = new Date();
 const years = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
 
+// 构建时请求的是线上站点（site_url）；域名不可达时回退空数据，部署恢复后自动取回
 const [holidaysRes, postsRes] = await Promise.all([
-	fetch(new URL("/api/holidays.json", Astro.url)),
-	fetch(new URL("/api/allPostMeta.json", Astro.url)),
+	fetch(new URL("/api/holidays.json", Astro.url)).catch(() => null),
+	fetch(new URL("/api/allPostMeta.json", Astro.url)).catch(() => null),
 ]);
 
-const holidays = holidaysRes.ok ? await holidaysRes.json() : [];
-const posts = postsRes.ok ? await postsRes.json() : [];
+const holidays = holidaysRes?.ok ? await holidaysRes.json() : [];
+const posts = postsRes?.ok ? await postsRes.json() : [];
 
 const overviewProps = {
 	holidays,

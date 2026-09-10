@@ -707,7 +707,7 @@ async function handleKeyFileSelect(e: Event) {
 		const pem = await readFileAsText(file);
 		const appId = repoConfig.appId;
 		if (!appId) {
-			showToast("请先在 Vercel 环境变量中配置 PUBLIC_GITHUB_APP_ID", "error");
+			showToast("请先配置 PUBLIC_GITHUB_APP_ID 环境变量（部署平台变量 + 重新构建）", "error");
 			input.value = "";
 			return;
 		}
