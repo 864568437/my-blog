@@ -11,7 +11,11 @@ import {
 
 const markdownImagePattern = /!\[([^\]]*)\]\((\S+?)(?:\s+["']([^"']*)["'])?\)/g;
 
-/** 从 src/content/dynamic.json 读取编辑器写入的条目（与 markdown 源合并） */
+/**
+ * 从 src/content/dynamic.json 读取编辑器写入的条目（与 markdown 源合并）。
+ * 不在此过滤 _draft/_deleted：_deleted 墓碑用于隐藏 markdown 源的对应条目，
+ * 过滤逻辑由 GET 统一处理。
+ */
 function loadJsonEntries(): any[] {
 	try {
 		const jsonPath = resolve(process.cwd(), "src/content/dynamic.json");
@@ -19,8 +23,7 @@ function loadJsonEntries(): any[] {
 		const raw = readFileSync(jsonPath, "utf-8");
 		const items = JSON.parse(raw);
 		if (!Array.isArray(items)) return [];
-		// 过滤草稿和已删除条目
-		return items.filter((item: any) => !item._draft && !item._deleted);
+		return items;
 	} catch {
 		return [];
 	}
@@ -28,7 +31,17 @@ function loadJsonEntries(): any[] {
 
 export async function GET() {
 	const processor = await createMarkdownProcessor();
-	const dynamics = sortDynamics(await getCollection("dynamic"));
+	const jsonEntries = loadJsonEntries();
+	// 已删除条目的墓碑 id：markdown 源同名条目也一并隐藏
+	// （在线编辑器不删 md 文件，删除状态只记录在 dynamic.json）
+	const deletedIds = new Set(
+		jsonEntries
+			.filter((item: any) => item._deleted)
+			.map((item: any) => String(item.id)),
+	);
+	const dynamics = sortDynamics(await getCollection("dynamic")).filter(
+		(entry) => !deletedIds.has(dynamicSlug(entry.id)),
+	);
 
 	// 从 markdown 源构建数据
 	const mdData = await Promise.all(
@@ -57,16 +70,19 @@ export async function GET() {
 				device: entry.data.device || "",
 				author: entry.data.author || profileConfig.name || "",
 				avatar: entry.data.avatar || profileConfig.avatar || "",
+				// 数据来源标记：编辑器据此决定删除时是否需要留墓碑
+				source: "md" as const,
 			};
 		}),
 	);
 
-	// 合并 dynamic.json 中不与 markdown 重复的条目
+	// 合并 dynamic.json 中不与 markdown 重复的条目（排除草稿与已删墓碑）
 	const mdIds = new Set(mdData.map((d) => d.id));
-	const jsonEntries = loadJsonEntries();
 	const jsonData = await Promise.all(
 		jsonEntries
-			.filter((item: any) => !mdIds.has(item.id))
+			.filter(
+				(item: any) => !item._draft && !item._deleted && !mdIds.has(item.id),
+			)
 			.map(async (item: any) => {
 				const images: Array<{ alt: string; src: string; title?: string }> = [];
 				const rawBody = item.body || "";
@@ -91,6 +107,7 @@ export async function GET() {
 					device: item.device || "",
 					author: item.author || profileConfig.name || "",
 					avatar: item.avatar || profileConfig.avatar || "",
+					source: "json" as const,
 				};
 			}),
 	);

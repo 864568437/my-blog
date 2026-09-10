@@ -15,10 +15,9 @@
  *   - 任何 modify 行为都通过 _draft / _deleted 软标记，提交时由 cleanItems
  *     过滤已删条目、剥离内部标记后序列化为 JSON 提交到 src/content/dynamic.json。
  *
- * ⚠️ 当前提交目标为 JSON 文件，而 /api/dynamic.json.ts 端点目前仅
- *    读取 src/content/dynamic/*.md。如需启用本编辑器落库，请同步
- *    修改 /api/dynamic.json.ts 优先读取 dynamic.json 源（或在构建
- *    脚本中将 JSON 同步为 markdown）。
+ * 数据源说明：/api/dynamic.json 合并 markdown 源（src/content/dynamic/*.md，
+ * 优先）与 dynamic.json 源，条目带 source 标记。删除 md 源条目不删文件，
+ * 仅在 dynamic.json 留墓碑（API 据此隐藏）；json 源条目删除即移除。
  */
 
 import { marked } from "marked";
@@ -29,7 +28,7 @@ import {
 	deepClone,
 	ensureIconify,
 	genId,
-	getRepoFileMeta,
+	getRepoFile,
 	showToast,
 } from "@/utils/editMode";
 
@@ -44,6 +43,7 @@ interface DynamicItem {
 	author?: string;
 	avatar?: string;
 	body: string; // Markdown 原文
+	source?: "md" | "json"; // 数据来源：md 源不可删文件，删除时需留墓碑
 	_draft?: boolean; // 新建标记：未提交时存在
 	_deleted?: boolean; // 删除标记：提交前软删除
 }
@@ -122,18 +122,34 @@ function sortDynamics(items: DynamicItem[]): DynamicItem[] {
  *   dynamic.json 已存在于仓库中，缺失 sha 的 PUT 会被 GitHub 以 422 拒绝。
  */
 /**
- * 提交/草稿共用的净化工件：剔除已软删除条目、剥离 _draft/_deleted 内部标记。
- * 不净化会把删除标记连同条目一起写进 dynamic.json（前台虽不显示，文件里残留尸体）。
+ * 提交/草稿共用的净化工件。
+ * - 正常条目：剥离 _draft 标记后保留
+ * - 已删除条目：json 源直接移除（条目只存在于 json，移除即彻底删除）；
+ *   md 源不可删文件，转为最小墓碑（仅 id + published + _deleted），
+ *   API 渲染时据此隐藏对应的 markdown 条目
  */
 function cleanItems(items: DynamicItem[]): DynamicItem[] {
-	return items
-		.filter((d) => !d._deleted)
-		.map((d) => {
+	return items.flatMap((d) => {
+		if (!d._deleted) {
 			const copy: DynamicItem = { ...d };
 			delete copy._draft;
-			delete copy._deleted;
-			return copy;
-		});
+			return [copy];
+		}
+		if (d.source === "md") {
+			return [
+				{
+					id: d.id,
+					published: d.published,
+					pinned: false,
+					tags: [],
+					body: "",
+					source: "md",
+					_deleted: true,
+				},
+			];
+		}
+		return [];
+	});
 }
 
 const drafts = setupRepoDrafts({
@@ -218,31 +234,55 @@ onMount(() => {
  * 注意：API 返回的 published 是 number（时间戳），这里统一转为 ISO。
  */
 async function loadDynamics() {
+	const items: DynamicItem[] = [];
 	try {
 		const res = await fetch("/api/dynamic.json");
 		const data = await res.json();
-		const items: DynamicItem[] = data.map((d: any) => ({
-			id: d.id,
-			published: new Date(d.published).toISOString(),
-			pinned: d.pinned || false,
-			tags: d.tags || [],
-			location: d.location || "",
-			device: d.device || "",
-			author: d.author || "",
-			avatar: d.avatar || "",
-			body: d.body || "",
-		}));
-		dynamics = sortDynamics(items);
-		originalDynamics = deepClone(dynamics);
-		initialLoaded = true;
-		repoLoaded = true;
+		for (const d of data) {
+			items.push({
+				id: d.id,
+				published: new Date(d.published).toISOString(),
+				pinned: d.pinned || false,
+				tags: d.tags || [],
+				location: d.location || "",
+				device: d.device || "",
+				author: d.author || "",
+				avatar: d.avatar || "",
+				body: d.body || "",
+				source: d.source === "md" ? "md" : "json",
+			});
+		}
 	} catch (e) {
 		console.error("Failed to load dynamics", e);
 		showToast("加载动态失败", "error");
 	}
-	// 无论站点 API 结果如何，都取一次仓库文件 sha 供提交使用
-	const meta = await getRepoFileMeta("src/content/dynamic.json");
-	if (meta) fileSha = meta.sha;
+	// 取仓库文件：sha 供提交使用；_deleted 墓碑必须并入本地列表——
+	// API 不会返回墓碑，若漏掉，下一次提交会把墓碑冲掉、被隐藏的
+	// markdown 条目就会重新显示
+	const repo = await getRepoFile("src/content/dynamic.json");
+	if (repo) {
+		fileSha = repo.sha;
+		try {
+			const repoItems = JSON.parse(repo.content);
+			const liveIds = new Set(items.map((i) => i.id));
+			for (const r of repoItems) {
+				if (r?._deleted && r.id && !liveIds.has(r.id)) {
+					items.push({
+						...r,
+						published: r.published || new Date().toISOString(),
+						pinned: r.pinned || false,
+						tags: r.tags || [],
+						body: r.body || "",
+						source: "md",
+					});
+				}
+			}
+		} catch {}
+	}
+	dynamics = sortDynamics(items);
+	originalDynamics = deepClone(dynamics);
+	initialLoaded = true;
+	repoLoaded = true;
 }
 
 /* ========== 侧边栏事件处理 ==========
@@ -433,7 +473,8 @@ function togglePin(index: number) {
  * 删除条目（软删除）：
  *  - 二次确认；
  *  - _draft=true 的条目直接从列表中移除；
- *  - 已有条目标记 _deleted=true，submit 阶段过滤。
+ *  - 已有条目标记 _deleted=true，提交时由 cleanItems 决定去留
+ *   （md 源转墓碑、json 源直接移除）。
  */
 function removeItem(index: number) {
 	if (!confirm("确定要删除这条动态吗？")) return;
