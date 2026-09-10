@@ -82,11 +82,15 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				url: "/life/notebooks/",
 				icon: "material-symbols:menu-book-outline",
 			},
-			{
-				name: "朋友的动态",
-				url: "/pengyou/",
-				icon: "material-symbols:group",
-			},
+			...(siteConfig.pages.pengyou
+				? [
+						{
+							name: "朋友的动态",
+							url: "/pengyou/",
+							icon: "material-symbols:group",
+						},
+					]
+				: []),
 		],
 	});
 
@@ -115,17 +119,20 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 	if (siteConfig.pages.calendar) {
 		recordChildren.push(LinkPreset.Calendar);
 	}
-	// 规划 & 足迹
+	// 规划
 	recordChildren.push({
 		name: "规划",
 		url: "/life/routines/",
 		icon: "material-symbols:list-alt",
 	});
-	recordChildren.push({
-		name: "足迹",
-		url: "/life/places/",
-		icon: "material-symbols:location-on",
-	});
+	// 足迹
+	if (siteConfig.pages.places) {
+		recordChildren.push({
+			name: "足迹",
+			url: "/life/places/",
+			icon: "material-symbols:location-on",
+		});
+	}
 
 	if (recordChildren.length > 0) {
 		const defaultUrl = siteConfig.pages.musicPage

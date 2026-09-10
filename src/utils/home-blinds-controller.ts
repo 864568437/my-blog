@@ -1478,33 +1478,43 @@ function setupReveal(context: SetupContext) {
 		y: 0,
 		autoAlpha: 0,
 	});
-	const revealTimeline = gsap.timeline({
-		scrollTrigger: {
-			id: "home-blinds-reveal",
-			trigger: section,
-			// 揭示层现在是首页首屏：从页面顶部即开始，滚到 1/3 屏处完成入场
-			start: "top top",
-			end: "bottom 33.333%",
-			scrub: 0.35,
-			invalidateOnRefresh: true,
-		},
-	});
-
-	// 前景图的 autoAlpha 只由这条 scrub 时间线写入，refresh 时会按进度重新渲染，
-	// 因此滚过揭示层后缩放窗口不会让它重新出现。
-	revealTimeline
-		.fromTo(
+	// 前景图入场：加载即播（与入场标题共用 enterDuration 节奏），不挂在滚动上；
+	// 未播完就滚进退场段时由 onUpdate 直接落位，避免与 scrub 时间线抢写 autoAlpha
+	let entrance: GsapTween | null = null;
+	const playEntrance = () => {
+		entrance = gsap.fromTo(
 			foreground,
 			{ yPercent: 34, autoAlpha: 0 },
 			{
 				yPercent: 0,
 				autoAlpha: foregroundOpacity,
-				duration: REVEAL_ENTER_END,
+				duration: Math.max(0.24, config.reveal.headline.enterDuration),
 				ease: "power3.out",
-				immediateRender: false,
 			},
-			0,
-		)
+		);
+	};
+	const revealTimeline = gsap.timeline({
+		scrollTrigger: {
+			id: "home-blinds-reveal",
+			trigger: section,
+			// 揭示层是首页首屏：前景图与标题都在加载时入场，
+			// 这条 scrub 时间线只负责把它们一起滑出
+			start: "top top",
+			end: "bottom 33.333%",
+			scrub: 0.35,
+			invalidateOnRefresh: true,
+			onUpdate: (self) => {
+				if (entrance && self.progress >= REVEAL_EXIT_START) {
+					entrance.progress(1);
+					entrance = null;
+				}
+			},
+		},
+	});
+
+	// 滚过揭示层后 refresh 仍按 scrub 进度渲染退场值，前景不会重新出现；
+	// 滚回顶部时退场段反向渲染回起点值（常显状态），与加载入场后的状态一致
+	revealTimeline
 		.fromTo(
 			foreground,
 			{ yPercent: 0, autoAlpha: foregroundOpacity },

@@ -1,6 +1,6 @@
 import type { SiteConfig } from "@/types/config";
-import { fontConfig } from "./fontConfig";
 import { resolvePageToggles } from "../utils/page-toggle-utils";
+import { fontConfig } from "./fontConfig";
 
 // 定义站点语言
 // 语言代码，例如：'zh_CN', 'zh_TW', 'en', 'ja', 'ru'。
@@ -12,7 +12,7 @@ const pages = resolvePageToggles({
 	// 赞助页面开关
 	sponsor: false,
 	// 留言板页面开关，需要配置评论系统
-	guestbook: false,
+	guestbook: true,
 	// 番组计划页面开关
 	bangumi: false,
 	// 追番页面开关
@@ -20,11 +20,15 @@ const pages = resolvePageToggles({
 	// 相册页面开关
 	gallery: false,
 	// 音乐页面开关
-	musicPage: true,
+	musicPage: false,
 	// 更新日志页面开关
 	timeline: true,
 	// 日历页面开关
 	calendar: true,
+	// 足迹页面开关
+	places: false,
+	// 朋友的动态（朋友圈）页面开关
+	pengyou: false,
 });
 
 // 区域屏蔽配置 - 选择哪些页面对指定国家/地区的访问者屏蔽，设为 true 后：

@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <style>
   html, body { margin: 0; padding: 0; background: transparent; }
-  /* yishuzi.png 原始 2376x886，此处按 1/2 精确缩放 */
+  /* yishuzi.png 原始 2376x886，画布按原生尺寸 1:1（mask 零重采样，
+     显示端由浏览器单次缩放，避免双重缩放导致边缘发糊） */
   #reveal {
-    width: 1188px;
-    height: 443px;
+    width: 2376px;
+    height: 886px;
     /* 书写揭示遮罩：--rev 左侧实心，右侧渐隐（软边宽度 7%） */
     --rev: 0%;
     -webkit-mask: linear-gradient(90deg, #000 calc(var(--rev) - 7%), transparent var(--rev));

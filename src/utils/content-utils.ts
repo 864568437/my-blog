@@ -164,21 +164,23 @@ export async function getArchiveList(): Promise<ArchiveItem[]> {
 		const notebooksEntries = await getCollection("notebooks");
 		const routinesEntries = await getCollection("routines");
 
-		lifeEntries
-			.filter((entry) => isIn(entry.id, "places"))
-			.forEach((p) => {
-				const parts = [p.data.province, p.data.city].filter(Boolean);
-				lifeItems.push({
-					id: p.id,
-					type: "life",
-					data: {
-						title: parts.length > 0 ? parts.join(" ") : "足迹记录",
-						published: p.data.date || new Date(),
-						tags: ["足迹"],
-						link: "/life/places/",
-					},
-				});
+		const placesEntries = siteConfig.pages.places
+			? lifeEntries.filter((entry) => isIn(entry.id, "places"))
+			: [];
+
+		placesEntries.forEach((p) => {
+			const parts = [p.data.province, p.data.city].filter(Boolean);
+			lifeItems.push({
+				id: p.id,
+				type: "life",
+				data: {
+					title: parts.length > 0 ? parts.join(" ") : "足迹记录",
+					published: p.data.date || new Date(),
+					tags: ["足迹"],
+					link: "/life/places/",
+				},
 			});
+		});
 
 		notebooksEntries
 			.filter((n) => !n.id.includes("_index"))

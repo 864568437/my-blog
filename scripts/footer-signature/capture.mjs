@@ -14,10 +14,15 @@ import { fileURLToPath } from "node:url";
 
 const FPS = 30;
 const DURATION = 3.2; // 与 sig-gen.html 的揭示时间轴尾部对齐
-const VIEWPORT = { width: 1188, height: 443 }; // yishuzi.png 的 1/2 精确尺寸
+const VIEWPORT = { width: 2376, height: 886 }; // yishuzi.png 原生尺寸，1:1 无重采样
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
-const browser = await chromium.launch({ channel: "chrome" });
+// --allow-file-access-from-files：Chrome 152+ 对 file:// 页面的 CSS mask
+// 按 CORS 模式抓取，跨文件会被拒（mask 加载失败 = 元素不可见 = 全空帧）
+const browser = await chromium.launch({
+  channel: "chrome",
+  args: ["--allow-file-access-from-files"],
+});
 const page = await browser.newPage({
 	viewport: VIEWPORT,
 	deviceScaleFactor: 1,

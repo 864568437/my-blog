@@ -7,6 +7,6 @@ set FF=%1
 %FF% -y -framerate 30 -i frames-dark/frame_%%04d.png -pix_fmt yuva420p -c:v libvpx-vp9 -auto-alt-ref 0 -lossless 1 -an -metadata:s:v:0 alpha_mode=1 ..\..\public\assets\images\xiaozhu-sig-dark.webm
 %FF% -y -framerate 30 -i frames-light/frame_%%04d.png -c:v qtrle -pix_fmt argb -an ..\..\public\assets\images\xiaozhu-sig-light.mov
 %FF% -y -framerate 30 -i frames-dark/frame_%%04d.png -c:v qtrle -pix_fmt argb -an ..\..\public\assets\images\xiaozhu-sig-dark.mov
-copy /y xiaozhu-sig-light-still.png ..\..\public\assets\images\ >nul
-copy /y xiaozhu-sig-dark-still.png ..\..\public\assets\images\ >nul
+rem 定格图不直接 copy：需经 optimize-stills.mjs 做 lanczos 缩放 + 调色板量化
+node optimize-stills.mjs
 echo done

@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import PageHeader from "@/components/common/PageHeader.astro";
 import PengyouEditor from "@/components/edit/PengyouEditor.svelte";
+import { siteConfig } from "@/config";
 import { circleConfig } from "@/config/circleConfig";
 import { pengyouConfig } from "@/config/pengyouConfig";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
@@ -15,6 +16,11 @@ import "@/styles/features/circle.css";
 
 const title = "朋友圈";
 const description = "来看看我的朋友们都在干嘛";
+
+// 检查页面是否启用
+if (!siteConfig.pages.pengyou) {
+	return Astro.redirect("/404/");
+}
 
 const items: PengyouItem[] = await fetchPengyouItems();
 const { rss } = pengyouConfig;

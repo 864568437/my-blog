@@ -252,6 +252,8 @@ export type SiteConfig = {
 		musicPage: boolean; // 音乐页面开关
 		timeline: boolean; // 更新日志页面开关
 		calendar: boolean; // 日历页面开关
+		places: boolean; // 足迹页面开关
+		pengyou: boolean; // 朋友的动态（朋友圈）页面开关
 	};
 
 	// 归档页面内容开关

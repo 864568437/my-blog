@@ -10,7 +10,9 @@
  * 资产由 scripts 离线生成：yishuzi.png（白色艺术字）作为 CSS mask
  * 按从左到右渐变揭示 → playwright 逐帧截图 →
  * ffmpeg 编码（webm: VP9 lossless yuva420p；mov: qtrle argb）。
- * 画布为原图 2376x886 的 1/2 精确尺寸（1188x443）。
+ * 截帧画布为原图原生 2376x886（1:1 无缩放），视频即此尺寸；
+ * 定格图经 lanczos 缩放 + 调色板量化为 1188x443（~40KB）。
+ * 全分辨率单次缩放是清晰度关键，勿改回 1188 截帧（会双重缩放发糊）。
  */
 const assets = {
 	light: {

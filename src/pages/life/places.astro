@@ -2,12 +2,18 @@
 import { Icon } from "astro-icon/components";
 import PageHeader from "@/components/common/PageHeader.astro";
 import PlacesEditor from "@/components/edit/PlacesEditor.svelte";
+import { siteConfig } from "@/config";
 import {
 	getEnabledPlaces,
 	getThisYearVisitCount,
 	getTotalVisitCount,
 } from "@/config/placesConfig";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
+
+// 检查页面是否启用
+if (!siteConfig.pages.places) {
+	return Astro.redirect("/404/");
+}
 
 const sortedPlaces = getEnabledPlaces();
 

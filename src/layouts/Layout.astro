@@ -2,10 +2,6 @@
 import GoogleAnalytics from "@components/analytics/GoogleAnalytics.astro";
 import MicrosoftClarity from "@components/analytics/MicrosoftClarity.astro";
 import UmamiAnalytics from "@components/analytics/UmamiAnalytics.astro";
-import {
-	REGION_BLOCKED_COUNTRY_CODES,
-	REGION_BLOCKED_PAGES,
-} from "../config/regionBlockConfig";
 import SearchModal from "@components/controls/SearchModal.svelte";
 import FancyboxManager from "@components/features/FancyboxManager.astro";
 import FloatingLyrics from "@components/features/FloatingLyrics.astro";
@@ -15,7 +11,6 @@ import PageLoader from "@components/features/PageLoader.astro";
 import SakuraEffect from "@components/features/SakuraEffect.astro";
 import ConfigCarrier from "@components/layout/ConfigCarrier.astro";
 import MobileDock from "@components/layout/MobileDock.astro";
-
 import {
 	backgroundWallpaper,
 	expressiveCodeConfig,
@@ -32,6 +27,10 @@ import { defaultFavicons } from "@/constants/icon";
 import type { Favicon } from "@/types/config";
 import { getDefaultBackground, isHomePage } from "@/utils/layout-utils";
 import { url } from "@/utils/url-utils";
+import {
+	REGION_BLOCKED_COUNTRY_CODES,
+	REGION_BLOCKED_PAGES,
+} from "../config/regionBlockConfig";
 
 import "@/styles/main.css";
 import "@rehype-callouts-theme";

@@ -1012,7 +1012,7 @@ onMount(async () => {
 
 <div class="write-toolbar">
 	<div class="toolbar-left">
-		<a href="/list/" class="toolbar-btn toolbar-back" title="返回文章列表" data-no-swup>
+		<a href="/posts/" class="toolbar-btn toolbar-back" title="返回文章列表" data-no-swup>
 			<iconify-icon icon="material-symbols:arrow-back-rounded" class="text-lg"></iconify-icon>
 			<span class="btn-text">返回列表</span>
 		</a>
