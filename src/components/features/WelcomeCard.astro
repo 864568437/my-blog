@@ -5,6 +5,7 @@
  */
 import { getCollection } from "astro:content";
 import { getEnabledMoments } from "@/config/momentsConfig";
+import { getLivePosts } from "@/utils/content-utils";
 import { getGitLog } from "@/utils/git-log";
 import { getPostUrlBySlug } from "@/utils/url-utils";
 
@@ -17,9 +18,7 @@ interface RawItem {
 const allItems: RawItem[] = [];
 
 try {
-	const posts = await getCollection("posts", ({ data }) =>
-		import.meta.env.PROD ? data.draft !== true : true,
-	);
+	const posts = await getLivePosts();
 	for (const p of posts)
 		allItems.push({
 			type: "post",

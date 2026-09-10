@@ -5,12 +5,11 @@ import WidgetLayout from "@/components/common/WidgetLayout.astro";
 import { getEnabledMoments } from "@/config/momentsConfig";
 import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
+import { getLivePosts } from "@/utils/content-utils";
 import { processCoverImageSync } from "@/utils/image-utils";
 import { getPostUrlBySlug } from "@/utils/url-utils";
 
-const posts = await getCollection("posts", ({ data }) => {
-	return import.meta.env.PROD ? data.draft !== true : true;
-});
+const posts = await getLivePosts();
 const moments = getEnabledMoments();
 const bangumi = await getCollection("bangumi");
 const notebooksEntries = await getCollection("notebooks");

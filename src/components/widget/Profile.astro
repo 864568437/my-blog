@@ -1,15 +1,12 @@
 ---
-import { getCollection } from "astro:content";
 import { Icon } from "astro-icon/components";
 import ImageWrapper from "@/components/common/ImageWrapper.astro";
 import { getEnabledMoments } from "@/config/momentsConfig";
 import { profileConfig } from "@/config/profileConfig";
-import { getTagList } from "@/utils/content-utils";
+import { getLivePosts, getTagList } from "@/utils/content-utils";
 import { url } from "@/utils/url-utils";
 
-const posts = await getCollection("posts", ({ data }) => {
-	return import.meta.env.PROD ? data.draft !== true : true;
-});
+const posts = await getLivePosts();
 const tags = await getTagList();
 const moments = getEnabledMoments();
 

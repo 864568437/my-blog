@@ -628,7 +628,61 @@ async function publishDraftPayload(
 			repoConfig,
 		);
 	}
+	// 新增路径先探测远端：同名文件已存在时，不带 sha 的 PUT 会被 GitHub 以
+	// 422 拒绝（slug 冲突重复发布是常见场景），改走 update
+	const existing = await getRepoFile(filePath, repoConfig);
+	if (existing?.sha) {
+		return await updateRepoFile(
+			filePath,
+			fullContent,
+			existing.sha,
+			`chore(posts): update "${esc(payload.title)}"`,
+			repoConfig,
+		);
+	}
 	return await createRepoFile(filePath, fullContent, commitMsg, repoConfig);
+}
+
+/** 删除文章：不删 md 文件，把 entry id 写入 posts.deleted.json 墓碑，构建时隐藏 */
+async function deletePost() {
+	if (!editMode || !savePath) return;
+	if (!confirm(`确定要删除「${title}」吗？\n文件保留在仓库中，仅从站点隐藏。`))
+		return;
+	saving = true;
+	try {
+		const entryId = savePath
+			.replace(/\\/g, "/")
+			.replace(/^src\/content\/posts\//, "");
+		const tombPath = "src/content/posts.deleted.json";
+		const existing = await getRepoFile(tombPath, repoConfig);
+		let list: string[] = [];
+		if (existing) {
+			try {
+				const parsed = JSON.parse(existing.content);
+				if (Array.isArray(parsed)) list = parsed;
+			} catch {}
+		}
+		if (!list.includes(entryId)) list.push(entryId);
+		const content = `${JSON.stringify(list, null, 2)}\n`;
+		const commitMsg = `chore(posts): hide "${entryId}"`;
+		const ok = existing?.sha
+			? await updateRepoFile(
+					tombPath,
+					content,
+					existing.sha,
+					commitMsg,
+					repoConfig,
+				)
+			: await createRepoFile(tombPath, content, commitMsg, repoConfig);
+		if (ok) {
+			showToast("文章已删除（文件保留），页面稍后刷新", "success");
+			setTimeout(() => window.location.reload(), 1500);
+		} else {
+			showToast("删除失败，请检查权限", "error");
+		}
+	} finally {
+		saving = false;
+	}
 }
 
 // ============ Save / Publish ============
@@ -709,7 +763,10 @@ async function handleKeyFileSelect(e: Event) {
 		// （代理状态检测会把服务端配置的 App ID 存进去）
 		const appId = getStoredAppId();
 		if (!appId) {
-			showToast("请先配置 PUBLIC_GITHUB_APP_ID 环境变量（部署平台变量 + 重新构建）", "error");
+			showToast(
+				"请先配置 PUBLIC_GITHUB_APP_ID 环境变量（部署平台变量 + 重新构建）",
+				"error",
+			);
 			input.value = "";
 			return;
 		}
@@ -1066,6 +1123,13 @@ onMount(async () => {
 				<iconify-icon icon="material-symbols:cloud-upload-rounded" class="text-lg"></iconify-icon>
 				<span class="btn-text">批量提交</span>
 				<span class="batch-badge-inline">{totalDraftCount}</span>
+			</button>
+		{/if}
+
+		{#if editMode && savePath}
+			<button class="toolbar-btn toolbar-draft" onclick={deletePost} disabled={saving || loading} title="从站点隐藏该文章（md 文件保留在仓库）">
+				<iconify-icon icon="material-symbols:delete-outline-rounded" class="text-lg"></iconify-icon>
+				<span class="btn-text">删除文章</span>
 			</button>
 		{/if}
 

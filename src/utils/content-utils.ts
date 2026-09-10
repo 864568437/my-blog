@@ -1,4 +1,6 @@
 import { type CollectionEntry, getCollection } from "astro:content";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { getCategoryUrl, getPostUrlBySlug, getTagUrl } from "@utils/url-utils";
@@ -6,11 +8,35 @@ import { siteConfig } from "@/config";
 import { getEnabledMoments } from "@/config/momentsConfig";
 import { buildTagGraphData, type TagGraphData } from "@/utils/tag-graph-data";
 
-// // Retrieve posts and sort them by publication date
-async function getRawSortedPosts() {
-	const allBlogPosts = await getCollection("posts", ({ data }) => {
+/**
+ * 已删除文章墓碑（src/content/posts.deleted.json）。
+ * 在线编辑器删除文章不删 md 文件，仅把 entry id 记入此列表，
+ * 构建时统一过滤——文章列表/详情/RSS/widget 均不再出现该文章。
+ */
+function loadDeletedPostIds(): Set<string> {
+	try {
+		const tombPath = resolve(process.cwd(), "src/content/posts.deleted.json");
+		if (!existsSync(tombPath)) return new Set();
+		const ids: unknown = JSON.parse(readFileSync(tombPath, "utf-8"));
+		if (!Array.isArray(ids)) return new Set();
+		return new Set(ids.map((s) => String(s).replace(/\\/g, "/")));
+	} catch {
+		return new Set();
+	}
+}
+
+/** 获取未被墓碑隐藏且（生产环境）非草稿的全部文章 */
+export async function getLivePosts() {
+	const deleted = loadDeletedPostIds();
+	return getCollection<"posts">("posts", ({ id, data }) => {
+		if (deleted.has(String(id).replace(/\\/g, "/"))) return false;
 		return import.meta.env.PROD ? data.draft !== true : true;
 	});
+}
+
+// // Retrieve posts and sort them by publication date
+async function getRawSortedPosts() {
+	const allBlogPosts = await getLivePosts();
 
 	const sorted = allBlogPosts.sort((a, b) => {
 		// 首先按置顶状态排序，置顶文章在前
@@ -82,9 +108,7 @@ export async function getArchiveList(): Promise<ArchiveItem[]> {
 
 	const postItems: ArchiveItem[] = [];
 	if (archiveConfig.posts) {
-		const posts = await getCollection("posts", ({ data }) => {
-			return import.meta.env.PROD ? data.draft !== true : true;
-		});
+		const posts = await getLivePosts();
 		postItems.push(
 			...posts.map<ArchiveItem>((post) => ({
 				id: post.id,
@@ -130,9 +154,6 @@ export async function getArchiveList(): Promise<ArchiveItem[]> {
 			...bangumi.map<ArchiveItem>((b) => {
 				let link = b.data.link || "";
 				if (!link) {
-					const slug = b.id
-						.replace(/\\/g, "/")
-						.replace(/\.(md|mdx|markdown)$/i, "");
 					if (b.data.category === "music") {
 						link = "/music/";
 					} else {
@@ -286,9 +307,7 @@ export type Tag = {
 };
 
 export async function getTagList(): Promise<Tag[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getLivePosts();
 
 	const allMoments = getEnabledMoments();
 
@@ -332,9 +351,7 @@ export type CategoryTagGroup = Category & {
 };
 
 export async function getCategoryList(): Promise<Category[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getLivePosts();
 	const count: { [key: string]: number } = {};
 	allBlogPosts.forEach((post: { data: { category: string | null } }) => {
 		if (!post.data.category) {
@@ -369,9 +386,7 @@ export async function getCategoryList(): Promise<Category[]> {
 }
 
 export async function getCategoryTagGroups(): Promise<CategoryTagGroup[]> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getLivePosts();
 	const groupMap = new Map<
 		string,
 		{ count: number; tagCounts: Map<string, number> }
@@ -420,9 +435,7 @@ export async function getCategoryTagGroups(): Promise<CategoryTagGroup[]> {
 }
 
 export async function getTagGraphData(): Promise<TagGraphData> {
-	const allBlogPosts = await getCollection<"posts">("posts", ({ data }) => {
-		return import.meta.env.PROD ? data.draft !== true : true;
-	});
+	const allBlogPosts = await getLivePosts();
 
 	const posts = allBlogPosts.map((post) => ({
 		title: post.data.title,
