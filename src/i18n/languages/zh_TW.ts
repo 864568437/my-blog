@@ -269,6 +269,12 @@ export const zh_TW: Translation = {
 	[Key.siteHeatmap]: "更新熱力圖",
 	[Key.today]: "今天",
 
+	// 頁腳
+	[Key.footerRunningDays]: "已運行 {days} 天",
+	[Key.footerLastUpdate]: "最後更新於 {days} 天前",
+	[Key.footerPoweredBy]: "框架",
+	[Key.footerTheme]: "主題",
+
 	// 日曆組件
 	[Key.calendarSunday]: "日",
 	[Key.calendarMonday]: "一",

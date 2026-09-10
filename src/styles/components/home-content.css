@@ -1,10 +1,9 @@
 /* ============================================
    首页终幕退场跑道（#home-afterglow）
-   终幕层恒为 fixed 全屏图，pin 结束后随滚动由控制器写入
-   --home-afterglow-veil 0→1，::before 的 page-bg 幕布逐渐盖住图片，
-   滚满一屏（t=1）后整层隐藏。
-   跑道高度必须 ≥ 100vh：否则 t 到不了 1，终幕图永远盖住
-   下方的页脚（页脚高度不足一屏，独木难支）。
+   终幕层恒为 fixed 全屏图，pin 结束后钉在视口里不动。
+   本跑道只提供 footer 之前约一屏的滚动行程，让背景图有独立展示空间；
+   退场不再用 page-bg 幕布盖住背景图（见 home-blinds-controller 的 renderExit），
+   背景图常驻可见，footer 滚上来后浮在完整背景图之上。
    ============================================ */
 
 .home-content {
@@ -14,18 +13,12 @@
 	min-height: 100vh;
 }
 
-/* 退场幕布（不含文字）：水平 full-bleed，z-index -1 垫在跑道内容之下；
-   .home-content 整体 z-index 2 高于 .home-blinds（z-index 1），
-   故幕布能盖住 fixed 终幕图 */
-.home-content::before {
-	content: "";
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: calc(50% - 50vw);
-	right: calc(50% - 50vw);
-	z-index: -1;
+/* 首页 footer：抬到终幕背景图（.home-blinds，局部 z-index 1）与退场跑道
+   （.home-content，z-index 2）之上，并铺一层页面底色作背景，把版权/备案区与
+   背景图分隔开——浅色模式即白色，深色模式自适应为深色底（选择器与
+   layout-styles.css 的网格定位分工）。 */
+.lg\:is-home .footer {
+	position: relative;
+	z-index: 3;
 	background: var(--page-bg);
-	opacity: var(--home-afterglow-veil, 0);
-	pointer-events: none;
 }

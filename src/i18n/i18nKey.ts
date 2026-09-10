@@ -286,6 +286,12 @@ enum I18nKey {
 	siteHeatmap = "siteHeatmap",
 	today = "today",
 
+	// 页脚
+	footerRunningDays = "footerRunningDays",
+	footerLastUpdate = "footerLastUpdate",
+	footerPoweredBy = "footerPoweredBy",
+	footerTheme = "footerTheme",
+
 	// 日历组件
 	calendarSunday = "calendarSunday",
 	calendarMonday = "calendarMonday",

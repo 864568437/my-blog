@@ -185,31 +185,6 @@
 	will-change: transform;
 }
 
-/* 影像层与内容区的衔接带：参考页式纯线性渐变（transparent → --page-bg），
-   不再渲染水波纹。负 margin 上叠到终幕全屏图底缘，
-   autoAlpha 由控制器随终幕放大尾段淡入（见 home-blinds-controller 的 renderFinale）。 */
-.home-blinds-transition {
-	position: relative;
-	z-index: 2;
-	width: 100%;
-	overflow: hidden;
-	pointer-events: none;
-	opacity: 0;
-	visibility: hidden;
-}
-
-.home-blinds-transition__gradient {
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(to bottom, transparent, var(--page-bg));
-}
-
-/* 与设置面板的渐变开关联动（html 上的 data-gradient-enabled 属性，
-   逻辑与壁纸区 #wallpaper-gradient 一致） */
-html[data-gradient-enabled="false"] .home-blinds-transition__gradient {
-	display: none !important;
-}
-
 /* ============================================
    第一层入场标题：长条横移揭示标题 → 标题上移 → 祝福语循环翻转
    所有 transform 由控制器写入，故 transform-origin 一律留在 CSS 里，

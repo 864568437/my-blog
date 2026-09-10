@@ -1,0 +1,72 @@
+---
+/**
+ * Footer 手写签名艺术字：预录手写动画视频方案，
+ * 参考博客.xuioo.com 的 site-footer__signature 实现。
+ * 结构：浅色/深色两套动画视频（VP9 alpha webm + qtrle mov 兜底）
+ * + 两张写完定格图（透明底 PNG）。显隐状态机
+ * （pending → drawn → holding → done）见 footer-signature.css，
+ * 滚入视口触发播放的逻辑见 Footer.astro。
+ *
+ * 资产由 scripts 离线生成：yishuzi.png（白色艺术字）作为 CSS mask
+ * 按从左到右渐变揭示 → playwright 逐帧截图 →
+ * ffmpeg 编码（webm: VP9 lossless yuva420p；mov: qtrle argb）。
+ * 画布为原图 2376x886 的 1/2 精确尺寸（1188x443）。
+ */
+const assets = {
+	light: {
+		webm: "/assets/images/xiaozhu-sig-light.webm",
+		mov: "/assets/images/xiaozhu-sig-light.mov",
+		still: "/assets/images/xiaozhu-sig-light-still.png",
+	},
+	dark: {
+		webm: "/assets/images/xiaozhu-sig-dark.webm",
+		mov: "/assets/images/xiaozhu-sig-dark.mov",
+		still: "/assets/images/xiaozhu-sig-dark-still.png",
+	},
+};
+---
+
+<div class="footer-signature" data-footer-signature style="aspect-ratio: 1188 / 443">
+	<video
+		class="footer-signature__video footer-signature__video--light"
+		muted
+		playsinline
+		preload="auto"
+		aria-label="xiaozhu"
+	>
+		<source type="video/webm" src={assets.light.webm} />
+		<source type="video/quicktime" src={assets.light.mov} />
+	</video>
+	<video
+		class="footer-signature__video footer-signature__video--dark"
+		muted
+		playsinline
+		preload="auto"
+		aria-label="xiaozhu"
+	>
+		<source type="video/webm" src={assets.dark.webm} />
+		<source type="video/quicktime" src={assets.dark.mov} />
+	</video>
+	<img
+		class="footer-signature__still footer-signature__still--light"
+		src={assets.light.still}
+		alt=""
+		loading="eager"
+		decoding="sync"
+		width="1188"
+		height="443"
+		aria-hidden="true"
+		draggable="false"
+	/>
+	<img
+		class="footer-signature__still footer-signature__still--dark"
+		src={assets.dark.still}
+		alt=""
+		loading="eager"
+		decoding="sync"
+		width="1188"
+		height="443"
+		aria-hidden="true"
+		draggable="false"
+	/>
+</div>

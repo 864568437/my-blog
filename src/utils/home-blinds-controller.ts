@@ -756,11 +756,6 @@ function setupScenes(context: SetupContext) {
 		finalePortal,
 		"[data-finale-image]",
 	);
-	// 衔接过渡带（水波纹 / 渐变）：终幕放大尾段淡入，让全屏终幕与下方内容区衔接；
-	// 未配置任何过渡效果时该节点不存在，用可选查询避免整层搭建失败
-	const transitionBand = root.querySelector<HTMLElement>(
-		"[data-home-blinds-transition]",
-	);
 	const stage = selectRequired<HTMLElement>(root, "[data-blinds-stage]");
 	const stageBackground = selectRequired<HTMLImageElement>(
 		stage,
@@ -1140,13 +1135,6 @@ function setupScenes(context: SetupContext) {
 	const renderFinale = (t: number) => {
 		const bounded = clamp(t, 0, 1);
 		gsap.set(viewport, { autoAlpha: 1 - bounded });
-		// 衔接带在放大尾段淡入：终幕接近满屏时水波纹 / 渐变从底缘浮现，
-		// 滚出 pin 后带体留在文档流里，与下方内容区自然衔接
-		if (transitionBand) {
-			gsap.set(transitionBand, {
-				autoAlpha: clamp((bounded - 0.72) / 0.28, 0, 1),
-			});
-		}
 		if (bounded <= 0) {
 			gsap.set(finalePortal, { autoAlpha: 0 });
 			return;
@@ -1183,14 +1171,11 @@ function setupScenes(context: SetupContext) {
 
 	/**
 	 * 终幕退场：终幕层恒为 position: fixed（root 直下，无 transform 祖先），
-	 * 全屏图片钉在视口里一动不动，全程保持完全不透明、无模糊；下方内容区
-	 * 背景（不含文字，由 .home-content::before 承担）初始全透明，随滚动通过
-	 * --home-afterglow-veil 从 0 渐变到 1，内容顶到视口顶（约一屏）时背景
-	 * 完全不透明，图片被完全盖住后随即隐藏（防止深处透明区域透出）。滚动
-	 * 回退按同一公式还原，无跳变。
+	 * 全屏图片钉在视口里一动不动，全程保持完全不透明、无模糊。退场段不再用
+	 * page-bg 幕布盖住背景图——背景图常驻可见，footer 滚上来后直接浮在完整
+	 * 背景图之上（见 home-content.css 的首页 footer 浮层）。
 	 */
 	let exitActive = false;
-	const afterglowHost = document.getElementById("home-afterglow");
 	const renderExit = () => {
 		if (!pinTrigger) return;
 		const released = window.scrollY - pinTrigger.end;
@@ -1199,23 +1184,11 @@ function setupScenes(context: SetupContext) {
 			if (!exitActive) return;
 			exitActive = false;
 			gsap.set(finalePortal, { autoAlpha: 1, filter: "none" });
-			// 衔接带恢复终幕满屏时的完全可见态（renderFinale(1) 的状态）
-			if (transitionBand) gsap.set(transitionBand, { autoAlpha: 1 });
-			if (afterglowHost)
-				gsap.set(afterglowHost, { "--home-afterglow-veil": "0" });
 			return;
 		}
 		exitActive = true;
-		const t = clamp(released / Math.max(1, window.innerHeight), 0, 1);
-		// 图片本身不动不淡；t=1 被背景盖满后整层隐藏，滚回即恢复
-		gsap.set(finalePortal, {
-			autoAlpha: t >= 1 ? 0 : 1,
-			filter: "none",
-		});
-		// 内容背景（衔接带渐变 + 内容区 ::before）与 veil 同步从透明淡入
-		if (transitionBand) gsap.set(transitionBand, { autoAlpha: t });
-		if (afterglowHost)
-			gsap.set(afterglowHost, { "--home-afterglow-veil": t.toFixed(4) });
+		// 背景图常驻可见：退场既不隐藏也不遮挡，让 footer 浮在完整背景图之上
+		gsap.set(finalePortal, { autoAlpha: 1, filter: "none" });
 	};
 
 	function applyPhase() {
@@ -1286,8 +1259,6 @@ function setupScenes(context: SetupContext) {
 		autoAlpha: 0,
 	});
 	gsap.set(finaleImage, { scale: () => cachedFinaleScale });
-	// 衔接带初始隐藏，终幕放大尾段由 renderFinale 淡入
-	if (transitionBand) gsap.set(transitionBand, { autoAlpha: 0 });
 	gsap.set(cards, { autoAlpha: 0 });
 	// 立牌与背景跑马灯的初始姿态：以底边为铰链向后（远离视线）几乎平躺，入场时朝观众立起来
 	gsap.set(stands, {

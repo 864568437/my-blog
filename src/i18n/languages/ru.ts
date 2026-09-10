@@ -277,6 +277,12 @@ export const ru: Translation = {
 	[Key.siteHeatmap]: "Тепловая карта активности",
 	[Key.today]: "Сегодня",
 
+	// Футер
+	[Key.footerRunningDays]: "Работает {days} дней",
+	[Key.footerLastUpdate]: "Обновлено {days} дней назад",
+	[Key.footerPoweredBy]: "Фреймворк",
+	[Key.footerTheme]: "Тема",
+
 	// Компонент календаря
 	[Key.calendarSunday]: "Вс",
 	[Key.calendarMonday]: "Пн",

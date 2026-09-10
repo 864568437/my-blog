@@ -1,12 +1,17 @@
 ---
 import fs from "node:fs";
 import path from "node:path";
-import { footerConfig, profileConfig } from "@/config";
+import { Icon } from "astro-icon/components";
+import FooterSignature from "@components/layout/FooterSignature.astro";
+import { footerConfig, profileConfig, siteConfig } from "@/config";
+import { i18n } from "@/i18n/translation";
+import I18nKey from "@/i18n/i18nKey";
+import { getSortedPosts } from "@/utils/content-utils";
 import { url } from "@/utils/url-utils";
 
 const currentYear = new Date().getFullYear();
 
-// 读取FooterConfig.html文件内容
+// 读取FooterConfig.html文件内容（备案号等）
 let customFooterHtml = "";
 if (footerConfig.enable) {
 	try {
@@ -23,52 +28,463 @@ if (footerConfig.enable) {
 		console.warn("FooterConfig.html文件读取失败:", error.message);
 	}
 }
+
+// 标语：footerConfig.tagline 优先，留空回退到 profileConfig.bio[0]
+const bioFirst =
+	typeof profileConfig.bio === "string"
+		? profileConfig.bio
+		: (profileConfig.bio?.[0] ?? "");
+const tagline = footerConfig.tagline?.trim() || bioFirst.trim() || "";
+
+// 栏目导航：按 siteConfig.pages 开关自动生成
+interface FooterNavLink {
+	name: string;
+	url: string;
+}
+const navLinks: FooterNavLink[] = [
+	{ name: "文章", url: url("/posts/") },
+	{ name: "动态", url: url("/dynamic/") },
+	...(siteConfig.pages.musicPage
+		? [{ name: "音乐", url: url("/music/") }]
+		: []),
+	...(siteConfig.pages.timeline
+		? [{ name: "时间线", url: url("/timeline/") }]
+		: []),
+	...(siteConfig.pages.calendar
+		? [{ name: "日历", url: url("/calendar/") }]
+		: []),
+	...(siteConfig.pages.gallery
+		? [{ name: "相册", url: url("/gallery/") }]
+		: []),
+	{ name: "关于", url: url("/about/") },
+	{ name: "友链", url: url("/friends/") },
+];
+
+// 社交按钮：取 profileConfig.links 中的外部链接（过滤 RSS 等本地链接）
+const socialLinks = profileConfig.links.filter(
+	(link) => !link.url.startsWith("/") && link.url !== "",
+);
+
+// 运行天数（初始值，客户端脚本会刷新）
+const siteStartDate = siteConfig.siteStartDate || "2025-01-01";
+const runningDaysInitial = Math.max(
+	1,
+	Math.ceil(
+		(new Date().getTime() - new Date(siteStartDate).getTime()) /
+			(1000 * 60 * 60 * 24),
+	),
+);
+
+// 最后更新：最新一篇文章的发布日期（初始值，客户端脚本会刷新）
+const posts = await getSortedPosts();
+const latestPost = posts.find((post) => !post.data.draft);
+const lastPostDate = latestPost?.data.published?.toISOString() ?? "";
+const lastUpdateDaysInitial = lastPostDate
+	? Math.max(
+			0,
+			Math.floor(
+				(new Date().getTime() - new Date(lastPostDate).getTime()) /
+					(1000 * 60 * 60 * 24),
+			),
+		)
+	: 0;
+
+const runningDaysTemplate = i18n(I18nKey.footerRunningDays);
+const lastUpdateTemplate = i18n(I18nKey.footerLastUpdate);
+const todayText = i18n(I18nKey.today);
+
+const fillTemplate = (template: string, days: number | string) =>
+	template.replace("{days}", String(days));
 ---
 
+<footer class="site-footer" aria-label="站点页脚">
+	<div class="site-footer__brand">
+		<div class="site-footer__signature">
+			<FooterSignature />
+		</div>
+		{tagline && <p class="site-footer__tagline">{tagline}</p>}
+		<nav class="site-footer__nav" aria-label="站点主要栏目">
+			{
+				navLinks.map((link, index) => (
+					<>
+						{index > 0 && (
+							<span class="site-footer__nav-sep" aria-hidden="true">
+								/
+							</span>
+						)}
+						<a href={link.url} class="site-footer__nav-link">
+							{link.name}
+						</a>
+					</>
+				))
+			}
+		</nav>
+	</div>
 
-<div
-  class="transition border-t border-black/10 dark:border-white/15 mt-2 mb-6 border-dashed mx-32"
->
-</div>
+	<div class="site-footer__rule" aria-hidden="true"></div>
 
-<div
-  class="transition border-dashed border-[oklch(85%_0_0)] dark:border-white/15 rounded-2xl mb-12 flex flex-col items-center justify-center px-6"
->
-  <div class="transition text-50 text-sm text-center">
-    <div class="mb-2">
-      {customFooterHtml && <div set:html={customFooterHtml} />}
-    </div>
-    <div class="m-0.5">
-      &copy; <span id="copyright-year">{currentYear}</span>
-      {profileConfig.name}. All Rights Reserved. /
-      <a
-        class="transition link text-(--primary) font-medium"
-        target="_blank"
-        href={url("rss.xml")}>RSS</a
-      > /
-      <a
-        class="transition link text-(--primary) font-medium"
-        target="_blank"
-        href={url("sitemap-index.xml")}>Sitemap</a
-      >
-    </div>
-    <div class="m-0.5">
-      Powered by
-      <a
-        class="transition link text-(--primary) font-medium"
-        target="_blank"
-        href="https://astro.build">Astro</a
-      > &
-      <a
-        class="transition link text-(--primary) font-medium"
-        target="_blank"
-        href="https://github.com/CuteLeaf/Firefly">Firefly</a
-      >
-    </div>
-    <!-- 
-      注意：请勿随意修改或删除 "Powered by Astro & Firefly" 部分，这是对开源项目的尊重和支持。
-      如果您需要在底部增加内容，请在src/config/footerConfig.ts中修改enable属性为true，然后编辑src/config/FooterConfig.html文件。
-      您可以随意在src/config/FooterConfig.html中随意添加自定义内容，不需要修改Footer.astro文件。
-    -->
-  </div>
-</div>
+	<div class="site-footer__meta">
+		<div class="site-footer__meta-main">
+			<p class="site-footer__powered-line">
+				<span class="site-footer__powered-label">
+					{i18n(I18nKey.footerPoweredBy)}
+				</span>
+				<a
+					href="https://astro.build"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="site-footer__text-link site-footer__text-link--strong">Astro</a
+				>
+				<span class="site-footer__dot" aria-hidden="true">·</span>
+				<span class="site-footer__powered-label">
+					{i18n(I18nKey.footerTheme)}
+				</span>
+				<a
+					href="https://github.com/CuteLeaf/Firefly"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="site-footer__text-link site-footer__text-link--strong">Firefly</a
+				>
+			</p>
+		</div>
+		<div class="site-footer__meta-right">
+			{
+				socialLinks.length > 0 && (
+					<div class="site-footer__social" aria-label="社交链接">
+						{socialLinks.map((link) => (
+							<a
+								href={link.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="site-footer__social-btn"
+								aria-label={link.name}
+								title={link.name}
+							>
+								<Icon name={link.icon} class="site-footer__social-ico" />
+							</a>
+						))}
+					</div>
+				)
+			}
+			<div class="site-footer__status-line">
+				<a
+					href={url("rss.xml")}
+					target="_blank"
+					class="site-footer__text-link">RSS</a
+				>
+				{
+					footerConfig.showRunningDays && (
+						<>
+							<span class="site-footer__dot" aria-hidden="true">·</span>
+							<span
+								class="site-footer__stat"
+								id="footer-running-days"
+								data-template={runningDaysTemplate}
+							>
+								{fillTemplate(runningDaysTemplate, runningDaysInitial)}
+							</span>
+						</>
+					)
+				}
+				{
+					footerConfig.showLastUpdate && lastPostDate && (
+						<>
+							<span class="site-footer__dot" aria-hidden="true">·</span>
+							<span
+								class="site-footer__stat"
+								id="footer-last-update"
+								data-template={lastUpdateTemplate}
+								data-today={todayText}
+							>
+								{lastUpdateDaysInitial === 0
+									? todayText
+									: fillTemplate(lastUpdateTemplate, lastUpdateDaysInitial)}
+							</span>
+						</>
+					)
+				}
+			</div>
+		</div>
+	</div>
+
+	<div class="site-footer__rule site-footer__rule--mid" aria-hidden="true"></div>
+
+	<div class="site-footer__meta-bottom">
+		<p class="site-footer__copy-line">
+			<span>Copyright © {currentYear}</span>
+			<span>{profileConfig.name}. All Rights Reserved.</span>
+		</p>
+		{customFooterHtml && <div class="site-footer__beian" set:html={customFooterHtml} />}
+	</div>
+
+	<!--
+		注意：请勿随意修改或删除 "Powered by Astro & Firefly" 部分，这是对开源项目的尊重和支持。
+		如果您需要在底部增加内容，请在src/config/footerConfig.ts中修改enable属性为true，然后编辑src/config/FooterConfig.html文件。
+		您可以随意在src/config/FooterConfig.html中随意添加自定义内容，不需要修改Footer.astro文件。
+	-->
+</footer>
+
+<script>
+	// 手写签名视频状态机（参考 blog.xuioo.com 的 site-footer__signature 实现）：
+	// - 预热：预取两套视频与定格图（fetch force-cache + preload link），视频 preload=auto
+	// - 滚入视口 28% → is-signature-drawn，两套视频就绪（canplaythrough，12s 超时兜底）后播放
+	// - 任一视频 ended → is-signature-holding（定格图盖上）→ 双 rAF 后 is-signature-done（视频隐藏）
+	// - 播放失败（play() 被拒，如不支持 webm/mov 的浏览器）→ 直接进入终态显示定格图
+	// - prefers-reduced-motion → 跳过动画直接显示定格图
+	// - 主题切换（theme-change）在终态后把视频 seek 到末帧，保持画面一致
+	// Footer 不在 Swup 容器内跨页持久，data-signature-bound 防重复绑定。
+	function initFooterSignature() {
+		const signature = document.querySelector<HTMLElement>(
+			"[data-footer-signature]",
+		);
+
+		if (!signature || signature.dataset.signatureBound === "1") return;
+		signature.dataset.signatureBound = "1";
+		signature.classList.add("is-signature-pending");
+
+		const videos = [
+			...signature.querySelectorAll<HTMLVideoElement>(
+				".footer-signature__video",
+			),
+		];
+		const stills = [
+			...signature.querySelectorAll<HTMLImageElement>(
+				".footer-signature__still",
+			),
+		];
+
+		// --- 预热：源地址从 DOM 读取，注入 preload link 并 fetch 进缓存 ---
+		const assetUrls = [
+			...videos.flatMap((video) =>
+				[...video.querySelectorAll("source")].map((s) => s.src),
+			),
+			...stills.map((img) => img.src),
+		];
+		for (const url of assetUrls) {
+			const as = url.endsWith(".png") ? "image" : "video";
+			if (
+				!document.querySelector(
+					`link[rel="preload"][as="${as}"][href="${url}"]`,
+				)
+			) {
+				const link = document.createElement("link");
+				link.rel = "preload";
+				link.as = as;
+				link.href = url;
+				if (as === "video") link.type = "video/webm";
+				document.head.appendChild(link);
+			}
+			if (typeof fetch === "function") {
+				fetch(url, { credentials: "same-origin", cache: "force-cache" }).catch(
+					() => {},
+				);
+			}
+		}
+		for (const video of videos) {
+			video.preload = "auto";
+			video.muted = true;
+			video.playsInline = true;
+			video.loop = false;
+			try {
+				video.pause();
+				video.load();
+			} catch {
+				/* 加载失败由 canplaythrough 超时兜底 */
+			}
+		}
+
+		const waitForStill = (img: HTMLImageElement) =>
+			new Promise<void>((resolve) => {
+				if (!img) {
+					resolve();
+					return;
+				}
+				const decode = () => {
+					if (typeof img.decode === "function") {
+						img.decode().then(resolve).catch(resolve);
+					} else {
+						resolve();
+					}
+				};
+				if (img.complete && img.naturalWidth > 0) {
+					decode();
+					return;
+				}
+				img.addEventListener("load", decode, { once: true });
+				img.addEventListener("error", () => resolve(), { once: true });
+			});
+
+		const waitCanPlay = (video: HTMLVideoElement, timeoutMs = 12000) =>
+			new Promise<void>((resolve) => {
+				if (!video) {
+					resolve();
+					return;
+				}
+				if (video.readyState >= 4) {
+					resolve();
+					return;
+				}
+				let settled = false;
+				const settle = () => {
+					if (!settled) {
+						settled = true;
+						resolve();
+					}
+				};
+				video.addEventListener("canplaythrough", settle, { once: true });
+				video.addEventListener("error", settle, { once: true });
+				window.setTimeout(settle, timeoutMs);
+			});
+
+		// 视频跳到末帧并暂停（终态画面由定格图承担，这里只保证时间轴一致）
+		const seekToEnd = (video: HTMLVideoElement) => {
+			if (!video) return;
+			const seek = () => {
+				try {
+					const duration = video.duration;
+					if (Number.isFinite(duration) && duration > 0) {
+						video.currentTime = Math.max(0, duration - 0.04);
+					}
+					video.pause();
+				} catch {
+					/* 忽略 seek 异常 */
+				}
+			};
+			if (video.readyState >= 1) {
+				seek();
+			} else {
+				video.addEventListener("loadedmetadata", seek, { once: true });
+			}
+		};
+
+		const complete = async () => {
+			await Promise.all(stills.map(waitForStill));
+			for (const video of videos) seekToEnd(video);
+			signature.classList.add("is-signature-holding");
+			await new Promise<void>((resolve) =>
+				requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+			);
+			signature.classList.add("is-signature-done");
+		};
+
+		const finishWithoutMotion = () => {
+			signature.classList.add(
+				"is-signature-drawn",
+				"is-signature-holding",
+				"is-signature-done",
+			);
+			for (const video of videos) {
+				try {
+					video.pause();
+				} catch {
+					/* 忽略 */
+				}
+			}
+		};
+
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+			Promise.all(stills.map(waitForStill)).then(finishWithoutMotion);
+			return;
+		}
+
+		const play = async () => {
+			if (signature.dataset.signaturePlaying === "1") return;
+			signature.dataset.signaturePlaying = "1";
+			signature.classList.add("is-signature-drawn");
+
+			await Promise.all([
+				...videos.map((video) => waitCanPlay(video)),
+				...stills.map(waitForStill),
+			]);
+
+			let ended = false;
+			const onEnded = () => {
+				if (!ended) {
+					ended = true;
+					complete();
+				}
+			};
+			for (const video of videos) {
+				video.loop = false;
+				video.muted = true;
+				video.playsInline = true;
+				video.addEventListener("ended", onEnded, { once: true });
+				try {
+					video.currentTime = 0;
+				} catch {
+					/* 忽略 */
+				}
+				const played = video.play();
+				if (played && typeof played.catch === "function") {
+					played.catch(onEnded);
+				}
+			}
+		};
+
+		// 终态后切主题：把视频 seek 到末帧，防止后续重播看到错帧
+		const onThemeChange = () => {
+			if (signature.classList.contains("is-signature-done")) {
+				for (const video of videos) seekToEnd(video);
+			}
+		};
+		window.addEventListener("theme-change", onThemeChange);
+
+		if (typeof IntersectionObserver === "undefined") {
+			play();
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting && entry.intersectionRatio >= 0.28) {
+						play();
+						observer.disconnect();
+						break;
+					}
+				}
+			},
+			{ threshold: [0, 0.28, 0.5, 1] },
+		);
+
+		observer.observe(signature);
+	}
+
+	initFooterSignature();
+	document.addEventListener("astro:page-load", initFooterSignature);
+	document.addEventListener("swup:page:view", initFooterSignature);
+</script>
+
+<script is:inline define:vars={{ siteStartDate, lastPostDate }}>
+	// 页脚统计行：客户端按本地时间刷新「已运行 N 天」与「最后更新于 N 天前」
+	(function updateFooterStats() {
+		const today = new Date();
+
+		const runningDaysEl = document.getElementById("footer-running-days");
+		if (runningDaysEl) {
+			const start = new Date(siteStartDate);
+			const days = Math.max(
+				1,
+				Math.ceil(
+					Math.abs(today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24),
+				),
+			);
+			const template = runningDaysEl.dataset.template || "{days}";
+			runningDaysEl.textContent = template.replace("{days}", String(days));
+		}
+
+		const lastUpdateEl = document.getElementById("footer-last-update");
+		if (lastUpdateEl && lastPostDate) {
+			const lastPost = new Date(lastPostDate);
+			const days = Math.floor(
+				Math.abs(today.getTime() - lastPost.getTime()) / (1000 * 60 * 60 * 24),
+			);
+			if (days === 0) {
+				lastUpdateEl.textContent = lastUpdateEl.dataset.today || "";
+			} else {
+				const template = lastUpdateEl.dataset.template || "{days} 天前";
+				lastUpdateEl.textContent = template.replace("{days}", String(days));
+			}
+		}
+	})();
+</script>

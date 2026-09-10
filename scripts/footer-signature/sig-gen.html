@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; }
+  /* yishuzi.png 原始 2376x886，此处按 1/2 精确缩放 */
+  #reveal {
+    width: 1188px;
+    height: 443px;
+    /* 书写揭示遮罩：--rev 左侧实心，右侧渐隐（软边宽度 7%） */
+    --rev: 0%;
+    -webkit-mask: linear-gradient(90deg, #000 calc(var(--rev) - 7%), transparent var(--rev));
+    mask: linear-gradient(90deg, #000 calc(var(--rev) - 7%), transparent var(--rev));
+  }
+  /* 艺术字作为 mask，墨色由背景承担（与旧版 ?ink 参数一致的深/浅墨） */
+  #sig {
+    width: 100%;
+    height: 100%;
+    -webkit-mask: url("../../public/assets/images/yishuzi.png") center / contain no-repeat;
+    mask: url("../../public/assets/images/yishuzi.png") center / contain no-repeat;
+  }
+</style>
+</head>
+<body>
+<div id="reveal"><div id="sig"></div></div>
+<script>
+  // 揭示时间轴：延迟 0.2s 起，2.7s 写完，之后定格到 3.2s（与 capture.mjs 的 DURATION 对齐）
+  const DELAY = 0.2;
+  const DURATION = 2.7;
+  const HOLD = 3.2;
+
+  // cubic-bezier(0.35, 0, 0.15, 1) 缓动，二分求解（沿用旧版）
+  function ease(t) {
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    const x1 = 0.35, y1 = 0, x2 = 0.15, y2 = 1;
+    let lo = 0, hi = 1, x = t;
+    for (let i = 0; i < 24; i++) {
+      const cx = 3 * x1 * (1 - x) ** 2 * x + 3 * x2 * (1 - x) * x ** 2 + x ** 3;
+      if (cx < t) lo = x; else hi = x;
+      x = (lo + hi) / 2;
+    }
+    return 3 * y1 * (1 - x) ** 2 * x + 3 * y2 * (1 - x) * x ** 2 + x ** 3;
+  }
+
+  // 渲染第 t 秒的书写状态（供 playwright 逐帧截图调用）
+  window.renderAt = function (t) {
+    const raw = Math.min(1, Math.max(0, (t - DELAY) / DURATION));
+    // 100% 时软边仍会裁掉尾部，多放 8% 保证末帧完整
+    const pct = ease(raw) * 108;
+    document.getElementById('reveal').style.setProperty('--rev', pct.toFixed(3) + '%');
+  };
+
+  // 墨色由 URL 参数控制：?ink=light（浅色主题深墨）或 dark（深色主题浅墨）
+  const ink = new URLSearchParams(location.search).get('ink') === 'dark'
+    ? 'oklch(0.90 0 0)' : 'oklch(0.10 0 0)';
+  document.getElementById('sig').style.background = ink;
+  window.renderAt(0);
+</script>
+</body>
+</html>

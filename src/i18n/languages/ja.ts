@@ -275,6 +275,12 @@ export const ja: Translation = {
 	[Key.siteHeatmap]: "アクティビティヒートマップ",
 	[Key.today]: "今日",
 
+	// フッター
+	[Key.footerRunningDays]: "{days} 日間運営中",
+	[Key.footerLastUpdate]: "最終更新は {days} 日前",
+	[Key.footerPoweredBy]: "フレームワーク",
+	[Key.footerTheme]: "テーマ",
+
 	// カレンダーコンポーネント
 	[Key.calendarSunday]: "日",
 	[Key.calendarMonday]: "月",

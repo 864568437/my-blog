@@ -96,7 +96,7 @@ export const homeConfig: HomeConfig = {
 			eyebrow: "The End",
 			titleEn: "Pure Wish True",
 			titleZh: "「纯粹祈愿皆成真」",
-			copyright: "Copyright © 2026 Fqzlr. All Rights Reserved",
+			copyright: "Copyright © 2026 XIAOZHU. All Rights Reserved",
 		},
 	},
 };

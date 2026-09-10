@@ -1,26 +1,11 @@
 ---
 import HomeBlindsScene from "@components/layout/HomeBlindsScene.astro";
-import { backgroundWallpaper, homeConfig } from "@/config";
+import { homeConfig } from "@/config";
 import type { HomeBlindsSceneItem } from "@/types/config";
 
 const config = homeConfig.homeBlinds;
 const background = config.reveal.backgroundImage;
 const isEnabled = config.enabled && Boolean(background);
-
-/** 衔接过渡带：参考页式纯线性渐变（transparent → --page-bg），
- * 不再渲染水波纹；显隐仍跟随壁纸区的渐变开关联动 */
-const gradientConfig = backgroundWallpaper.banner?.gradient?.enable;
-const gradientSwitchable =
-	backgroundWallpaper.banner?.gradient?.switchable ?? false;
-const gradientEnabledOnDesktop =
-	typeof gradientConfig === "object" ? gradientConfig.desktop : gradientConfig;
-const gradientEnabledOnMobile =
-	typeof gradientConfig === "object" ? gradientConfig.mobile : gradientConfig;
-const gradientHeight = backgroundWallpaper.banner?.gradient?.height ?? "30vh";
-const shouldRenderGradient =
-	gradientEnabledOnDesktop || gradientEnabledOnMobile || gradientSwitchable;
-// 过渡带高度：直接采用渐变配置的高度
-const transitionHeight = gradientHeight;
 
 // 第一层入场标题配置：时长节奏供控制器使用；标题文字已由中央圈内的
 // 主页文字组（data-hero-emblem）取代
@@ -342,25 +327,6 @@ const runtimeConfig = {
 			data-finale-image
 		/>
 	</div>
-
-	<!-- 影像层与内容区的衔接带：参考页式纯线性渐变（transparent → --page-bg）。
-	     负 margin 上叠到终幕全屏图底缘；初始隐藏，控制器随终幕放大进度淡入 -->
-	{shouldRenderGradient && (
-		<div
-			class="home-blinds-transition"
-			data-home-blinds-transition
-			style={`height: ${transitionHeight}; margin-top: -${transitionHeight};`}
-			aria-hidden="true"
-		>
-			<div
-				class:list={[
-					"home-blinds-transition__gradient",
-					{ hidden: !gradientEnabledOnMobile },
-					{ "md:hidden": !gradientEnabledOnDesktop },
-				]}
-			/>
-		</div>
-	)}
 
 	<script
 		type="application/json"

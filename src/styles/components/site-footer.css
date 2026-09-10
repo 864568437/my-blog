@@ -1,0 +1,252 @@
+/* ============================================
+   站点页脚（.site-footer）— 仿 xuioo.com 布局
+   结构：签名区 → 标语 → 栏目导航 → 分隔线 →
+   框架/主题 + 社交按钮 + 状态行 → 分隔线 →
+   版权 + 备案（FooterConfig.html 注入）
+   签名动画状态机见 footer-signature.css。
+   ============================================ */
+
+.site-footer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-block: 1.5rem 2rem;
+	margin-block: 1.5rem 2rem;
+	text-align: center;
+}
+
+/* --- 品牌区：签名 + 标语 + 栏目导航 --- */
+
+.site-footer__brand {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.site-footer__signature {
+	/* 页脚语境下签名比独立展示（13rem）略大 */
+	width: min(100%, 18rem);
+}
+
+:where(.site-footer__signature) .footer-signature {
+	width: 100%;
+}
+
+.site-footer__tagline {
+	margin: 0;
+	font-size: 0.8rem;
+	line-height: 1.6;
+	color: var(--primary);
+	opacity: 0.75;
+}
+
+.site-footer__nav {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 0.375rem 0.5rem;
+	margin-top: 0.25rem;
+}
+
+.site-footer__nav-link {
+	font-size: 0.85rem;
+	color: var(--primary);
+	opacity: 0.85;
+	text-decoration: none;
+	transition: opacity 0.2s ease;
+
+	&:hover {
+		opacity: 1;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+	}
+}
+
+.site-footer__nav-sep {
+	font-size: 0.75rem;
+	color: var(--primary);
+	opacity: 0.35;
+	user-select: none;
+}
+
+/* --- 分隔线 --- */
+
+.site-footer__rule {
+	width: min(100%, 40rem);
+	height: 1px;
+	margin-block: 1.25rem;
+	background: linear-gradient(
+		to right,
+		transparent,
+		var(--line-divider),
+		transparent
+	);
+}
+
+.site-footer__rule--mid {
+	margin-block: 1rem;
+	width: min(100%, 36rem);
+}
+
+/* --- 信息区：框架/主题 + 社交 + 状态行（整体居中） --- */
+
+.site-footer__meta {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+}
+
+.site-footer__meta-main {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.site-footer__powered-line {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.375rem;
+	margin: 0;
+	font-size: 0.8rem;
+	color: var(--primary);
+	opacity: 0.85;
+}
+
+.site-footer__powered-label {
+	opacity: 0.6;
+}
+
+.site-footer__meta-right {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+/* --- 社交按钮 --- */
+
+.site-footer__social {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.site-footer__social-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: 9999px;
+	color: var(--primary);
+	background: var(--btn-regular-bg, var(--card-bg));
+	border: 1px solid var(--line-divider);
+	opacity: 0.9;
+	transition:
+		opacity 0.2s ease,
+		transform 0.2s ease;
+
+	&:hover {
+		opacity: 1;
+		transform: translateY(-2px);
+	}
+}
+
+.site-footer__social-ico {
+	width: 1.1em;
+	height: 1.1em;
+	font-size: 1.1rem;
+}
+
+/* --- 状态行 --- */
+
+.site-footer__status-line {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 0.375rem;
+	margin: 0;
+	font-size: 0.75rem;
+	color: var(--primary);
+	opacity: 0.7;
+}
+
+/* --- 底部：版权 + 备案 --- */
+
+.site-footer__meta-bottom {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	width: 100%;
+}
+
+.site-footer__copy-line {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.375rem;
+	margin: 0;
+	font-size: 0.8rem;
+	color: var(--primary);
+	opacity: 0.85;
+}
+
+/* 备案行：FooterConfig.html 注入的纯内容，样式在此接管 */
+.site-footer__beian {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.375rem;
+	margin: 0;
+	font-size: 0.75rem;
+	color: var(--primary);
+	opacity: 0.65;
+
+	& a {
+		color: inherit;
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+			text-underline-offset: 4px;
+		}
+	}
+}
+
+/* --- 共享小元素 --- */
+
+.site-footer__text-link {
+	font-size: inherit;
+	color: var(--primary);
+	opacity: 0.75;
+	text-decoration: none;
+	transition: opacity 0.2s ease;
+
+	&:hover {
+		opacity: 1;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+	}
+}
+
+.site-footer__text-link--strong {
+	opacity: 0.9;
+	font-weight: 500;
+}
+
+.site-footer__dot {
+	opacity: 0.35;
+	user-select: none;
+}
+
+.site-footer__stat {
+	white-space: nowrap;
+}

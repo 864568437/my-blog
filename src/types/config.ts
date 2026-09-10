@@ -610,6 +610,9 @@ export type FontConfig = {
 export type FooterConfig = {
 	enable: boolean; // 是否启用Footer HTML注入功能
 	customHtml?: string; // 自定义HTML内容，用于添加备案号等信息
+	tagline?: string; // 签名下方标语，留空则使用 profileConfig.bio[0]
+	showRunningDays?: boolean; // 是否显示「已运行 N 天」
+	showLastUpdate?: boolean; // 是否显示「最后更新于 N 天前」
 };
 
 export type CoverImageConfig = {

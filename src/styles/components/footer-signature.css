@@ -1,0 +1,118 @@
+/* ============================================
+   Footer 手写签名（.footer-signature）— 视频方案
+   参考 blog.xuioo.com 的 site-footer__signature 实现。
+   状态机（类加在 .footer-signature 容器上，由 Footer.astro 的
+   IntersectionObserver 驱动）：
+   - 默认：当前主题视频可见（停在首帧，透明底无内容）
+   - is-signature-drawn：滚入视口，视频开始播放
+   - is-signature-holding：播放结束，定格图盖在视频上
+   - is-signature-done：视频隐藏，定格图常驻（最终态）
+   prefers-reduced-motion 时直接显示定格图，不播放动画。
+   ============================================ */
+
+.footer-signature {
+	position: relative;
+	display: block;
+	width: min(100%, 13rem);
+	height: auto;
+	margin-inline: auto;
+	overflow: hidden;
+}
+
+.footer-signature__video,
+.footer-signature__still {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	object-position: center;
+	pointer-events: none;
+	background: transparent;
+}
+
+.footer-signature__video {
+	z-index: 1;
+}
+
+/* 主题切换：浅色主题显示 --light，深色主题显示 --dark */
+.footer-signature__video--dark,
+:root.dark .footer-signature__video--light {
+	opacity: 0;
+	visibility: hidden;
+}
+
+:root.dark .footer-signature__video--dark {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* 定格图：默认隐藏，holding/done 时按主题显示 */
+.footer-signature__still {
+	z-index: 2;
+	opacity: 0;
+	visibility: hidden;
+}
+
+.footer-signature.is-signature-holding .footer-signature__still--light {
+	opacity: 1;
+	visibility: visible;
+}
+
+.footer-signature.is-signature-holding .footer-signature__still--dark,
+:root.dark .footer-signature.is-signature-holding .footer-signature__still--light {
+	opacity: 0;
+	visibility: hidden;
+}
+
+:root.dark .footer-signature.is-signature-holding .footer-signature__still--dark {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* 终态：视频隐藏，定格图常驻 */
+.footer-signature.is-signature-done .footer-signature__video {
+	opacity: 0 !important;
+	visibility: hidden !important;
+}
+
+.footer-signature.is-signature-done .footer-signature__still--light {
+	opacity: 1;
+	visibility: visible;
+}
+
+.footer-signature.is-signature-done .footer-signature__still--dark,
+:root.dark .footer-signature.is-signature-done .footer-signature__still--light {
+	opacity: 0;
+	visibility: hidden;
+}
+
+:root.dark .footer-signature.is-signature-done .footer-signature__still--dark {
+	opacity: 1;
+	visibility: visible;
+}
+
+/* 减少动效：不播视频，直接显示定格图 */
+@media (prefers-reduced-motion: reduce) {
+	.footer-signature.is-signature-pending .footer-signature__video {
+		opacity: 0 !important;
+		visibility: hidden !important;
+	}
+
+	.footer-signature.is-signature-pending .footer-signature__still--light {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.footer-signature.is-signature-pending .footer-signature__still--dark,
+	:root.dark .footer-signature.is-signature-pending .footer-signature__still--light {
+		opacity: 0;
+		visibility: hidden;
+	}
+
+	:root.dark .footer-signature.is-signature-pending .footer-signature__still--dark {
+		opacity: 1;
+		visibility: visible;
+	}
+}

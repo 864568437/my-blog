@@ -47,6 +47,8 @@
 @import './components/page-title.css';
 @import './components/home-blinds.css';
 @import './components/home-content.css';
+@import './components/footer-signature.css';
+@import './components/site-footer.css';
 @import './components/animated-tabs.css';
 @import './components/article-catalog.css';
 @import './components/page-loader.css';

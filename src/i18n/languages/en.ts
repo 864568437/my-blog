@@ -278,6 +278,12 @@ export const en: Translation = {
 	[Key.siteHeatmap]: "Activity Heatmap",
 	[Key.today]: "Today",
 
+	// Footer
+	[Key.footerRunningDays]: "Running for {days} days",
+	[Key.footerLastUpdate]: "Last updated {days} days ago",
+	[Key.footerPoweredBy]: "Framework",
+	[Key.footerTheme]: "Theme",
+
 	// Calendar Component
 	[Key.calendarSunday]: "Sun",
 	[Key.calendarMonday]: "Mon",
