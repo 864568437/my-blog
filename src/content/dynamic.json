@@ -2,7 +2,7 @@
   {
     "id": "2026-07-26-genggai",
     "published": "2026-07-26T08:00:00.000Z",
-    "pinned": false,
+    "pinned": true,
     "tags": [
       "博客相关"
     ],
@@ -15,7 +15,7 @@
   {
     "id": "2026-07-06-test-1",
     "published": "2026-07-06T10:00:00.000Z",
-    "pinned": false,
+    "pinned": true,
     "tags": [
       "测试",
       "动态"
@@ -29,7 +29,7 @@
   {
     "id": "2026-07-06-test-2",
     "published": "2026-07-06T08:00:00.000Z",
-    "pinned": false,
+    "pinned": true,
     "tags": [
       "测试"
     ],
@@ -38,6 +38,20 @@
     "author": "fqzlr",
     "avatar": "assets/images/touxiang.webp",
     "body": "测试第二条动态\n\n![图片](https://tu.fqzlr.com/file/beijing/1777266325757_bk4__1_.webp)"
+  },
+  {
+    "id": "2026-09-10-id-17890",
+    "published": "2026-09-10T18:20:40.931Z",
+    "pinned": false,
+    "tags": [
+      "测试"
+    ],
+    "location": "苏州",
+    "device": "samsung",
+    "author": "Xiaozhu",
+    "avatar": "assets/images/touxiang.webp",
+    "body": "测试新增和删除",
+    "_draft": true
   },
   {
     "id": "2026-05-10-xiangfa",
