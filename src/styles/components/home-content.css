@@ -13,6 +13,14 @@
 	min-height: 100vh;
 }
 
+/* 移动端首页没有 HomeBlinds 终幕层，退场跑道失去作用，
+   隐藏后避免壁纸与 footer 之间出现一屏纯空白 */
+@media (max-width: 768px) {
+	.home-content {
+		display: none;
+	}
+}
+
 /* 首页 footer：抬到终幕背景图（.home-blinds，局部 z-index 1）与退场跑道
    （.home-content，z-index 2）之上，并铺一层页面底色作背景，把版权/备案区与
    背景图分隔开——浅色模式即白色，深色模式自适应为深色底（选择器与
