@@ -105,7 +105,10 @@ const fallbackInline = inlineSvgAvatar(title);
   </div>
 </a>
 
-<style>
+<!-- is:global：friends.astro 的 KV 动态刷新脚本用 innerHTML 整块重渲染卡片，
+     客户端生成的节点没有 Astro scoped class，scoped 样式会失效。
+     所有选择器均为 friend-card-* 独占命名，全局化无冲突风险。 -->
+<style is:global>
   .friend-card-link {
     display: flex;
     flex-direction: column;

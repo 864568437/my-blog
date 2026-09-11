@@ -5,28 +5,9 @@
  * 同时支持 Cloudflare Workers 和 Vercel Edge Functions
  */
 
+import { corsHeaders, jsonResponse } from "./http-utils.js";
+
 const GH_API = "https://api.github.com";
-
-function corsHeaders(extra = {}) {
-	return {
-		"Access-Control-Allow-Origin": "*",
-		"Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-		"Access-Control-Allow-Headers":
-			"Content-Type, Authorization, Accept, X-GitHub-Api-Version, User-Agent",
-		"Access-Control-Max-Age": "86400",
-		...extra,
-	};
-}
-
-function jsonResponse(data, status = 200) {
-	return new Response(JSON.stringify(data), {
-		status,
-		headers: {
-			"Content-Type": "application/json",
-			...corsHeaders(),
-		},
-	});
-}
 
 // ============ 服务端 GitHub App 认证 ============
 
@@ -136,8 +117,8 @@ async function signJwtServer(appId, privateKeyPem) {
 	return `${data}.${sig}`;
 }
 
-/** 获取 Installation Token（服务端） */
-async function getInstallationTokenServer(env) {
+/** 获取 Installation Token（服务端）。导出供 kv-data.js 的 /api/data/auth 复用 */
+export async function getInstallationTokenServer(env) {
 	const now = Date.now();
 	if (cachedToken && now < cachedTokenExpiry) return cachedToken;
 

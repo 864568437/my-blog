@@ -60,7 +60,11 @@ const DRAFT_STORAGE_KEY = "guestbook-chat-draft";
  * 这里用 objectId 作为唯一键（addComment 返回时由服务端分配）。
  */
 const PENDING_STORAGE_KEY = "guestbook-chat-pending";
-const serverURL = commentConfig.waline?.serverURL ?? "";
+const serverURL =
+	guestbookConfig.type === "waline"
+		? (commentConfig.waline?.serverURL ?? "")
+		: "";
+const isEnabled = guestbookConfig.type === "waline" && serverURL !== "";
 const lang = commentConfig.waline?.lang ?? "zh-CN";
 const loginMode = commentConfig.waline?.login ?? "enable";
 const announcements = guestbookConfig.announcements;
@@ -1179,6 +1183,7 @@ function handleDraftChange(nextDraft: string) {
 }
 
 onMount(() => {
+	if (!isEnabled) return;
 	const storedProfile = readStoredValue<unknown>(
 		localStorage,
 		PROFILE_STORAGE_KEY,
@@ -1198,6 +1203,7 @@ onMount(() => {
 	window.addEventListener("offline", handleOffline);
 
 	return () => {
+		if (!isEnabled) return;
 		if (pollTimer) window.clearInterval(pollTimer);
 		dataController?.abort();
 		initialMediaCleanup?.();
@@ -1213,7 +1219,18 @@ onMount(() => {
 
 <svelte:window onkeydown={handleChatKeydown} />
 
-<section class="guestbook-chat" aria-label="留言板">
+{#if !isEnabled}
+	<section class="guestbook-chat" aria-label="留言板">
+		<div class="guestbook-chat__conversation">
+			<div class="guestbook-chat__state">
+				<Bell size={34} aria-hidden="true" />
+				<h3>留言板未开启</h3>
+				<p>留言功能暂时关闭，请稍后再来看看。</p>
+			</div>
+		</div>
+	</section>
+{:else}
+	<section class="guestbook-chat" aria-label="留言板">
 	<header class="guestbook-chat__header">
 		<div class="guestbook-chat__channel">
 			<button
@@ -1613,3 +1630,4 @@ onMount(() => {
 		{/if}
 	</dialog>
 </section>
+{/if}

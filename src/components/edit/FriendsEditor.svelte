@@ -1,13 +1,8 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
-import {
-	deepClone,
-	ensureIconify,
-	genId,
-	getRepoFile,
-	showToast,
-} from "@/utils/editMode";
+import { setupKvDrafts } from "@/utils/draftHelpers";
+import { deepClone, ensureIconify, genId, showToast } from "@/utils/editMode";
+import { fetchKvData } from "@/utils/kvData";
 
 interface FriendItem {
 	id?: string;
@@ -27,176 +22,24 @@ let friends = $state<FriendItem[]>([]);
 let originalFriends = $state<FriendItem[]>([]);
 let editingIndex = $state(-1);
 let repoLoaded = $state(false);
-let fileSha = $state<string | null>(null);
-let originalTS = $state<string>("");
-
-// 从 TypeScript 配置文件中解析友链数组
-function parseFriendsFromTS(tsContent: string): FriendItem[] {
-	tsContent = tsContent.replace(/\r\n/g, "\n");
-	const startMarker = "export const friendsConfig: FriendLink[] = [";
-	const startIdx = tsContent.indexOf(startMarker);
-	if (startIdx === -1) return [];
-	let bracketStart = startIdx + startMarker.length;
-	let depth = 1;
-	let idx = bracketStart;
-	while (idx < tsContent.length && depth > 0) {
-		if (tsContent[idx] === "[") depth++;
-		else if (tsContent[idx] === "]") depth--;
-		if (depth > 0) idx++;
-	}
-	let arrayStr = tsContent.substring(bracketStart, idx).trim();
-	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
-	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
-	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
-	try {
-		return JSON.parse(`[${arrayStr}]`);
-	} catch (e) {
-		console.error("Failed to parse friends from TS:", e);
-		return [];
-	}
-}
-
-function stripLineComments(code: string): string {
-	const lines = code.split("\n");
-	return lines
-		.map((line) => {
-			let inStr = false;
-			let quotes = 0;
-			for (let i = 0; i < line.length - 1; i++) {
-				if (line[i] === '"' && (i === 0 || line[i - 1] !== "\\")) {
-					inStr = !inStr;
-					quotes++;
-				}
-				if (!inStr && line[i] === "/" && line[i + 1] === "/") {
-					if (quotes % 2 === 0) {
-						return line.substring(0, i);
-					}
-				}
-			}
-			return line;
-		})
-		.join("\n");
-}
-
-function buildFriendsConfigTS(
-	friends: FriendItem[],
-	originalContent?: string,
-): string {
-	const entries = friends.map((f) => {
-		const obj = {
-			title: f.title,
-			imgurl: f.imgurl,
-			desc: f.desc,
-			siteurl: f.siteurl,
-			tags: f.tags || ["Blog"],
-			weight: f.weight ?? 10,
-			enabled: f.enabled !== false,
-		};
-		const json = JSON.stringify(obj, null, 2)
-			.split("\n")
-			.map((line, i, arr) =>
-				i === arr.length - 1 ? `\t\t${line},` : `\t\t${line}`,
-			)
-			.join("\n");
-		return json;
-	});
-	const newArrayContent = `[\n${entries.join("\n")}\n]`;
-
-	if (originalContent) {
-		const startMarker = "export const friendsConfig: FriendLink[] = [";
-		const startIdx = originalContent.indexOf(startMarker);
-		if (startIdx !== -1) {
-			let bracketStart = startIdx + startMarker.length;
-			let depth = 1;
-			let idx = bracketStart;
-			while (idx < originalContent.length && depth > 0) {
-				if (originalContent[idx] === "[") depth++;
-				else if (originalContent[idx] === "]") depth--;
-				if (depth > 0) idx++;
-			}
-			const innerContent = entries.join("\n");
-			return (
-				originalContent.substring(0, bracketStart) +
-				"\n" +
-				innerContent +
-				"\n\t]" +
-				originalContent.substring(idx + 1)
-			);
-		}
-	}
-
-	return `import type { FriendLink, FriendsPageConfig } from "../types/config";
-
-// 可以在src/content/spec/friends.md中编写友链页面下方的自定义内容
-
-// 友链页面配置
-export const friendsPageConfig: FriendsPageConfig = {
-	title: "",
-	description: "",
-	showCustomContent: true,
-	showComment: true,
-	randomizeSort: false,
-	applyLink: "https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml",
-	siteInfo: {
-		name: "fqzlr",
-		desc: "躬身入局，心为主理，行有尺度，自持本心.",
-		url: "https://blog.fqzlr.top/",
-		avatar: "https://blog.fqzlr.top/avatar.png",
-		email: "",
-	},
-	notes: [
-		{ title: "互换原则", content: "请先将本站添加到您的友链页面，确认后会添加您的友链" },
-		{ title: "链接维护", content: "友链网站长期无法访问或内容违规，将会被移除" },
-		{ title: "内容要求", content: "内容积极向上，不含有任何含色情/反动/暴力等违法违规内容" },
-		{ title: "站点要求", content: "支持 HTTPS，以原创内容为主，能够正常访问且有持续更新" },
-		{ title: "广告规范", content: "站点禁止充斥大量弹窗、诱导跳转、恶意悬浮广告，影响阅读体验" },
-		{ title: "域名规范", content: "不接纳垃圾短链、多级跳转域名、已被标记风险的域名站点" },
-		{ title: "版权规范", content: "尊重原创版权，不盗用他人文章、图片、资源，杜绝洗稿搬运站点" },
-		{ title: "站点氛围", content: "不发布引战、对立、恶意引流量、抹黑攻击他人的情绪化内容" },
-		{ title: "失效清理", content: "站点关停、域名过期、长期停更超过6个月，会直接清理友链" },
-		{ title: "个人主页限制", content: "纯空白个人主页、无任何原创文字内容的展示站暂不互换" },
-	],
-};
-
-// 友链配置
-export const friendsConfig: FriendLink[] = ${newArrayContent};
-
-// 获取启用的友链并进行排序
-export const getEnabledFriends = (): FriendLink[] => {
-	const friends = friendsConfig.filter((friend) => friend.enabled);
-	if (friendsPageConfig.randomizeSort) {
-		return friends.sort(() => Math.random() - 0.5);
-	}
-	return friends.sort((a, b) => b.weight - a.weight);
-};
-`;
-}
 
 const typeColors: Record<string, { bg: string; text: string }> = {
 	Blog: { bg: "#3b82f6", text: "#ffffff" },
 	Docs: { bg: "#f59e0b", text: "#ffffff" },
 };
 
-const drafts = setupRepoDrafts({
+// KV 实时数据：提交直接写 Cloudflare KV（/api/data/friends），秒级生效
+const drafts = setupKvDrafts({
 	pageKey: "friends",
 	pageName: "友链",
-	getContent: () => buildFriendsConfigTS(friends, originalTS),
-	setContent: (v) => {
-		const parsed = parseFriendsFromTS(v);
-		if (parsed.length > 0 || v.includes("friendsConfig")) {
-			friends = parsed;
-		}
+	type: "friends",
+	getContent: () => ({ items: friends }),
+	setContent: (d) => {
+		if (Array.isArray(d.items)) friends = d.items as FriendItem[];
 	},
-	getPath: () => "src/config/friendsConfig.ts",
-	getSha: () => fileSha,
-	setSha: (v) => (fileSha = v),
-	getOriginalContent: () => originalTS,
-	setOriginalContent: (v) => (originalTS = v),
-	getCommitMsg: (isEdit) =>
-		isEdit ? "chore: update friends" : "chore: create friends",
-	onSubmitted: () => {
-		setTimeout(() => window.location.reload(), 1200);
+	getOriginalContent: () => ({ items: originalFriends }),
+	setOriginalContent: (d) => {
+		if (Array.isArray(d.items)) originalFriends = d.items as FriendItem[];
 	},
 });
 
@@ -213,7 +56,7 @@ $effect(() => {
 onMount(() => {
 	ensureIconify();
 	collectFromDOM();
-	loadRepoData();
+	loadKvData();
 
 	// 监听侧边栏编辑按钮事件
 	window.addEventListener("edit:sidebarModeChange", handleSidebarModeChange);
@@ -271,44 +114,14 @@ function handleSidebarAdd(e: Event) {
 	handleAdd();
 }
 
-async function loadRepoData() {
-	const existing = await getRepoFile("src/config/friendsConfig.ts");
-	if (existing && existing.content) {
-		try {
-			const repoItems: FriendItem[] = parseFriendsFromTS(existing.content);
-			originalTS = existing.content;
-			const repoMap = new Map(
-				repoItems.map((f) => [f.siteurl.replace(/\/$/, ""), f]),
-			);
-			friends = friends.map((f) => {
-				const key = f.siteurl.replace(/\/$/, "");
-				const repoItem = repoMap.get(key);
-				if (repoItem) {
-					return {
-						...f,
-						weight: repoItem.weight ?? f.weight,
-						enabled: repoItem.enabled ?? f.enabled,
-					};
-				}
-				return f;
-			});
-			const existingUrls = new Set(
-				friends.map((f) => f.siteurl.replace(/\/$/, "")),
-			);
-			for (const g of repoItems) {
-				const url = g.siteurl.replace(/\/$/, "");
-				if (!existingUrls.has(url)) {
-					friends = [...friends, { ...g, id: g.id || genId("fr") }];
-					existingUrls.add(url);
-				}
-			}
-			originalFriends = deepClone(friends);
-		} catch (e) {
-			console.error("Failed to parse repo friends:", e);
-		}
-	} else {
-		originalTS = buildFriendsConfigTS(friends);
+/** 从 KV 拉取最新友链数据；失败回落 collectFromDOM() 的 SSR 收集结果 */
+async function loadKvData() {
+	const data = await fetchKvData<{ items: FriendItem[] }>("friends");
+	if (data && Array.isArray(data.items) && data.items.length > 0) {
+		friends = data.items.map((f) => ({ ...f, id: f.id || genId("fr") }));
+		originalFriends = deepClone(friends);
 	}
+	// collectFromDOM 已经填好 friends/originalFriends，这里仅在 KV 可用时覆盖
 	repoLoaded = true;
 	drafts.restoreFromDrafts();
 }
@@ -356,8 +169,6 @@ function collectFromDOM() {
 		});
 	});
 	friends = items;
-	const ts = buildFriendsConfigTS(items);
-	originalTS = ts;
 	originalFriends = deepClone(items);
 }
 

@@ -50,24 +50,24 @@ const sortedNotebooks = [...notebooks].sort((a, b) => {
 	</div>
 
 	<div class="diary-page flex w-full flex-col gap-6">
-		<!-- 笔记本网格 -->
+		<!-- 笔记本网格（容器 id 供 KV 动态刷新脚本重渲染） -->
 		<section>
 			{sortedNotebooks.length === 0 ? (
-				<div class="diary-empty">
+				<div class="diary-empty" id="diary-empty">
 					<div class="text-6xl mb-4">📖</div>
 					<h3 class="text-xl font-semibold mb-2 text-[var(--text-color)]">还没有日记本</h3>
 					<p class="text-sm text-[var(--content-meta)]">开始记录你的第一篇日记吧！</p>
 					<div class="mt-6 p-4 rounded-xl bg-[var(--btn-regular-bg)] text-left text-sm">
 						<p class="text-[var(--text-color)] mb-2">创建步骤：</p>
 						<ol class="text-[var(--content-meta)] space-y-1 list-decimal list-inside">
-							<li>在 <code class="px-1 rounded bg-[var(--btn-regular-bg-hover)] font-mono">src/config/notebooksConfig.ts</code> 中添加笔记本分类</li>
-							<li>在同一文件中添加笔记条目</li>
-							<li>或者使用编辑模式在线创建</li>
+							<li>点击侧边栏「编辑」进入编辑模式</li>
+							<li>添加笔记本分类与笔记条目</li>
+							<li>提交后实时生效</li>
 						</ol>
 					</div>
 				</div>
 			) : (
-				<div class="diary-grid">
+				<div class="diary-grid" id="diary-grid">
 					{sortedNotebooks.map((book) => (
 						<a
 							href={book.selfPath}
@@ -134,7 +134,120 @@ const sortedNotebooks = [...notebooks].sort((a, b) => {
 	</div>
 </MainGridLayout>
 
-<style>
+<script>
+	/* ========== 客户端动态刷新：从 KV 端点获取最新笔记本数据，整块重渲染 ==========
+	 * SSR 提供首屏（SEO），页面加载后 fetch /api/data/notebooks 实时更新。
+	 * 编辑器提交 KV 后秒级生效；fetch 失败静默回落 SSR 内容。
+	 * stats（每本笔记数 + 最后更新）在客户端复刻 getFolderStats 计算。
+	 * 注意：新增 folder 的详情页是构建期 getStaticPaths 产物，要等下次
+	 * 部署才存在——列表实时，但点新 folder 可能 404（已知接受的限制）。
+	 */
+	function escHtml(s: unknown): string {
+		return String(s ?? "")
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;");
+	}
+
+	function renderNotebookCard(folder: any, count: number, latestDate: string): string {
+		const dateStr = latestDate ? new Date(latestDate).toISOString().split("T")[0] : "未更新";
+		return (
+			'<a href="/life/notebooks/' + encodeURIComponent(folder.slug) + '/" class="diary-notebook group">' +
+			'<div class="diary-cover-img-area">' +
+			(folder.cover
+				? '<img src="' + escHtml(folder.cover) + '" alt="' + escHtml(folder.name || "笔记本封面") + '" class="diary-cover-img" loading="lazy" />'
+				: '<div class="diary-cover-placeholder"><span class="diary-cover-placeholder-icon">📔</span></div>') +
+			"</div>" +
+			'<div class="diary-cover-text">' +
+			'<div class="flex items-center gap-2 mb-2">' +
+			'<span class="px-2 py-0.5 rounded-full text-xs font-medium diary-cover-tag">笔记</span>' +
+			'<span class="text-xs diary-cover-meta">' + count + " 篇</span>" +
+			"</div>" +
+			'<h3 class="text-lg font-bold diary-cover-name">' + escHtml(folder.name || "未命名笔记本") + "</h3>" +
+			'<p class="text-sm diary-cover-desc line-clamp-2 mt-1">' + escHtml(folder.summary || "暂无描述") + "</p>" +
+			"</div>" +
+			'<div class="diary-notebook-footer">' +
+			'<span class="text-xs">' + dateStr + "</span>" +
+			'<span class="text-base">›</span>' +
+			"</div></a>"
+		);
+	}
+
+	function applyNotebooks(folders: any[], notes: any[]) {
+		const enabled = folders.filter((f) => f.enabled !== false);
+		const section = document.querySelector(".diary-page section");
+		if (!section) return;
+
+		if (enabled.length === 0) {
+			const grid = document.getElementById("diary-grid");
+			if (grid) grid.innerHTML = "";
+			return;
+		}
+
+		// 客户端复刻 getFolderStats：按 folder 字段统计 count + latestDate
+		const statsMap = new Map();
+		for (const n of notes || []) {
+			const prev = statsMap.get(n.folder) || { count: 0, latest: "" };
+			statsMap.set(n.folder, {
+				count: prev.count + 1,
+				latest: (n.updatedAt || "") > prev.latest ? (n.updatedAt || "") : prev.latest,
+			});
+		}
+
+		const cards = enabled
+			.map((f) => {
+				const s = statsMap.get(f.slug) || { count: 0, latest: "" };
+				return { f, ...s };
+			})
+			.sort((a, b) => new Date(b.latest || 0).getTime() - new Date(a.latest || 0).getTime());
+
+		// 空态 → 有数据：替换空态为 grid
+		let grid = document.getElementById("diary-grid");
+		if (!grid) {
+			const empty = document.getElementById("diary-empty");
+			grid = document.createElement("div");
+			grid.className = "diary-grid";
+			grid.id = "diary-grid";
+			if (empty) empty.replaceWith(grid);
+			else section.prepend(grid);
+		}
+		grid.innerHTML = cards.map((c) => renderNotebookCard(c.f, c.count, c.latest)).join("");
+	}
+
+	function doRefresh() {
+		fetch("/api/data/notebooks", { cache: "no-store" })
+			.then((res) => (res.ok ? res.json() : null))
+			.then((data) => {
+				if (!data || !Array.isArray(data.folders)) return;
+				applyNotebooks(data.folders, data.notes || []);
+			})
+			.catch((e) => console.warn("[notebooks] 动态更新失败，使用 SSR 数据:", e));
+	}
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", doRefresh);
+	} else {
+		doRefresh();
+	}
+	document.addEventListener("astro:page-load", doRefresh);
+	document.addEventListener("astro:after-swap", doRefresh);
+
+	// KV 编辑提交后同帧重渲染
+	if (!(window as any).__kvNotebooksBound) {
+		(window as any).__kvNotebooksBound = true;
+		document.addEventListener("kv:data-updated", (e: Event) => {
+			const detail = (e as CustomEvent).detail;
+			if (detail?.type === "notebooks" && Array.isArray(detail?.data?.folders)) {
+				applyNotebooks(detail.data.folders, detail.data.notes || []);
+			}
+		});
+	}
+</script>
+
+<!-- is:global：KV 动态刷新脚本用 innerHTML 重渲染卡片，客户端节点没有
+     Astro scoped class，scoped 样式会失效。类名均为 diary-* 独占命名。 -->
+<style is:global>
 	/* 日记本网格 — 等大卡片 */
 	.diary-grid {
 		display: grid;

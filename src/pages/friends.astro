@@ -379,7 +379,7 @@ const siteInfoText = _si
     document.addEventListener("astro:after-swap", () => { initFlinkCopyButtons(); initFlinkImportTemplate(); });
   </script>
 
-  <script set:html={`window.__FRIEND_LIST__ = ${friendListForInline};`}></script>
+  <script set:html={`window.__FRIEND_LIST__ = ${friendListForInline}; window.__FRIENDS_OWN_SITE__ = ${JSON.stringify(ownSiteUrl)};`}></script>
 
   <script>
     /* ========== 三区互不重复分组：正常友链 / 失效暂留 / 友链墓碑 ==========
@@ -597,71 +597,113 @@ const siteInfoText = _si
   </script>
 
   <script>
-    /* ========== 客户端动态更新：从 friends.json.ts 端点获取最新数据，更新网格 ==========
+    /* ========== 客户端动态更新：从 KV 端点获取最新友链数据，整块重渲染 ==========
      * SSR 渲染提供初始数据（SEO + 首屏），页面加载后通过此脚本实时更新。
-     * 当 FriendsEditor.svelte 提交变更到 GitHub 后，下一次刷新即可看到最新数据。
+     * 数据源：/api/data/friends（Cloudflare Worker 读 KV，编辑器提交后秒级生效）。
+     * fetch 失败时静默回落 SSR 内容。
+     * 渲染为整块替换（而非逐字段 patch）：KV 数据可能出现增删卡片。
+     * recommended-star-flow / owner-aurora-flow 是自定义元素，插入 DOM 后
+     * 自动 upgrade，canvas 特效正常启动，无需额外处理。
      */
     (function refreshFriendsGrid() {
-      async function doRefresh() {
-        try {
-          const res = await fetch("/friends.json", { cache: "no-store" });
-          if (!res.ok) return;
-          const data = await res.json();
-          const grid = document.getElementById("friends-grid");
-          if (!grid || !Array.isArray(data.link_list)) return;
+      // 与 avatar-fallback.ts 同源的三级容错参数（SSR 端由组件生成，
+      // 客户端重渲染时复刻同样逻辑）
+      function dicebearUrl(seed: string): string {
+        return "https://api.dicebear.com/7.x/shapes/svg?seed=" + encodeURIComponent(seed);
+      }
 
-          const latestMap = new Map();
-          data.link_list.forEach(function (f) {
-            var key = (f.link || "").replace(/\/$/, "");
-            latestMap.set(key, f);
-          });
+      function escAttr(s: string): string {
+        return String(s ?? "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+      }
 
-          // 更新现有卡片：名称、头像、描述、链接
-          grid.querySelectorAll(".friend-card[data-friend-id]").forEach(function (card) {
-            var link = (card.getAttribute("data-friend-id") || "").replace(/\/$/, "");
-            var latest = latestMap.get(link);
-            if (!latest) return;
+      function renderFriendCard(f: {
+        title: string; siteurl: string; imgurl: string; desc?: string;
+        tags?: string[]; siteshot?: string; recommended?: boolean;
+      }, ownSiteUrl: string): string {
+        const norm = (u: string) =>
+          (u || "").trim().replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/+$/, "").toLowerCase();
+        const isOwn = Boolean(ownSiteUrl) && norm(f.siteurl) === ownSiteUrl;
+        const isRecommended = !isOwn && f.recommended === true;
+        let host = f.siteurl;
+        try { host = new URL(f.siteurl).host.replace(/^www\./, ""); } catch {}
+        const tags = (f.tags || []).slice(0, 3);
+        return (
+          '<div class="friend-card" data-friend-id="' + escAttr(f.siteurl) + '" data-tags="' + escAttr((f.tags || []).join(",")) + '">' +
+          '<a class="friend-card-link' + (isOwn ? " friend-card-link--own" : "") + (isRecommended ? " friend-card-link--recommended" : "") + '"' +
+          ' href="' + escAttr(f.siteurl) + '" target="_blank" rel="noopener noreferrer"' +
+          ' title="' + escAttr(f.title + " - " + (f.desc || "")) + '"' +
+          ' data-desc="' + escAttr(f.desc || "") + '" data-host="' + escAttr(host) + '"' +
+          ' data-siteshot="' + escAttr(f.siteshot || "") + '"' +
+          ' data-avatar-fallback-dicebear="' + escAttr(dicebearUrl(f.title)) + '"' +
+          ' data-avatar-fallback-inline=""' +
+          (f.siteshot ? ' style="--siteshot-url: url(&quot;' + escAttr(f.siteshot) + '&quot;);"' : "") +
+          '>' +
+          '<span class="friend-status" data-status=""></span>' +
+          '<div class="friend-card-screenshot"></div>' +
+          '<div class="friend-card-info">' +
+          (isRecommended ? '<recommended-star-flow class="friend-recommended-flow" aria-hidden="true"><canvas class="friend-recommended-canvas"></canvas></recommended-star-flow><span class="friend-card-recommended-star" aria-hidden="true"></span>' : "") +
+          (isOwn ? '<owner-aurora-flow class="friend-owner-flow" aria-hidden="true"><canvas class="friend-owner-canvas"></canvas></owner-aurora-flow><span class="friend-card-own-deco" aria-hidden="true"></span>' : "") +
+          '<div class="friend-card-avatar-wrap" data-fallback="' + escAttr(f.title.slice(0, 2)) + '">' +
+          '<img src="' + escAttr(f.imgurl) + '" alt="' + escAttr(f.title) + '" class="friend-card-avatar" loading="lazy" decoding="async"' +
+          ' data-fb-1="' + escAttr(dicebearUrl(f.title)) + '" data-fb-2=""' +
+          ' onerror="var d=this.dataset;if(d.fb1Used!==\'1\'){d.fb1Used=\'1\';this.onerror=function(){this.classList.add(\'is-error\');this.parentElement?.classList.add(\'is-error\');};this.src=d.fb1;}else{this.classList.add(\'is-error\');this.parentElement?.classList.add(\'is-error\');}"' +
+          ' /></div>' +
+          '<div class="friend-card-text">' +
+          '<h3 class="friend-card-title">' + escAttr(f.title) + "</h3>" +
+          '<p class="friend-card-desc">' + escAttr(f.desc || "") + "</p>" +
+          (tags.length > 0
+            ? '<div class="friend-card-tags">' + tags.map((t) => '<span class="friend-card-tag">' + escAttr(t) + "</span>").join("") + "</div>"
+            : "") +
+          "</div></div></a></div>"
+        );
+      }
 
-            // 更新 <a> 链接
-            var anchor = card.tagName === "A" ? card : card.querySelector("a");
-            if (anchor && latest.link) {
-              (anchor as HTMLAnchorElement).href = latest.link;
+      function doRefresh() {
+        const ownSiteRaw = (window as any).__FRIENDS_OWN_SITE__ || "";
+        return fetch("/api/data/friends", { cache: "no-store" })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data) => {
+            if (!data || !Array.isArray(data.items) || data.items.length === 0) return;
+            const grid = document.getElementById("friends-grid");
+            const gridInner = grid?.querySelector(".grid");
+            if (!gridInner) return;
+
+            // 复刻 getEnabledFriends：weight 降序
+            const items = [...data.items]
+              .filter((f: any) => f.enabled !== false)
+              .sort((a: any, b: any) => (b.weight || 0) - (a.weight || 0));
+
+            gridInner.innerHTML = items
+              .map((f: any) => renderFriendCard(f, ownSiteRaw))
+              .join("");
+
+            // 更新标签筛选按钮集合（friend-filter 是自定义元素，重建后自动 upgrade）
+            const filterEl = document.querySelector("friend-filter");
+            if (filterEl) {
+              const allTags = [...new Set(items.flatMap((f: any) => f.tags || []))].sort();
+              const buttons = allTags
+                .map(
+                  (t: string) =>
+                    '<button type="button" data-tag="' + escAttr(t) + '" class="px-3 py-1.5 text-sm rounded-lg border transition-colors">' + escAttr(t) + "</button>",
+                )
+                .join("");
+              filterEl.innerHTML = '<button type="button" data-tag="" class="px-3 py-1.5 text-sm rounded-lg border transition-colors">全部</button>' + buttons;
             }
 
-            // 更新头像
-            var img = card.querySelector("img");
-            if (img && latest.avatar) {
-              img.src = latest.avatar;
-            }
-
-            // 更新标题
-            var titleEl = card.querySelector(".font-bold");
-            if (titleEl && latest.name) {
-              titleEl.textContent = latest.name;
-            }
-
-            // 更新描述
-            var descEl = card.querySelector(".text-sm.text-neutral-500");
-            if (descEl && latest.descr) {
-              descEl.textContent = latest.descr;
-            }
-          });
-
-          // 更新 window.__FRIEND_LIST__（供失效分区脚本使用）
-          if (Array.isArray(data.link_list)) {
-            (window as any).__FRIEND_LIST__ = data.link_list.map(function (f) {
+            // 更新 window.__FRIEND_LIST__（供失效分区脚本使用）
+            (window as any).__FRIEND_LIST__ = items.map(function (f: any) {
               return {
-                name: f.name,
-                link: f.link,
-                avatar: f.avatar,
-                desc: f.descr || "",
+                name: f.title,
+                link: f.siteurl,
+                avatar: f.imgurl,
+                desc: f.desc || "",
                 siteshot: f.siteshot || "",
               };
             });
-          }
-        } catch (e) {
-          console.warn("[friends] 动态更新失败，使用 SSR 数据:", e);
-        }
+          })
+          .catch((e) => {
+            console.warn("[friends] 动态更新失败，使用 SSR 数据:", e);
+          });
       }
 
       if (document.readyState === "loading") {
@@ -671,6 +713,20 @@ const siteInfoText = _si
       }
       document.addEventListener("astro:page-load", doRefresh);
       document.addEventListener("astro:after-swap", doRefresh);
+
+      // KV 编辑提交后同帧重渲染（编辑器 announceKvUpdate 派发）
+      if (!(window as any).__kvFriendsBound) {
+        (window as any).__kvFriendsBound = true;
+        document.addEventListener("kv:data-updated", (e: Event) => {
+          const detail = (e as CustomEvent).detail;
+          if (detail?.type === "friends" && detail?.data) {
+            (window as any).__FRIEND_LIST__ = detail.data.items.map(function (f: any) {
+              return { name: f.title, link: f.siteurl, avatar: f.imgurl, desc: f.desc || "", siteshot: f.siteshot || "" };
+            });
+            doRefresh();
+          }
+        });
+      }
     })();
   </script>
 

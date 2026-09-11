@@ -128,7 +128,7 @@ export const siteConfig: SiteConfig = {
 		// 3. 本地图片（src目录，自动优化但会增加构建时间，推荐）: { type: "image", value: "assets/images/logo.webp", alt: "Logo" }
 		// 4. 网络图片: { type: "url", value: "https://example.com/logo.png", alt: "Logo" }
 		logo: {
-			type: "url",
+			type: "image",
 			value: "assets/images/touxiang.webp",
 			alt: "logo",
 		},
@@ -153,9 +153,7 @@ export const siteConfig: SiteConfig = {
 		},
 		dailyQuote: {
 			enable: true,
-			quotes: [
-				{ text: "躬身入局，心为主理，行有尺度，自持本心", source: "Xiaozhu" },
-			],
+			quotes: [{ text: "风止于秋水，我止于自己", source: "Xiaozhu" }],
 		},
 		recentPostsCount: 3,
 		recentMomentsCount: 3,

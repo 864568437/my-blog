@@ -39,37 +39,11 @@ export const momentsCover: MomentsCover = {
 	cover_image: "http://tu.fqzlr.com/file/beijing/1777365393328_bkg__7_.png",
 	cover_avatar: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
 	cover_name: "xiaozhu",
-	cover_bio: "躬身入局，心为主理，行有尺度，自持本心.",
+	cover_bio: "风止于秋水，我止于自己.",
 };
 
 // 说说列表配置
 export const momentsConfig: MomentItem[] = [
-	{
-		id: "2026-07-06-ceshi2",
-		author: "xiaozhu",
-		pinned: true,
-		published: "2026-07-06",
-		location: "杭州",
-		images: ["https://tu.fqzlr.com/file/beijing/1777365393328_bkg__7_.png"],
-		tags: ["测试"],
-		body: `**测试** 
-## 测试
----
-测试
-- 测试`,
-		enabled: true,
-	},
-	{
-		id: "2026-07-06-ceshi",
-		author: "fqzlr",
-		pinned: true,
-		published: "2026-07-06",
-		location: "中国",
-		images: ["https://tu.fqzlr.com/file/beijing/1777266325757_bk4__1_.webp"],
-		tags: ["测试"],
-		body: "测试",
-		enabled: true,
-	},
 	{
 		id: "2026-05-10-xiangfa",
 		author: "fqzlr",

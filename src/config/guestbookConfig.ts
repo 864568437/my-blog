@@ -1,6 +1,10 @@
 import type { GuestbookConfig } from "../types/config";
 
 export const guestbookConfig: GuestbookConfig = {
+	// 留言板聊天室类型: waline, none，默认为 none，即不启用留言板聊天室
+	// 暂时关闭：等 Waline 后端（waline.fqzlr.com）重新部署完成后改回 "waline"
+	type: "none",
+
 	announcements: [
 		{
 			id: "comment-and-message-rules",

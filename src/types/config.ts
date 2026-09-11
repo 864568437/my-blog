@@ -1193,5 +1193,8 @@ export type GuestbookAnnouncementItem = {
 };
 
 export type GuestbookConfig = {
+	// 留言板聊天室类型: waline, none，默认为 none，即不启用留言板聊天室
+	// 聊天室数据依赖 Waline 后端，与服务端配置（commentConfig.waline.serverURL）共用
+	type: "waline" | "none";
 	announcements: GuestbookAnnouncementItem[];
 };

@@ -18,6 +18,17 @@ import {
 } from "../config";
 import { isHomePage as checkIsHomePage } from "./layout-utils";
 
+/**
+ * 首页影像揭示层（HomeBlinds）仅在桌面端且未开启"减少动态效果"时激活。
+ * 移动端首页没有该层，壁纸需正常渲染，否则首页无任何背景。
+ */
+function isHomeBlindsActive(): boolean {
+	return (
+		window.matchMedia("(min-width: 769px)").matches &&
+		!window.matchMedia("(prefers-reduced-motion: reduce)").matches
+	);
+}
+
 // Declare global functions
 declare global {
 	interface Window {
@@ -392,15 +403,15 @@ function showBannerMode() {
 		// 恢复 banner 模式的 top 定位
 		wallpaperWrapper.style.top = `-${BANNER_HEIGHT_EXTEND}vh`;
 
-		if (isHomeForBanner) {
-			// 首页：保持 wallpaper-wrapper 隐藏，避免与影像揭示层重叠
+		if (isHomeForBanner && isHomeBlindsActive()) {
+			// 首页（影像层激活时）：保持 wallpaper-wrapper 隐藏，避免与影像揭示层重叠
 			wallpaperWrapper.style.setProperty("display", "none", "important");
 		} else {
-			// 非首页：显示 banner
+			// 非首页或移动端首页：显示 banner
 			const isMobile = window.innerWidth < 1024;
 
 			// 移动端非首页时，不显示banner；桌面端始终显示
-			if (isMobile) {
+			if (isMobile && !isHomeForBanner) {
 				wallpaperWrapper.style.display = "none";
 				wallpaperWrapper.classList.add("mobile-hide-banner");
 			} else {
@@ -417,11 +428,14 @@ function showBannerMode() {
 		}
 	}
 
-	// 横幅图片来源文本（首页隐藏，因为首页用影像揭示层）
+	// 移动端首页没有影像揭示层，壁纸照常显示，来源文本与首页文本也正常展示
+	const isHomeWithBlinds = isHomeForBanner && isHomeBlindsActive();
+
+	// 横幅图片来源文本（桌面首页隐藏，因为首页用影像揭示层）
 	const creditDesktop = document.getElementById("banner-credit-desktop");
 	const creditMobile = document.getElementById("banner-credit-mobile");
 	const bannerCredit = document.getElementById("banner-credit");
-	if (isHomeForBanner) {
+	if (isHomeWithBlinds) {
 		if (creditDesktop) creditDesktop.style.display = "none";
 		if (creditMobile) creditMobile.style.display = "none";
 		if (bannerCredit) bannerCredit.style.display = "none";
@@ -438,7 +452,7 @@ function showBannerMode() {
 		const homeTextEnabled = backgroundWallpaper.banner?.homeText?.enable;
 
 		// 只有在启用且在首页时才显示
-		if (homeTextEnabled && isHomeForBanner) {
+		if (homeTextEnabled && isHomeWithBlinds) {
 			bannerTextOverlay.classList.remove("hidden");
 		} else {
 			bannerTextOverlay.classList.add("hidden");
@@ -446,8 +460,8 @@ function showBannerMode() {
 	}
 
 	// 调整主内容位置
-	if (isHomeForBanner) {
-		// 首页：主内容从顶部开始（因为用影像揭示层）
+	if (isHomeWithBlinds) {
+		// 桌面首页：主内容从顶部开始（因为用影像揭示层）
 		const mainContent = document.querySelector(
 			".w-full.z-30.pointer-events-none",
 		) as HTMLElement;
@@ -506,11 +520,11 @@ function showOverlayMode() {
 		wallpaperWrapper.classList.remove("wallpaper-fullscreen");
 		wallpaperWrapper.classList.add("wallpaper-overlay");
 
-		if (isHomeForOverlay) {
-			// 首页：保持 wallpaper-wrapper 隐藏，避免与影像揭示层重叠
+		if (isHomeForOverlay && isHomeBlindsActive()) {
+			// 首页（影像层激活时）：保持 wallpaper-wrapper 隐藏，避免与影像揭示层重叠
 			wallpaperWrapper.style.setProperty("display", "none", "important");
 		} else {
-			// 非首页：显示壁纸
+			// 非首页或移动端首页：显示壁纸
 			wallpaperWrapper.style.display = "block";
 			wallpaperWrapper.style.setProperty("display", "block", "important");
 			wallpaperWrapper.style.top = "";
@@ -547,8 +561,8 @@ function showOverlayMode() {
 	adjustMainContentTransparency(true);
 
 	// 调整布局
-	if (isHomeForOverlay) {
-		// 首页：主内容从顶部开始（因为用影像揭示层）
+	if (isHomeForOverlay && isHomeBlindsActive()) {
+		// 桌面首页：主内容从顶部开始（因为用影像揭示层）
 		const mainContent = document.querySelector(
 			".w-full.z-30.pointer-events-none",
 		) as HTMLElement;
@@ -560,7 +574,7 @@ function showOverlayMode() {
 			mainContent.style.top = "0";
 		}
 	} else {
-		// 非首页：紧凑布局
+		// 非首页或移动端首页：紧凑布局
 		adjustMainContentPosition("overlay");
 	}
 }
@@ -577,11 +591,11 @@ function showFullscreenMode() {
 		// 移除 overlay 模式类，添加 fullscreen 模式类
 		wallpaperWrapper.classList.remove("wallpaper-overlay");
 		wallpaperWrapper.classList.add("wallpaper-fullscreen");
-		if (isHomeForFullscreenWallpaper) {
-			// 首页：保持 wallpaper-wrapper 隐藏，避免在公告/影像层后面出现壁纸
+		if (isHomeForFullscreenWallpaper && isHomeBlindsActive()) {
+			// 首页（影像层激活时）：保持 wallpaper-wrapper 隐藏，避免在公告/影像层后面出现壁纸
 			wallpaperWrapper.style.setProperty("display", "none", "important");
 		} else {
-			// 非首页：显示壁纸，铺满全屏
+			// 非首页或移动端首页：显示壁纸，铺满全屏
 			wallpaperWrapper.style.display = "block";
 			wallpaperWrapper.style.setProperty("display", "block", "important");
 			wallpaperWrapper.style.top = "";
@@ -743,7 +757,7 @@ function adjustMainContentPosition(
 				window.location.pathname === "/" ||
 				window.location.pathname === "" ||
 				window.location.pathname.endsWith("/index.html");
-			if (isHomeForFullscreen) {
+			if (isHomeForFullscreen && isHomeBlindsActive()) {
 				mainContent.style.position = "";
 				mainContent.style.zIndex = "";
 				mainContent.style.marginTop = "";

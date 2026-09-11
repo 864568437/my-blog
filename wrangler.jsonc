@@ -3,14 +3,20 @@
   "name": "my-blog",
   "main": "src/workers/index.js",
   "compatibility_date": "2026-09-01",
+  // KV 存储：友链/笔记本/规划的实时数据（首次使用需
+  // `npx wrangler kv namespace create BLOG_KV` 并把输出的 id 填到下面）
+  "kv_namespaces": [
+    { "binding": "BLOG_KV", "id": "1bfbb988c4a847c9ac9787d293f00eda" }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     // 未命中资源时返回 Astro 生成的 404 页面
     "not_found_handling": "404-page",
-    // /api/github*、/api/ai-chat* 永远先走 Worker：dist/api/* 是 Astro 构建时
-    // 预渲染的死文件，不能让它们拦截代理请求
-    "run_worker_first": ["/api/github*", "/api/ai-chat*"]
+    // 动态接口永远先走 Worker：dist/ 下同名文件是 Astro 构建的死文件，
+    // 不能让它们拦截代理请求。/friends.json 旧 Astro 端点已删除，
+    // 由 Worker 提供 check-flink 兼容形状。
+    "run_worker_first": ["/api/github*", "/api/ai-chat*", "/api/data*", "/friends.json"]
   },
   "vars": {
     // 在线编辑目标仓库（公开值；构建时也会注入客户端 bundle）
@@ -18,10 +24,10 @@
     "PUBLIC_GITHUB_REPO": "my-blog",
     // GitHub App ID（数字，App 设置页可见）——部署前必填，填错会导致在线编辑无法认证
     "PUBLIC_GITHUB_APP_ID": "4899171",
-    // ===== AI 对话代理（AgentRouter，https://agentrouter.org/docs/claude-code.html）=====
-    // base URL 填 root 不带 /v1（SDK 自己拼 /v1/messages）；AgentRouter 用
-    // Bearer 鉴权（ANTHROPIC_AUTH_TOKEN → AI_API_KEY secret）
-    "AI_BASE_URL": "https://agentrouter.org",
+    // ===== AI 对话代理（newapi 网关 ps.air-outer.com，与 agentrouter.org 同站点）=====
+    // base URL 填 root 不带 /v1（SDK 自己拼 /v1/messages）；
+    // Bearer 鉴权（AI_API_KEY secret，在网关控制台获取）
+    "AI_BASE_URL": "https://ps.air-outer.com",
     "AI_MODEL": "deepseek-v4-flash",
     // anthropic（默认）| openai
     "AI_API_FORMAT": "anthropic",

@@ -60,15 +60,15 @@ const totalEntries = entriesWithContent.length;
         <RoutinesEditor client:load />
       </div>
 
-      <!-- 规划列表 -->
+      <!-- 规划列表（容器 id 供 KV 动态刷新脚本重渲染） -->
       <div>
         {totalEntries === 0 ? (
-          <div class="w-full p-12 text-center">
+          <div class="w-full p-12 text-center" id="routines-empty">
             <Icon name="material-symbols:checklist" class="text-5xl text-neutral-300 dark:text-neutral-600 mb-4" />
             <p class="text-neutral-500 dark:text-neutral-400">还没有日常规划</p>
           </div>
         ) : (
-          <div class="routines-grid">
+          <div class="routines-grid" id="routines-grid">
             {entriesWithContent.map((entry) => (
               <article class="routine-card">
                 <div class="routine-card-header">
@@ -102,7 +102,113 @@ const totalEntries = entriesWithContent.length;
   </div>
 </MainGridLayout>
 
-<style>
+<script>
+  /* ========== 客户端动态刷新：从 KV 端点获取最新规划数据，整块重渲染 ==========
+   * SSR 提供首屏（SEO），页面加载后 fetch /api/data/routines 实时更新。
+   * 编辑器提交 KV 后秒级生效；fetch 失败静默回落 SSR 内容。
+   * marked 在客户端渲染 body（与 SSR 参数一致：gfm + breaks）。
+   */
+  import { marked } from "marked";
+
+  function escHtml(s: unknown): string {
+    return String(s ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function renderRoutineCard(entry: any): string {
+    const html = marked.parse(entry.body || "", { gfm: true, breaks: true, async: false }) as string;
+    return (
+      '<article class="routine-card">' +
+      '<div class="routine-card-header">' +
+      '<div class="routine-icon-wrap"><span class="text-xl">' + escHtml(entry.icon) + "</span></div>" +
+      '<div class="flex-1 min-w-0">' +
+      '<div class="flex items-center gap-2 flex-wrap">' +
+      '<h2 class="routine-title">' + escHtml(entry.name) + "</h2>" +
+      (entry.time ? '<span class="routine-time">' + escHtml(entry.time) + "</span>" : "") +
+      "</div>" +
+      (entry.description ? '<p class="routine-desc">' + escHtml(entry.description) + "</p>" : "") +
+      "</div></div>" +
+      '<div class="routine-card-body"><div class="routine-content">' + html + "</div></div>" +
+      "</article>"
+    );
+  }
+
+  function applyRoutines(items: any[]) {
+    const enabled = items.filter((e) => e.enabled !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
+    const grid = document.getElementById("routines-grid");
+    const empty = document.getElementById("routines-empty");
+    if (!grid && !empty) return;
+
+    if (enabled.length === 0) {
+      grid?.remove();
+      if (!empty) {
+        const wrap = document.createElement("div");
+        wrap.className = "w-full p-12 text-center";
+        wrap.id = "routines-empty";
+        wrap.innerHTML =
+          '<span class="text-5xl text-neutral-300 dark:text-neutral-600 mb-4 inline-block">📋</span><p class="text-neutral-500 dark:text-neutral-400">还没有日常规划</p>';
+        (grid || empty)?.parentElement?.appendChild(wrap);
+      }
+      return;
+    }
+
+    if (!grid) {
+      // SSR 空态 → 有数据：建 grid
+      const newGrid = document.createElement("div");
+      newGrid.className = "routines-grid";
+      newGrid.id = "routines-grid";
+      empty?.replaceWith(newGrid);
+    }
+    const target = document.getElementById("routines-grid");
+    if (target) target.innerHTML = enabled.map(renderRoutineCard).join("");
+
+    // 更新统计
+    const pills = document.querySelectorAll(".stat-pill .font-semibold");
+    if (pills[0]) pills[0].textContent = String(enabled.length);
+    if (pills[1]) {
+      const latest = enabled.find((e) => e.updatedAt)?.updatedAt;
+      pills[1].textContent = latest
+        ? new Date(latest).toLocaleDateString("zh-CN")
+        : "暂无";
+    }
+  }
+
+  function doRefresh() {
+    fetch("/api/data/routines", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data || !Array.isArray(data.items)) return;
+        applyRoutines(data.items);
+      })
+      .catch((e) => console.warn("[routines] 动态更新失败，使用 SSR 数据:", e));
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", doRefresh);
+  } else {
+    doRefresh();
+  }
+  document.addEventListener("astro:page-load", doRefresh);
+  document.addEventListener("astro:after-swap", doRefresh);
+
+  // KV 编辑提交后同帧重渲染
+  if (!(window as any).__kvRoutinesBound) {
+    (window as any).__kvRoutinesBound = true;
+    document.addEventListener("kv:data-updated", (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.type === "routines" && Array.isArray(detail?.data?.items)) {
+        applyRoutines(detail.data.items);
+      }
+    });
+  }
+</script>
+
+<!-- is:global：KV 动态刷新脚本用 innerHTML 重渲染卡片，客户端节点没有
+     Astro scoped class，scoped 样式会失效。类名均为 routine-* 独占命名。 -->
+<style is:global>
   .stat-pill {
     display: inline-flex;
     align-items: center;

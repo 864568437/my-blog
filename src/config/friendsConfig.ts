@@ -1,3 +1,5 @@
+/* [KV 已迁移] 本文件仅作构建期 SSR 兜底与 KV 初始种子（scripts/seed-kv.mjs）。
+ * 在线编辑已改写 Cloudflare KV（/api/data/*），实时数据以 KV 为准，请勿手动更新此文件。 */
 import type { FriendLink, FriendsPageConfig } from "../types/config";
 
 // 可以在src/content/spec/friends.md中编写友链页面下方的自定义内容
@@ -10,11 +12,11 @@ export const friendsPageConfig: FriendsPageConfig = {
 	showComment: true,
 	randomizeSort: false,
 	applyLink:
-		"https://github.com/fqzlr/fqzl-bk/issues/new?template=friend-link.yml",
+		"https://github.com/864568437/my-blog/issues/new?template=friend-link.yml",
 	siteInfo: {
-		name: "fqzlr",
-		desc: "躬身入局，心为主理，行有尺度，自持本心.",
-		url: "https://blog.fqzlr.top/",
+		name: "xiaozhu",
+		desc: "风止于秋水，我止于自己.",
+		url: "https://blog.zhujs.dpdns.org/",
 		avatar: "https://q1.qlogo.cn/g?b=qq&nk=20447289&s=640",
 		email: "",
 	},

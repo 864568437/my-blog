@@ -358,6 +358,12 @@ const siteLang = lang.replace("_", "-");
           (baseUrl !== '/' && window.location.pathname === baseUrl.replace(/\/$/, '')) ||
           window.location.pathname === "/";
 
+        // 首页影像揭示层（HomeBlinds）仅在桌面端且未开启"减少动态效果"时激活；
+        // 移动端首页没有该层，壁纸需正常渲染，否则首页无任何背景
+        const isBlindsActive = () =>
+          window.matchMedia("(min-width: 769px)").matches &&
+          !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
         const applyToBody = () => {
           if (!document.body) return;
 
@@ -409,11 +415,11 @@ const siteLang = lang.replace("_", "-");
           if (wallpaperWrapper) {
             wallpaperWrapper.classList.remove("wallpaper-overlay");
             wallpaperWrapper.classList.add("wallpaper-fullscreen");
-            if (isHomePage) {
-              // 首页：隐藏 wallpaper-wrapper（首页用影像揭示层）
+            if (isHomePage && isBlindsActive()) {
+              // 首页（影像层激活时）：隐藏 wallpaper-wrapper（首页用影像揭示层）
               wallpaperWrapper.style.setProperty("display", "none", "important");
             } else {
-              // 非首页：显示壁纸，铺满全屏
+              // 非首页或移动端首页：显示壁纸，铺满全屏
               wallpaperWrapper.style.setProperty("display", "block", "important");
               wallpaperWrapper.style.top = "";
               wallpaperWrapper.classList.remove("hidden", "opacity-0", "mobile-hide-banner");

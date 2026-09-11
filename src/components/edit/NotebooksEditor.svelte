@@ -1,14 +1,13 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
+import { setupKvDrafts } from "@/utils/draftHelpers";
 import {
 	deepClone,
 	ensureIconify,
 	genId,
-	getRepoFile,
-	hasValidToken,
 	showToast,
 } from "@/utils/editMode";
+import { fetchKvData } from "@/utils/kvData";
 
 interface NotebookFolder {
 	slug: string;
@@ -51,329 +50,32 @@ let imagesInput = $state("");
 let currentFolderSlug = $state("");
 let notePreview = $state("");
 let repoLoaded = $state(false);
-let fileSha = $state<string | null>(null);
-let originalTS = $state<string>("");
 
 const pageKey = "notebooks";
 const pageName = "笔记本";
 
-function stripLineComments(code: string): string {
-	const lines = code.split("\n");
-	return lines
-		.map((line) => {
-			let inStr = false;
-			let quotes = 0;
-			for (let i = 0; i < line.length - 1; i++) {
-				if (line[i] === '"' && (i === 0 || line[i - 1] !== "\\")) {
-					inStr = !inStr;
-					quotes++;
-				}
-				if (!inStr && line[i] === "/" && line[i + 1] === "/") {
-					if (quotes % 2 === 0) {
-						return line.substring(0, i);
-					}
-				}
-			}
-			return line;
-		})
-		.join("\n");
-}
-
-function parseObjectFromTS(tsContent: string, startMarker: string): any | null {
-	tsContent = tsContent.replace(/\r\n/g, "\n");
-	const startIdx = tsContent.indexOf(startMarker);
-	if (startIdx === -1) return null;
-	let braceStart = tsContent.indexOf("{", startIdx);
-	if (braceStart === -1) return null;
-	let depth = 1;
-	let idx = braceStart + 1;
-	while (idx < tsContent.length && depth > 0) {
-		if (tsContent[idx] === "{") depth++;
-		else if (tsContent[idx] === "}") depth--;
-		if (depth > 0) idx++;
-	}
-	let objStr = tsContent.substring(braceStart, idx + 1).trim();
-	objStr = stripLineComments(objStr);
-	objStr = objStr.replace(/,(\s*[\]}])/g, "$1");
-	objStr = objStr.replace(/,(\s*)$/, "$1");
-	objStr = objStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
-	try {
-		return JSON.parse(objStr);
-	} catch (e) {
-		console.error("Failed to parse object from TS:", e);
-		return null;
-	}
-}
-
-function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
-	tsContent = tsContent.replace(/\r\n/g, "\n");
-	const startIdx = tsContent.indexOf(startMarker);
-	if (startIdx === -1) return [];
-	// marker 以 "[" 结尾（数组开括号）。不能用 indexOf("[") 向后搜索，
-	// 会命中类型注解 XxxItem[] 的括号导致解析出空数组
-	let bracketStart = startIdx + startMarker.length - 1;
-	let depth = 1;
-	let idx = bracketStart + 1;
-	while (idx < tsContent.length && depth > 0) {
-		if (tsContent[idx] === "[") depth++;
-		else if (tsContent[idx] === "]") depth--;
-		if (depth > 0) idx++;
-	}
-	let arrayStr = tsContent.substring(bracketStart + 1, idx).trim();
-	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
-	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
-	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
-	try {
-		return JSON.parse(`[${arrayStr}]`);
-	} catch (e) {
-		console.error("Failed to parse array from TS:", e);
-		return [];
-	}
-}
-
-function parseFoldersFromTS(tsContent: string): NotebookFolder[] {
-	const items = parseArrayFromTS(
-		tsContent,
-		"export const notebookFolders: NotebookFolder[] = [",
-	);
-	return items.map((item: any, index: number) => ({
-		slug: item.slug || `folder-${index}`,
-		name: item.name || "未命名笔记本",
-		cover: item.cover || "",
-		summary: item.summary || "",
-		tags: Array.isArray(item.tags) ? item.tags : [],
-		enabled: item.enabled !== false,
-	}));
-}
-
-function parseNotesFromTS(tsContent: string): NotebookNote[] {
-	const items = parseArrayFromTS(
-		tsContent,
-		"export const notebookNotes: NotebookNote[] = [",
-	);
-	return items.map((item: any, index: number) => ({
-		id: item.id || `note-${index}`,
-		folder: item.folder || "",
-		title: item.title || "无标题",
-		date: item.date || new Date().toISOString().slice(0, 10),
-		content: item.content || "",
-		tags: Array.isArray(item.tags) ? item.tags : [],
-		images: Array.isArray(item.images) ? item.images : [],
-		enabled: item.enabled !== false,
-	}));
-}
-
-function buildFolderObject(f: NotebookFolder): string {
-	const obj: any = {
-		slug: f.slug,
-		name: f.name,
-		cover: f.cover,
-		summary: f.summary,
-		tags: f.tags,
-		enabled: f.enabled !== false,
-	};
-
-	const json = JSON.stringify(obj, null, 2)
-		.split("\n")
-		.map((line, i, arr) =>
-			i === arr.length - 1 ? `\t\t${line},` : `\t\t${line}`,
-		)
-		.join("\n");
-	return json;
-}
-
-function buildNoteObject(n: NotebookNote): string {
-	const obj: any = {
-		id: n.id,
-		folder: n.folder,
-		title: n.title,
-		date: n.date,
-		content: n.content,
-		tags: n.tags,
-		images: n.images,
-		enabled: n.enabled !== false,
-	};
-
-	const json = JSON.stringify(obj, null, 2)
-		.split("\n")
-		.map((line, i, arr) =>
-			i === arr.length - 1 ? `\t\t${line},` : `\t\t${line}`,
-		)
-		.join("\n");
-	return json;
-}
-
-function replaceArrayInTS(
-	originalContent: string,
-	startMarker: string,
-	newArrayContent: string,
-): string {
-	const startIdx = originalContent.indexOf(startMarker);
-	if (startIdx === -1) return originalContent;
-	// 同 parseArrayFromTS：marker 以 "[" 结尾，避免 indexOf 命中类型注解括号
-	let bracketStart = startIdx + startMarker.length - 1;
-	let depth = 1;
-	let idx = bracketStart + 1;
-	while (idx < originalContent.length && depth > 0) {
-		if (originalContent[idx] === "[") depth++;
-		else if (originalContent[idx] === "]") depth--;
-		if (depth > 0) idx++;
-	}
-	return (
-		originalContent.substring(0, bracketStart + 1) +
-		"\n" +
-		newArrayContent +
-		"\n\t]" +
-		originalContent.substring(idx + 1)
-	);
-}
-
-function buildNotebooksConfigTS(
-	foldersList: NotebookFolder[],
-	notesList: NotebookNote[],
-	originalContent?: string,
-): string {
-	const folderEntries = foldersList.map((f) => buildFolderObject(f));
-	const foldersArrayContent = folderEntries.join("\n");
-
-	const noteEntries = notesList.map((n) => buildNoteObject(n));
-	const notesArrayContent = noteEntries.join("\n");
-
-	if (originalContent) {
-		let result = originalContent;
-		result = replaceArrayInTS(
-			result,
-			"export const notebookFolders: NotebookFolder[] = [",
-			foldersArrayContent,
-		);
-		result = replaceArrayInTS(
-			result,
-			"export const notebookNotes: NotebookNote[] = [",
-			notesArrayContent,
-		);
-		return result;
-	}
-
-	return `/**
- * 笔记本页面配置
- * 用于管理笔记本分类和笔记内容
- */
-
-export interface NotebookFolder {
-	slug: string;
-	name: string;
-	cover: string;
-	summary: string;
-	tags: string[];
-	enabled?: boolean;
-}
-
-export interface NotebookNote {
-	id: string;
-	folder: string;
-	title: string;
-	date: string;
-	content: string;
-	tags: string[];
-	images: string[];
-	enabled?: boolean;
-}
-
-export interface NotebooksPageConfig {
-	title?: string;
-	description?: string;
-}
-
-export const notebookFolders: NotebookFolder[] = [
-${foldersArrayContent}
-];
-
-export const notebookNotes: NotebookNote[] = [
-${notesArrayContent}
-];
-
-export const notebooksPageConfig: NotebooksPageConfig = {
-	title: "笔记本",
-	description: "成长日记、学习复盘、灵感随笔",
-};
-
-export function getEnabledFolders(): NotebookFolder[] {
-	return notebookFolders.filter((f) => f.enabled !== false);
-}
-
-export function getFolderBySlug(slug: string): NotebookFolder | undefined {
-	return getEnabledFolders().find((f) => f.slug === slug);
-}
-
-export function getEnabledNotes(): NotebookNote[] {
-	return notebookNotes.filter((n) => n.enabled !== false);
-}
-
-export function getNotesByFolder(folderSlug: string): NotebookNote[] {
-	return getEnabledNotes()
-		.filter((n) => n.folder === folderSlug)
-		.sort(
-			(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-		);
-}
-
-export function getNoteById(id: string): NotebookNote | undefined {
-	return getEnabledNotes().find((n) => n.id === id);
-}
-
-export function getNoteByFolderAndSlug(
-	folderSlug: string,
-	noteSlug: string,
-): NotebookNote | undefined {
-	return getEnabledNotes().find(
-		(n) => n.folder === folderSlug && n.id === noteSlug,
-	);
-}
-
-export function getFolderStats(folderSlug: string): {
-	count: number;
-	latestDate: string;
-} {
-	const notes = getNotesByFolder(folderSlug);
-	return {
-		count: notes.length,
-		latestDate: notes.length > 0 ? notes[0].date : "",
-	};
-}
-`;
-}
-
-const drafts = setupRepoDrafts({
+// KV 实时数据：提交直接写 Cloudflare KV（/api/data/notebooks），秒级生效。
+// folders + notes 合并一个 KV key 提交（原子更新，getFolderStats 联算需要）
+const drafts = setupKvDrafts({
 	pageKey,
 	pageName,
-	getContent: () =>
-		buildNotebooksConfigTS(
-			folders.filter((f) => !f._deleted),
-			notes.filter((n) => !n._deleted),
-			originalTS,
-		),
-	setContent: (v) => {
-		const parsedFolders = parseFoldersFromTS(v);
-		const parsedNotes = parseNotesFromTS(v);
-		if (parsedFolders.length > 0 || v.includes("notebookFolders")) {
-			folders = parsedFolders;
-		}
-		if (parsedNotes.length > 0 || v.includes("notebookNotes")) {
-			notes = parsedNotes;
-		}
+	type: "notebooks",
+	getContent: () => ({
+		folders: folders.filter((f) => !f._deleted),
+		notes: notes.filter((n) => !n._deleted),
+	}),
+	setContent: (d) => {
+		if (Array.isArray(d.folders)) folders = d.folders as NotebookFolder[];
+		if (Array.isArray(d.notes)) notes = d.notes as NotebookNote[];
 	},
-	getPath: () => "src/config/notebooksConfig.ts",
-	getSha: () => fileSha,
-	setSha: (v) => (fileSha = v),
-	getOriginalContent: () => originalTS,
-	setOriginalContent: (v) => (originalTS = v),
-	getCommitMsg: (isEdit) =>
-		isEdit
-			? "chore(notebooks): 更新笔记本"
-			: "chore(notebooks): 创建笔记本配置",
-	onSubmitted: () => {
-		setTimeout(() => window.location.reload(), 1200);
+	getOriginalContent: () => ({
+		folders: originalFolders,
+		notes: originalNotes,
+	}),
+	setOriginalContent: (d) => {
+		if (Array.isArray(d.folders))
+			originalFolders = d.folders as NotebookFolder[];
+		if (Array.isArray(d.notes)) originalNotes = d.notes as NotebookNote[];
 	},
 });
 
@@ -390,7 +92,7 @@ $effect(() => {
 onMount(() => {
 	ensureIconify();
 	collectFromDOM();
-	loadRepoData();
+	loadKvData();
 
 	window.addEventListener("edit:sidebarModeChange", handleSidebarModeChange);
 	window.addEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
@@ -498,46 +200,17 @@ function collectFromDOM() {
 	}
 }
 
-async function loadRepoData() {
-	const existing = await getRepoFile("src/config/notebooksConfig.ts");
-	if (existing && existing.content) {
-		try {
-			const repoFolders: NotebookFolder[] = parseFoldersFromTS(
-				existing.content,
-			);
-			const repoNotes: NotebookNote[] = parseNotesFromTS(existing.content);
-			originalTS = existing.content;
-			fileSha = existing.sha || null;
-
-			const repoFolderMap = new Map(repoFolders.map((f) => [f.slug, f]));
-			folders = folders.map((f) => {
-				const repoItem = repoFolderMap.get(f.slug);
-				if (repoItem) {
-					return {
-						...f,
-						enabled: repoItem.enabled ?? f.enabled,
-					};
-				}
-				return f;
-			});
-
-			const existingFolderSlugs = new Set(folders.map((f) => f.slug));
-			for (const g of repoFolders) {
-				if (!existingFolderSlugs.has(g.slug)) {
-					folders = [...folders, { ...g, slug: g.slug || genId("nb") }];
-					existingFolderSlugs.add(g.slug);
-				}
-			}
-
-			notes = repoNotes;
-			originalNotes = deepClone(repoNotes);
-
-			originalFolders = deepClone(folders);
-		} catch (e) {
-			console.error("Failed to parse repo notebooks:", e);
-		}
-	} else {
-		originalTS = buildNotebooksConfigTS(folders, notes);
+/** 从 KV 拉取最新笔记本数据；失败回落 collectFromDOM() 的 SSR 收集结果 */
+async function loadKvData() {
+	const data = await fetchKvData<{
+		folders: NotebookFolder[];
+		notes: NotebookNote[];
+	}>("notebooks");
+	if (data && Array.isArray(data.folders) && data.folders.length > 0) {
+		folders = data.folders;
+		notes = Array.isArray(data.notes) ? data.notes : [];
+		originalFolders = deepClone(folders);
+		originalNotes = deepClone(notes);
 	}
 	repoLoaded = true;
 	drafts.restoreFromDrafts();
@@ -822,10 +495,6 @@ function handleSaveDraft() {
 async function handleSubmit() {
 	if (modalFolderItem || modalNoteItem) {
 		closeModal();
-	}
-	if (!hasValidToken()) {
-		showToast("GitHub 代理未配置，请联系管理员", "warning");
-		return;
 	}
 	saving = true;
 	try {

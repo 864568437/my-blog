@@ -57,26 +57,29 @@ const allItems = [
 			id: m.id,
 		};
 	}),
-	...bangumi.map((b) => {
-		let url = b.data.link || "";
-		if (!url) {
-			const slug = b.id
-				.replace(/\\/g, "/")
-				.replace(/\.(md|mdx|markdown)$/i, "");
-			url = b.data.category === "music" ? "/music/" : "/bangumi/";
-		}
-		return {
-			type: "bangumi",
-			title: b.data.title,
-			date: b.data.published || new Date(0),
-			url,
-			image:
-				typeof b.data.image === "string"
-					? b.data.image
-					: (b.data.image as any).src,
-			id: b.id,
-		};
-	}),
+	// music 类 bangumi 是音乐播放器曲库（由音乐组件/页面消费），不参与"最近更新"
+	...bangumi
+		.filter((b) => b.data.category !== "music")
+		.map((b) => {
+			let url = b.data.link || "";
+			if (!url) {
+				const slug = b.id
+					.replace(/\\/g, "/")
+					.replace(/\.(md|mdx|markdown)$/i, "");
+				url = b.data.category === "music" ? "/music/" : "/bangumi/";
+			}
+			return {
+				type: "bangumi",
+				title: b.data.title,
+				date: b.data.published || new Date(0),
+				url,
+				image:
+					typeof b.data.image === "string"
+						? b.data.image
+						: (b.data.image as any).src,
+				id: b.id,
+			};
+		}),
 	...notebooksEntries
 		.filter((n) => !n.id.includes("_index"))
 		.sort(

@@ -1,15 +1,9 @@
 <script lang="ts">
 import { marked } from "marked";
 import { onMount } from "svelte";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
-import {
-	deepClone,
-	ensureIconify,
-	genId,
-	getRepoFile,
-	hasValidToken,
-	showToast,
-} from "@/utils/editMode";
+import { setupKvDrafts } from "@/utils/draftHelpers";
+import { deepClone, ensureIconify, genId, showToast } from "@/utils/editMode";
+import { fetchKvData } from "@/utils/kvData";
 
 interface RoutineItem {
 	id: string;
@@ -33,8 +27,6 @@ let originalRoutines = $state<RoutineItem[]>([]);
 let editingIndex = $state(-1);
 let editPreview = $state("");
 let repoLoaded = $state(false);
-let fileSha = $state<string | null>(null);
-let originalTS = $state<string>("");
 
 const emojiOptions = [
 	"📌",
@@ -62,215 +54,20 @@ const emojiOptions = [
 const pageKey = "routines";
 const pageName = "日常规划";
 
-function stripLineComments(code: string): string {
-	const lines = code.split("\n");
-	return lines
-		.map((line) => {
-			let inStr = false;
-			let quotes = 0;
-			for (let i = 0; i < line.length - 1; i++) {
-				if (line[i] === '"' && (i === 0 || line[i - 1] !== "\\")) {
-					inStr = !inStr;
-					quotes++;
-				}
-				if (!inStr && line[i] === "/" && line[i + 1] === "/") {
-					if (quotes % 2 === 0) {
-						return line.substring(0, i);
-					}
-				}
-			}
-			return line;
-		})
-		.join("\n");
-}
-
-function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
-	tsContent = tsContent.replace(/\r\n/g, "\n");
-	const startIdx = tsContent.indexOf(startMarker);
-	if (startIdx === -1) return [];
-	// marker 以 "[" 结尾（数组开括号）。不能用 indexOf("[") 向后搜索，
-	// 会命中类型注解 RoutineItem[] 的括号导致解析出空数组
-	let bracketStart = startIdx + startMarker.length - 1;
-	let depth = 1;
-	let idx = bracketStart + 1;
-	while (idx < tsContent.length && depth > 0) {
-		if (tsContent[idx] === "[") depth++;
-		else if (tsContent[idx] === "]") depth--;
-		if (depth > 0) idx++;
-	}
-	let arrayStr = tsContent.substring(bracketStart + 1, idx).trim();
-	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
-	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
-	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
-	try {
-		return JSON.parse(`[${arrayStr}]`);
-	} catch (e) {
-		console.error("Failed to parse array from TS:", e);
-		return [];
-	}
-}
-
-function parseRoutinesFromTS(tsContent: string): RoutineItem[] {
-	const items = parseArrayFromTS(
-		tsContent,
-		"export const routinesConfig: RoutineItem[] = [",
-	);
-	return items.map((item: any, index: number) => ({
-		id: item.id || `routine-${index}`,
-		name: item.name || "",
-		time: item.time || "",
-		icon: item.icon || "📌",
-		color: item.color || "",
-		description: item.description || "",
-		body: item.body || "",
-		updatedAt: item.updatedAt || new Date().toISOString().slice(0, 10),
-		order: typeof item.order === "number" ? item.order : index + 1,
-		enabled: item.enabled !== false,
-	}));
-}
-
-function buildRoutineObject(r: RoutineItem): string {
-	const obj: any = {
-		id: r.id,
-		name: r.name,
-		time: r.time,
-		icon: r.icon,
-		color: r.color,
-		description: r.description,
-		body: r.body,
-		updatedAt: r.updatedAt,
-		order: r.order,
-		enabled: r.enabled !== false,
-	};
-
-	const json = JSON.stringify(obj, null, 2)
-		.split("\n")
-		.map((line, i, arr) =>
-			i === arr.length - 1 ? `\t\t${line},` : `\t\t${line}`,
-		)
-		.join("\n");
-	return json;
-}
-
-function replaceArrayInTS(
-	originalContent: string,
-	startMarker: string,
-	newArrayContent: string,
-): string {
-	const startIdx = originalContent.indexOf(startMarker);
-	if (startIdx === -1) return originalContent;
-	// 同 parseArrayFromTS：marker 以 "[" 结尾，避免 indexOf 命中类型注解括号
-	let bracketStart = startIdx + startMarker.length - 1;
-	let depth = 1;
-	let idx = bracketStart + 1;
-	while (idx < originalContent.length && depth > 0) {
-		if (originalContent[idx] === "[") depth++;
-		else if (originalContent[idx] === "]") depth--;
-		if (depth > 0) idx++;
-	}
-	return (
-		originalContent.substring(0, bracketStart + 1) +
-		"\n" +
-		newArrayContent +
-		"\n\t]" +
-		originalContent.substring(idx + 1)
-	);
-}
-
-function buildRoutinesConfigTS(
-	routineList: RoutineItem[],
-	originalContent?: string,
-): string {
-	const routineEntries = routineList.map((r) => buildRoutineObject(r));
-	const routinesArrayContent = routineEntries.join("\n");
-
-	if (originalContent) {
-		let result = originalContent;
-		result = replaceArrayInTS(
-			result,
-			"export const routinesConfig: RoutineItem[] = [",
-			routinesArrayContent,
-		);
-		return result;
-	}
-
-	return `/**
- * 日常规划页面配置
- * 用于管理日常规划展示的内容
- */
-
-// 日常规划项类型定义
-export interface RoutineItem {
-	id: string;
-	name: string;
-	time: string;
-	icon: string;
-	color: string;
-	description: string;
-	body: string;
-	updatedAt: string;
-	order: number;
-	enabled: boolean;
-}
-
-// 日常规划页面配置
-export interface RoutinePageConfig {
-	title?: string;
-	description?: string;
-}
-
-// 日常规划页面配置
-export const routinePageConfig: RoutinePageConfig = {
-	title: "日常规划",
-	description: "记录和规划生活中的各项事务",
-};
-
-// 日常规划列表配置
-export const routinesConfig: RoutineItem[] = [
-${routinesArrayContent}
-];
-
-// 获取所有日常规划（按 order 排序，相同 order 按 updatedAt 倒序）
-export function getAllRoutines(): RoutineItem[] {
-	return [...routinesConfig].sort((a, b) => {
-		if (a.order !== b.order) return a.order - b.order;
-		return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-	});
-}
-
-// 获取启用的日常规划
-export function getEnabledRoutines(): RoutineItem[] {
-	return getAllRoutines().filter((r) => r.enabled !== false);
-}
-`;
-}
-
-const drafts = setupRepoDrafts({
+// KV 实时数据：提交直接写 Cloudflare KV（/api/data/routines），秒级生效
+const drafts = setupKvDrafts({
 	pageKey,
 	pageName,
-	getContent: () =>
-		buildRoutinesConfigTS(
-			routines.filter((m) => !m._deleted),
-			originalTS,
-		),
-	setContent: (v) => {
-		const parsed = parseRoutinesFromTS(v);
-		if (parsed.length > 0 || v.includes("routinesConfig")) {
-			routines = parsed;
-		}
+	type: "routines",
+	getContent: () => ({
+		items: routines.filter((m) => !m._deleted),
+	}),
+	setContent: (d) => {
+		if (Array.isArray(d.items)) routines = d.items as RoutineItem[];
 	},
-	getPath: () => "src/config/routinesConfig.ts",
-	getSha: () => fileSha,
-	setSha: (v) => (fileSha = v),
-	getOriginalContent: () => originalTS,
-	setOriginalContent: (v) => (originalTS = v),
-	getCommitMsg: (isEdit) =>
-		isEdit
-			? "chore(routines): 更新日常规划"
-			: "chore(routines): 创建日常规划配置",
-	onSubmitted: () => {
-		setTimeout(() => window.location.reload(), 1200);
+	getOriginalContent: () => ({ items: originalRoutines }),
+	setOriginalContent: (d) => {
+		if (Array.isArray(d.items)) originalRoutines = d.items as RoutineItem[];
 	},
 });
 
@@ -287,7 +84,7 @@ $effect(() => {
 onMount(() => {
 	ensureIconify();
 	collectFromDOM();
-	loadRepoData();
+	loadKvData();
 
 	window.addEventListener("edit:sidebarModeChange", handleSidebarModeChange);
 	window.addEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
@@ -403,42 +200,12 @@ function collectFromDOM() {
 	originalRoutines = deepClone(result);
 }
 
-async function loadRepoData() {
-	const existing = await getRepoFile("src/config/routinesConfig.ts");
-	if (existing && existing.content) {
-		try {
-			const repoRoutines: RoutineItem[] = parseRoutinesFromTS(existing.content);
-			originalTS = existing.content;
-			fileSha = existing.sha || null;
-
-			const repoMap = new Map(repoRoutines.map((m) => [m.id, m]));
-			routines = routines.map((m) => {
-				const repoItem = repoMap.get(m.id);
-				if (repoItem) {
-					return {
-						...m,
-						enabled: repoItem.enabled ?? m.enabled,
-						order: repoItem.order ?? m.order,
-						color: repoItem.color ?? m.color,
-					};
-				}
-				return m;
-			});
-
-			const existingIds = new Set(routines.map((m) => m.id));
-			for (const g of repoRoutines) {
-				if (!existingIds.has(g.id)) {
-					routines = [...routines, { ...g, id: g.id || genId("rt") }];
-					existingIds.add(g.id);
-				}
-			}
-
-			originalRoutines = deepClone(routines);
-		} catch (e) {
-			console.error("Failed to parse repo routines:", e);
-		}
-	} else {
-		originalTS = buildRoutinesConfigTS(routines);
+/** 从 KV 拉取最新规划数据；失败回落 collectFromDOM() 的 SSR 收集结果 */
+async function loadKvData() {
+	const data = await fetchKvData<{ items: RoutineItem[] }>("routines");
+	if (data && Array.isArray(data.items) && data.items.length > 0) {
+		routines = data.items;
+		originalRoutines = deepClone(routines);
 	}
 	repoLoaded = true;
 	drafts.restoreFromDrafts();
@@ -611,10 +378,6 @@ async function handleSubmit() {
 	if (editingIndex >= 0) {
 		finishEdit(editingIndex);
 		if (editingIndex >= 0) return;
-	}
-	if (!hasValidToken()) {
-		showToast("GitHub 代理未配置，请联系管理员", "warning");
-		return;
 	}
 	saving = true;
 	try {

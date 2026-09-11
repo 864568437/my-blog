@@ -2,7 +2,7 @@ import type { SakuraConfig } from "../types/config";
 
 export const sakuraConfig: SakuraConfig = {
 	// 是否启用樱花特效（false 时特效与设置面板中的樱花开关一并隐藏，开启后默认播放）
-	enable: true,
+	enable: false,
 
 	// 樱花数量
 	sakuraNum: 21,
