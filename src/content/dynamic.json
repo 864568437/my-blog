@@ -1,1 +1,15 @@
-[]
+[
+  {
+    "id": "2026-09-11-dyn-1789114527643-u1cc0x",
+    "published": "2026-09-11T08:15:27.643Z",
+    "pinned": false,
+    "tags": [
+      "test"
+    ],
+    "location": "test",
+    "device": "test",
+    "author": "Xiaozhu",
+    "avatar": "assets/images/touxiang.webp",
+    "body": "test"
+  }
+]
