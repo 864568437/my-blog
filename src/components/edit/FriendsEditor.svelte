@@ -22,6 +22,8 @@ let friends = $state<FriendItem[]>([]);
 let originalFriends = $state<FriendItem[]>([]);
 let editingIndex = $state(-1);
 let repoLoaded = $state(false);
+// 批量删除：勾选中的条目 id 集合（id 缺失时回落 siteurl）
+let selectedIds = $state<Set<string>>(new Set());
 
 const typeColors: Record<string, { bg: string; text: string }> = {
 	Blog: { bg: "#3b82f6", text: "#ffffff" },
@@ -256,8 +258,46 @@ function deleteItem(index: number) {
 	const f = friends[index];
 	if (!confirm(`确定要删除「${f.title || "该条目"}」吗？`)) return;
 	friends = friends.filter((_, i) => i !== index);
+	syncSelectionAfterListChange();
 	if (editingIndex === index) editingIndex = -1;
 	else if (editingIndex > index) editingIndex--;
+	showToast("已删除，记得点击保存", "info");
+}
+
+/* ========== 批量删除 ========== */
+
+function itemId(f: FriendItem): string {
+	return f.id || f.siteurl;
+}
+
+function toggleSelect(index: number) {
+	const id = itemId(friends[index]);
+	const next = new Set(selectedIds);
+	if (next.has(id)) next.delete(id);
+	else next.add(id);
+	selectedIds = next;
+}
+
+function toggleSelectAll() {
+	if (selectedIds.size === friends.length) selectedIds = new Set();
+	else selectedIds = new Set(friends.map(itemId));
+}
+
+/** 列表变动（单项删除/提交恢复）后清掉指向已不存在条目的勾选 */
+function syncSelectionAfterListChange() {
+	const live = new Set(friends.map(itemId));
+	selectedIds = new Set([...selectedIds].filter((id) => live.has(id)));
+}
+
+function deleteSelected() {
+	if (selectedIds.size === 0) {
+		showToast("请先勾选要删除的条目", "info");
+		return;
+	}
+	if (!confirm(`确定要删除选中的 ${selectedIds.size} 个条目吗？`)) return;
+	friends = friends.filter((f) => !selectedIds.has(itemId(f)));
+	selectedIds = new Set();
+	editingIndex = -1;
 	showToast("已删除，记得点击保存", "info");
 }
 
@@ -301,6 +341,18 @@ async function handleSubmit() {
 			weight: rest.weight ?? 10,
 			enabled: rest.enabled !== false,
 		}));
+		// 防误删保护：把列表清空提交会让 KV 变成空列表，
+		// 页面 doRefresh() 会因 items 为空而回落 SSR 静态数据，
+		// 造成"提交了但不生效"的错觉（KV 里其实是全空）。提交前要求确认。
+		if (cleanData.length === 0 && originalFriends.length > 0) {
+			if (
+				!confirm(
+					"当前列表为空！提交后将删除全部友链（KV 会被清空），确定继续吗？",
+				)
+			) {
+				return;
+			}
+		}
 		friends = cleanData;
 		drafts.saveToDrafts();
 		await drafts.submitDrafts();
@@ -322,14 +374,44 @@ function getTagColor(tag: string) {
 
 <!-- 编辑模式：可编辑网格 -->
 {#if editMode}
+	{#if friends.length > 0}
+		<div class="bulk-delete-bar">
+			<label class="bulk-select-all">
+				<input
+					type="checkbox"
+					checked={selectedIds.size === friends.length && friends.length > 0}
+					onchange={toggleSelectAll}
+				/>
+				<span>全选（已选 {selectedIds.size}/{friends.length}）</span>
+			</label>
+			<button
+				class="bulk-delete-btn"
+				disabled={selectedIds.size === 0}
+				onclick={deleteSelected}
+				title="删除所有勾选的友链"
+			>
+				<iconify-icon icon="material-symbols:delete-outline-rounded"></iconify-icon>
+				批量删除{selectedIds.size > 0 ? `（${selectedIds.size}）` : ""}
+			</button>
+		</div>
+	{/if}
 	<div class="edit-friends-grid" id="edit-friends-grid">
 		{#each friends as friend, i (i + "-" + (friend.id || friend.siteurl))}
 			<div
 				class="edit-friend-card"
+				class:edit-friend-card-selected={selectedIds.has(itemId(friend))}
 				class:edit-friend-card-draft={friend._draft}
 				class:edit-friend-card-editing={editingIndex === i}
 			>
 				{#if editingIndex !== i}
+					<!-- 批量删除勾选框（左上角） -->
+					<label class="card-select" title="勾选后可批量删除">
+						<input
+							type="checkbox"
+							checked={selectedIds.has(itemId(friend))}
+							onchange={() => toggleSelect(i)}
+						/>
+					</label>
 					<div class="card-action-row">
 						{#if i > 0}
 							<button class="action-btn action-move" onclick={() => moveUp(i)} title="上移">
@@ -453,6 +535,82 @@ function getTagColor(tag: string) {
 {/if}
 
 <style>
+	/* ========== 批量删除工具栏 ========== */
+	.bulk-delete-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		margin-bottom: 12px;
+		padding: 10px 14px;
+		border-radius: 12px;
+		background: var(--btn-regular-bg, #f3f4f6);
+		border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+	}
+	:global(.dark) .bulk-delete-bar {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(255, 255, 255, 0.08);
+	}
+	.bulk-select-all {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--text-color, #374151);
+		cursor: pointer;
+		user-select: none;
+	}
+	:global(.dark) .bulk-select-all { color: #d1d5db; }
+	.bulk-delete-bar input[type="checkbox"],
+	.card-select input[type="checkbox"] {
+		width: 16px;
+		height: 16px;
+		accent-color: rgba(239, 68, 68, 1);
+		cursor: pointer;
+	}
+	.bulk-delete-btn {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 7px 14px;
+		border-radius: 8px;
+		border: none;
+		font-size: 13px;
+		font-weight: 600;
+		cursor: pointer;
+		color: white;
+		background: rgba(239, 68, 68, 1);
+		transition: all 0.15s;
+	}
+	.bulk-delete-btn:hover:not(:disabled) { background: rgba(220, 38, 38, 1); }
+	.bulk-delete-btn:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	/* 卡片左上角勾选框 */
+	.card-select {
+		position: absolute;
+		top: 8px;
+		left: 8px;
+		z-index: 10;
+		width: 30px;
+		height: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 8px;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(8px);
+		cursor: pointer;
+	}
+	:global(.dark) .card-select { background: rgba(23, 23, 23, 0.75); }
+	.edit-friend-card-selected {
+		border-color: rgba(239, 68, 68, 0.6) !important;
+		box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+	}
+
 	.edit-friends-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
