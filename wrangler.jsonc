@@ -22,7 +22,7 @@
     // base URL 填 root 不带 /v1（SDK 自己拼 /v1/messages）；AgentRouter 用
     // Bearer 鉴权（ANTHROPIC_AUTH_TOKEN → AI_API_KEY secret）
     "AI_BASE_URL": "https://agentrouter.org",
-    "AI_MODEL": "claude-opus-4-6",
+    "AI_MODEL": "deepseek-v4-flash",
     // anthropic（默认）| openai
     "AI_API_FORMAT": "anthropic",
     // bearer（默认，对应 ANTHROPIC_AUTH_TOKEN）| x-api-key（对应 ANTHROPIC_API_KEY）

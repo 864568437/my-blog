@@ -129,6 +129,59 @@ function resolveMaxTokens(env) {
 	return Math.min(Math.max(1, n), MAX_TOKENS_CAP);
 }
 
+/* ========== 博客文章上下文注入 ==========
+ * 三面统一走「自站点 fetch /api/allPostMeta.json」（按请求 Host 推导
+ * 站点地址），dev 路由可通过 env.AI_POSTS_CONTEXT 预生成跳过 fetch。
+ * 模块级缓存 5 分钟——文章列表只在重新构建后才变化，无新鲜性问题。
+ */
+let postsCache = { text: "", at: 0 };
+const POSTS_CACHE_MS = 5 * 60 * 1000;
+
+/** 元数据数组 → 紧凑清单文本（过滤加密文章，不暴露其标题） */
+function formatPosts(posts) {
+	return posts
+		.filter((p) => p && p.id && p.title && !p.password)
+		.map((p) => {
+			const date = p.published
+				? new Date(p.published).toISOString().slice(0, 7)
+				: "";
+			const meta = [p.category, date].filter(Boolean).join(", ");
+			return `- 《${p.title}》${meta ? `[${meta}]` : ""} /posts/${p.id}/ — ${p.description || "（无摘要）"}`;
+		})
+		.join("\n");
+}
+
+async function buildPostsContext(request, env) {
+	// dev 路由预算好的上下文优先（避免 dev server 冷启动时自 fetch 超时）
+	if (env?.AI_POSTS_CONTEXT) return env.AI_POSTS_CONTEXT;
+
+	const now = Date.now();
+	if (postsCache.text && now - postsCache.at < POSTS_CACHE_MS) {
+		return postsCache.text;
+	}
+
+	try {
+		// 从请求自身推导站点地址：Worker / Edge / dev 三面都是同源
+		const host =
+			request.headers.get("host") || request.headers.get("x-forwarded-host");
+		if (!host) return "";
+		const url = new URL(request.url);
+		const metaUrl = `${url.protocol}//${host}/api/allPostMeta.json`;
+		const resp = await fetch(metaUrl, {
+			headers: { Accept: "application/json" },
+			signal: AbortSignal.timeout(5000),
+		});
+		if (!resp.ok) return "";
+		const posts = await resp.json();
+		if (!Array.isArray(posts) || posts.length === 0) return "";
+		const text = formatPosts(posts);
+		postsCache = { text, at: now };
+		return text;
+	} catch {
+		return ""; // 拿不到就纯对话，不阻塞
+	}
+}
+
 export async function handleAiProxy(request, env) {
 	if (request.method === "OPTIONS") {
 		return new Response(null, { status: 204, headers: corsHeaders() });
@@ -175,10 +228,16 @@ export async function handleAiProxy(request, env) {
 	if (parsed.error) return jsonResponse({ error: parsed.error }, 400);
 
 	const messages = parsed.messages;
-	const system = env.AI_SYSTEM_PROMPT || DEFAULT_SYSTEM_PROMPT;
+	const baseSystem = env.AI_SYSTEM_PROMPT || DEFAULT_SYSTEM_PROMPT;
 	const maxTokens = resolveMaxTokens(env);
 	const model = env.AI_MODEL;
 	const format = (env.AI_API_FORMAT || "anthropic").toLowerCase();
+
+	// 文章上下文注入：AI 能据此列出/推荐/分析博客文章
+	const postsText = await buildPostsContext(request, env);
+	const system = postsText
+		? `${baseSystem}\n\n以下是本博客的全部文章列表，回答与博客内容、最近更新、推荐阅读相关的问题时以此为准；推荐或提及文章时附上 Markdown 链接（相对路径即可）：\n\n${postsText}`
+		: baseSystem;
 
 	try {
 		if (format === "openai") {
