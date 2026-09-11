@@ -13,7 +13,7 @@ export const aiSearchConfig = {
 	enable: true,
 
 	/** 对话模型名称（仅用于弹窗标题展示，与后端实际调用的 AI_MODEL 解耦） */
-	modelName: "GLM-5.3",
+	modelName: "deepseek-v4.1-flash",
 
 	/** AI 名称 */
 	aiName: "zhu秘书",

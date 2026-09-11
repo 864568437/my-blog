@@ -14,6 +14,7 @@ export default async function handler(request) {
 		AI_MAX_TOKENS: process.env.AI_MAX_TOKENS || "",
 		AI_SYSTEM_PROMPT: process.env.AI_SYSTEM_PROMPT || "",
 		AI_THINKING: process.env.AI_THINKING || "",
+		AI_USER_AGENT: process.env.AI_USER_AGENT || "",
 	};
 	return handleAiProxy(request, env);
 }

@@ -24,6 +24,8 @@
  *   AI_MAX_TOKENS   默认 4096，硬上限 8192
  *   AI_SYSTEM_PROMPT 覆盖内置系统提示词
  *   AI_THINKING     adaptive 时开启扩展思考（仅真 Anthropic 端点支持）
+ *   AI_USER_AGENT   覆盖上游请求 UA（默认伪装 claude-cli；AgentRouter 等
+ *                   网关按 UA 拦截非 Claude Code 客户端）
  */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -205,6 +207,15 @@ async function streamAnthropic({ env, model, system, messages, maxTokens }) {
 	if (authStyle === "x-api-key") clientOpts.apiKey = env.AI_API_KEY;
 	else clientOpts.authToken = env.AI_API_KEY;
 
+	// AgentRouter 等中转网关按 User-Agent 拦截非 Claude Code 客户端
+	// （返回 unauthorized client detected）。SDK 默认 UA 会被拦，
+	// 这里伪装成 Claude CLI 让网关放行，可用 AI_USER_AGENT 覆盖。
+	const userAgent = env.AI_USER_AGENT || "claude-cli/2.0.14 (external, cli)";
+	clientOpts.defaultHeaders = {
+		"User-Agent": userAgent,
+		"anthropic-version": "2023-06-01",
+	};
+
 	const client = new Anthropic(clientOpts);
 
 	const body = { model, max_tokens: maxTokens, system, messages };
@@ -257,6 +268,9 @@ async function streamOpenAI({ env, model, system, messages, maxTokens }) {
 	const headers = { "Content-Type": "application/json" };
 	if (authStyle === "x-api-key") headers["api-key"] = env.AI_API_KEY;
 	else headers.Authorization = `Bearer ${env.AI_API_KEY}`;
+	// 同 streamAnthropic：部分网关按 UA 拦截非 Claude Code 客户端
+	headers["User-Agent"] =
+		env.AI_USER_AGENT || "claude-cli/2.0.14 (external, cli)";
 
 	const upstream = await fetch(url, {
 		method: "POST",

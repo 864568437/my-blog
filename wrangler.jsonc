@@ -18,10 +18,11 @@
     "PUBLIC_GITHUB_REPO": "my-blog",
     // GitHub App ID（数字，App 设置页可见）——部署前必填，填错会导致在线编辑无法认证
     "PUBLIC_GITHUB_APP_ID": "4899171",
-    // ===== AI 对话代理（对应 CC Switch 的 Claude 自定义配置）=====
-    // AI_BASE_URL 填 root，不要带 /v1（SDK 会自己拼 /v1/messages）
-    "AI_BASE_URL": "https://ps.air-outer.com",
-    "AI_MODEL": "deepseek-v4-flash",
+    // ===== AI 对话代理（AgentRouter，https://agentrouter.org/docs/claude-code.html）=====
+    // base URL 填 root 不带 /v1（SDK 自己拼 /v1/messages）；AgentRouter 用
+    // Bearer 鉴权（ANTHROPIC_AUTH_TOKEN → AI_API_KEY secret）
+    "AI_BASE_URL": "https://agentrouter.org",
+    "AI_MODEL": "claude-opus-4-6",
     // anthropic（默认）| openai
     "AI_API_FORMAT": "anthropic",
     // bearer（默认，对应 ANTHROPIC_AUTH_TOKEN）| x-api-key（对应 ANTHROPIC_API_KEY）

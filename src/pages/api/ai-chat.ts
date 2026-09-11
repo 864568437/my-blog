@@ -22,6 +22,7 @@ function buildEnv() {
 		AI_MAX_TOKENS: import.meta.env?.AI_MAX_TOKENS || "",
 		AI_SYSTEM_PROMPT: import.meta.env?.AI_SYSTEM_PROMPT || "",
 		AI_THINKING: import.meta.env?.AI_THINKING || "",
+		AI_USER_AGENT: import.meta.env?.AI_USER_AGENT || "",
 	};
 }
 
