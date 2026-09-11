@@ -453,7 +453,8 @@ function handleAdd() {
 }
 
 function handleSaveDraft() {
-	const cleanData = items.map(({ _draft, _deleted, ...rest }) => ({
+	// 只剥 _draft；_deleted 墓碑必须保留（getContent 靠它过滤已删除条目）
+	const cleanData = items.map(({ _draft, ...rest }) => ({
 		...rest,
 		id: rest.id || genId("dh"),
 		enabled: rest.enabled !== false,
@@ -469,7 +470,7 @@ async function handleSubmit() {
 	}
 	saving = true;
 	try {
-		const cleanData = items.map(({ _draft, _deleted, ...rest }) => ({
+		const cleanData = items.map(({ _draft, ...rest }) => ({
 			...rest,
 			id: rest.id || genId("dh"),
 			enabled: rest.enabled !== false,

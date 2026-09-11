@@ -477,12 +477,14 @@ function getNotesForFolder(folderSlug: string): NotebookNote[] {
 }
 
 function handleSaveDraft() {
-	const cleanFolders = folders.map(({ _draft, _deleted, ...rest }) => ({
+	// 只剥 _draft；_deleted 墓碑必须保留——getContent() 靠它过滤已删除条目，
+	// 剥掉会让删除在提交时「复活」成未更改状态
+	const cleanFolders = folders.map(({ _draft, ...rest }) => ({
 		...rest,
 		slug: rest.slug || genId("nb"),
 		enabled: rest.enabled !== false,
 	}));
-	const cleanNotes = notes.map(({ _draft, _deleted, ...rest }) => ({
+	const cleanNotes = notes.map(({ _draft, ...rest }) => ({
 		...rest,
 		id: rest.id || genId("note"),
 		enabled: rest.enabled !== false,
@@ -498,12 +500,12 @@ async function handleSubmit() {
 	}
 	saving = true;
 	try {
-		const cleanFolders = folders.map(({ _draft, _deleted, ...rest }) => ({
+		const cleanFolders = folders.map(({ _draft, ...rest }) => ({
 			...rest,
 			slug: rest.slug || genId("nb"),
 			enabled: rest.enabled !== false,
 		}));
-		const cleanNotes = notes.map(({ _draft, _deleted, ...rest }) => ({
+		const cleanNotes = notes.map(({ _draft, ...rest }) => ({
 			...rest,
 			id: rest.id || genId("note"),
 			enabled: rest.enabled !== false,
