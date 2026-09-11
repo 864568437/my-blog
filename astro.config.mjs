@@ -80,6 +80,62 @@ function githubProxyDevPlugin() {
 	};
 }
 
+/**
+ * dev 下接管 /api/ai-chat 的 Vite 中间件。
+ *
+ * 为什么不复用 githubProxyDevPlugin：那个插件用
+ * res.end(await response.arrayBuffer()) 把整个响应一次性缓冲后再吐出，
+ * 对 SSE 来说等于把流式变成了「等全部生成完再一次性显示」。这里必须
+ * 逐块 res.write()，才能让 AI 回答逐字出现。
+ */
+function aiProxyDevPlugin() {
+	return {
+		name: "ai-proxy-dev",
+		apply: "serve",
+		configureServer(server) {
+			server.middlewares.use("/api/ai-chat", async (req, res, next) => {
+				try {
+					const chunks = [];
+					for await (const chunk of req) chunks.push(chunk);
+					const rawBody = Buffer.concat(chunks).toString("utf-8");
+					const hasBody = !["GET", "HEAD", "OPTIONS"].includes(req.method);
+					// 必须带上真实 host（含端口）：ai-proxy 的同源校验要比对
+					// Origin 与请求 URL 的 host，写死 http://localhost 会丢端口而误判 403
+					const origin = `http://${req.headers.host || "localhost"}`;
+					const request = new Request(new URL(req.url, origin), {
+						method: req.method,
+						headers: req.headers,
+						body: hasBody && rawBody ? rawBody : undefined,
+					});
+					const mod = await server.ssrLoadModule("/src/pages/api/ai-chat.ts");
+					const handler = mod[req.method] || mod.GET;
+					if (!handler) {
+						next();
+						return;
+					}
+					const response = await handler({ request });
+					res.statusCode = response.status;
+					response.headers.forEach((value, key) => res.setHeader(key, value));
+					if (!response.body) {
+						res.end();
+						return;
+					}
+					// 逐块转发，保持流式（不能用 arrayBuffer 缓冲）
+					const reader = response.body.getReader();
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						res.write(Buffer.from(value));
+					}
+					res.end();
+				} catch (err) {
+					next(err);
+				}
+			});
+		},
+	};
+}
+
 export default defineConfig({
 	site: siteConfig.site_url,
 
@@ -328,6 +384,7 @@ export default defineConfig({
 		plugins: [
 			tailwindcss(),
 			githubProxyDevPlugin(),
+			aiProxyDevPlugin(),
 		],
 		optimizeDeps: {
 			include: [

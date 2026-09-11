@@ -234,6 +234,38 @@ function renderSimpleMd(text: string): string {
 	return html;
 }
 
+/**
+ * 把代理返回的错误响应翻译成给访客看的可读提示。
+ * 503 = 服务端没配环境变量；403 = 同源校验失败；502 = 上游报错（多为密钥无效）。
+ */
+async function describeError(resp: Response): Promise<string> {
+	let detail = "";
+	try {
+		const data = await resp.json();
+		detail = data?.detail || data?.message || data?.error || "";
+	} catch {
+		detail = "";
+	}
+	if (resp.status === 503) {
+		return (
+			"AI 对话还没配置好~\n\n" +
+			"需要在部署环境配置 `AI_BASE_URL` / `AI_API_KEY` / `AI_MODEL` 三个环境变量" +
+			"（对应 CC Switch 里那份 Claude 自定义配置）。" +
+			(detail ? `\n\n> ${detail}` : "")
+		);
+	}
+	if (resp.status === 403) {
+		return "请求被拒绝了：请从站内页面发起对话~";
+	}
+	if (resp.status === 400) {
+		return `请求有点问题：${detail || "内容格式不正确"}`;
+	}
+	if (resp.status === 502) {
+		return `上游 AI 服务报错了${detail ? `：${detail}` : "，请检查 AI_API_KEY 是否有效~"}`;
+	}
+	return `抱歉，请求出错了（HTTP ${resp.status}）${detail ? `：${detail}` : ""}`;
+}
+
 async function send(text?: string) {
 	const q = (text || inputVal).trim();
 	if (!q || isLoading) return;
@@ -266,18 +298,66 @@ async function send(text?: string) {
 	scrollToBottom();
 
 	try {
-		await new Promise((resolve) => setTimeout(resolve, 800));
+		// 携带最近若干轮历史：剔除 refs / streaming 等内部字段，
+		// 并排除刚插入的流式占位（它还没有内容）
+		const history = messages
+			.slice(0, aiIdx)
+			.slice(-(aiSearchConfig.maxHistory || 10))
+			.map((m) => ({ role: m.role, content: m.content }));
 
-		messages[aiIdx].content =
-			"你好呀！我是" +
-			aiSearchConfig.aiName +
-			"~ 👋\n\n" +
-			"目前 AI 对话功能需要配置后端 API 才能使用。你可以：\n\n" +
-			"1. 在 `src/config/aiSearchConfig.ts` 中配置你的 AI API 地址\n" +
-			"2. 或者搭建自己的后端服务来处理对话请求\n\n" +
-			"如果你想了解博客的相关信息，可以看看侧边栏的文章列表哦~";
-		messages = [...messages];
-		scrollToBottom();
+		const resp = await fetch(aiSearchConfig.apiPath || "/api/ai-chat/", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ messages: history }),
+			signal: abortCtrl.signal,
+		});
+
+		if (!resp.ok || !resp.body) {
+			messages[aiIdx].content = await describeError(resp);
+			messages = [...messages];
+			scrollToBottom();
+			return;
+		}
+
+		// 解析代理归一化后的 SSE：data: {"text":"..."} / {"error":"..."} / [DONE]
+		const reader = resp.body.getReader();
+		const decoder = new TextDecoder();
+		let buffer = "";
+		let streamErr = "";
+
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			buffer += decoder.decode(value, { stream: true });
+			const lines = buffer.split("\n");
+			buffer = lines.pop() || "";
+			for (const line of lines) {
+				const trimmed = line.trim();
+				if (!trimmed.startsWith("data:")) continue;
+				const data = trimmed.slice(5).trim();
+				if (!data || data === "[DONE]") continue;
+				try {
+					const json = JSON.parse(data);
+					if (json.error) {
+						streamErr = json.error;
+					} else if (json.text) {
+						messages[aiIdx].content += json.text;
+						messages = [...messages];
+						scrollToBottom();
+					}
+				} catch {
+					// 忽略无法解析的行
+				}
+			}
+		}
+
+		if (streamErr && !messages[aiIdx].content.trim()) {
+			messages[aiIdx].content = `抱歉，生成失败了：${streamErr}`;
+			messages = [...messages];
+		} else if (streamErr) {
+			messages[aiIdx].content += `\n\n> *(中断：${streamErr})*`;
+			messages = [...messages];
+		}
 	} catch (err: unknown) {
 		const e = err instanceof Error ? err : new Error(String(err));
 		if (e.name === "AbortError") {

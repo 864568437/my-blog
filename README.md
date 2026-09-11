@@ -231,8 +231,16 @@ fqzlr-bk/
 | `PUBLIC_GITHUB_APP_ID` | GitHub App ID（浏览器端 JWT 签名） | 在线编辑必需 |
 | `GH_PRIVATE_KEY` | GitHub App 私钥（服务端代理签名，可选） | 可选 |
 | `PUBLIC_IMG_UPLOAD_TOKEN` | 评论图床上传 Token（tu.fqzlr.com） | 可选 |
+| `AI_BASE_URL` | AI 搜索上游地址（root，不带 /v1；对应 CC Switch 的 `ANTHROPIC_BASE_URL`） | AI 搜索必需 |
+| `AI_API_KEY` | AI 搜索上游密钥（机密；对应 `ANTHROPIC_AUTH_TOKEN`，或 `ANTHROPIC_API_KEY` 配 `AI_AUTH_STYLE=x-api-key`） | AI 搜索必需 |
+| `AI_MODEL` | AI 搜索上游模型 id（对应 `ANTHROPIC_MODEL`） | AI 搜索必需 |
+| `AI_API_FORMAT` | 上游协议：`anthropic`（默认）/ `openai` | 可选 |
+| `AI_AUTH_STYLE` | 鉴权头：`bearer`（默认）/ `x-api-key` | 可选 |
+| `AI_MAX_TOKENS` | 单次回复上限，默认 4096（硬上限 8192） | 可选 |
+| `AI_SYSTEM_PROMPT` | 覆盖 AI 搜索内置系统提示词 | 可选 |
 
 > GitHub 仓库配置必须通过环境变量设置，代码中无硬编码默认值。
+> AI 搜索的 `AI_API_KEY` 是机密：Cloudflare 用 `wrangler secret put AI_API_KEY`，Vercel 在项目 Environment Variables 里配置。AI 搜索走 `/api/ai-chat` 服务端代理（`src/workers/ai-proxy.js`），密钥不会进入前端 bundle。
 
 ## ✏️ 内容编辑方式
 
@@ -297,7 +305,7 @@ pnpm dev   # http://localhost:4321
 
 ### Cloudflare Workers 部署（主）
 
-站点为纯静态构建（`dist/`），`/api/github` 在线编辑代理由 Cloudflare Worker 处理（`src/workers/index.js`），认证逻辑复用 `src/workers/github-proxy.js`。
+站点为纯静态构建（`dist/`），`/api/github` 在线编辑代理与 `/api/ai-chat` AI 对话代理均由 Cloudflare Worker 处理（`src/workers/index.js`），认证逻辑复用平台无关的 `src/workers/github-proxy.js` 与 `src/workers/ai-proxy.js`。
 
 **一次性配置：**
 
@@ -306,8 +314,8 @@ pnpm dev   # http://localhost:4321
    - 构建命令：`node scripts/ensure-git-history.mjs && pnpm build`（保留完整 git 历史供时间线页面使用）
    - 部署命令：`npx wrangler deploy`
 3. Build Variables（构建时注入客户端 bundle，三个 `PUBLIC_*` 变量都要配）
-4. 运行时变量（`wrangler.jsonc` 的 `vars` 或控制台）：`PUBLIC_GITHUB_APP_ID`
-5. 运行时机密：`wrangler secret put GH_PRIVATE_KEY < 私钥.pem`，配置后浏览器端无需导入 `.pem`（服务端代理认证）
+4. 运行时变量（`wrangler.jsonc` 的 `vars` 或控制台）：`PUBLIC_GITHUB_APP_ID`，以及 AI 搜索的 `AI_BASE_URL` / `AI_MODEL`（及可选的 `AI_API_FORMAT` / `AI_AUTH_STYLE`，默认 anthropic + bearer）
+5. 运行时机密：`wrangler secret put GH_PRIVATE_KEY < 私钥.pem`，配置后浏览器端无需导入 `.pem`（服务端代理认证）；AI 搜索密钥用 `wrangler secret put AI_API_KEY`（对应 CC Switch 里那份 Claude 自定义配置的 token）
 
 `public/_headers` 已配置安全响应头与 `/_astro/*` 一年强缓存（等价原 `vercel.json`）。
 

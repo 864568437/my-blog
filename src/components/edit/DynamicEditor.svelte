@@ -46,6 +46,7 @@ interface DynamicItem {
 	source?: "md" | "json"; // 数据来源：md 源不可删文件，删除时需留墓碑
 	_draft?: boolean; // 新建标记：未提交时存在
 	_deleted?: boolean; // 删除标记：提交前软删除
+	_uid?: string; // 行标识：仅存在于内存，供 keyed each 使用，不写入 JSON
 }
 
 // ====== 状态 ======
@@ -101,6 +102,32 @@ function buildFrontmatter(item: DynamicItem): string {
 }
 
 /**
+ * 为条目补上行标识 _uid。
+ * keyed each 不能用 id 做 key：仓库里一旦存在重复 id（旧 id 生成缺陷的
+ * 产物），Svelte 会抛 each_key_duplicate，整个编辑列表连删除按钮一起消失。
+ * _uid 由本地生成、提交前被 cleanItems 剥离，因此不影响 dynamic.json。
+ */
+function withRowKey(item: DynamicItem): DynamicItem {
+	return item._uid ? item : { ...item, _uid: genId("row") };
+}
+
+/**
+ * 生成新动态的 id。
+ * ⚠️ genId() 的唯一性来自「毫秒时间戳 + 随机串」，截断即失效：
+ *    旧实现 genId().slice(0, 8) 只留下 "id-" 加时间戳前 5 位，该前缀约
+ *    28 小时才变一次，于是同一天新增的动态全部撞成同一个 id
+ *    （dynamic.json 里已出现两条 2026-09-11-id-17890）。
+ *    重复 id 会连带污染删除墓碑与前台锚点，故这里不截断并做去重兜底。
+ */
+function makeDynamicId(dateStr: string, taken: Set<string>): string {
+	let id = `${dateStr}-${genId("dyn")}`;
+	while (taken.has(id)) {
+		id = `${dateStr}-${genId("dyn")}`;
+	}
+	return id;
+}
+
+/**
  * 动态列表排序：置顶优先，按发布时间倒序。
  * 与 src/utils/dynamic-utils.ts 中 sortDynamics 行为保持一致。
  */
@@ -123,7 +150,7 @@ function sortDynamics(items: DynamicItem[]): DynamicItem[] {
  */
 /**
  * 提交/草稿共用的净化工件。
- * - 正常条目：剥离 _draft 标记后保留
+ * - 正常条目：剥离 _draft / _uid 等内部标记后保留
  * - 已删除条目：json 源直接移除（条目只存在于 json，移除即彻底删除）；
  *   md 源不可删文件，转为最小墓碑（仅 id + published + _deleted），
  *   API 渲染时据此隐藏对应的 markdown 条目
@@ -133,6 +160,7 @@ function cleanItems(items: DynamicItem[]): DynamicItem[] {
 		if (!d._deleted) {
 			const copy: DynamicItem = { ...d };
 			delete copy._draft;
+			delete copy._uid;
 			return [copy];
 		}
 		if (d.source === "md") {
@@ -158,7 +186,7 @@ const drafts = setupRepoDrafts({
 	getContent: () => JSON.stringify(cleanItems(dynamics), null, 2),
 	setContent: (v) => {
 		try {
-			dynamics = JSON.parse(v);
+			dynamics = JSON.parse(v).map(withRowKey);
 		} catch {
 			dynamics = [];
 		}
@@ -166,7 +194,10 @@ const drafts = setupRepoDrafts({
 	getPath: () => "src/content/dynamic.json",
 	getSha: () => fileSha,
 	setSha: (v) => (fileSha = v),
-	getOriginalContent: () => JSON.stringify(originalDynamics, null, 2),
+	// 两侧都过一遍 cleanItems，口径一致才不会因内部标记（_uid 等）
+	// 产生「刚加载就有未保存修改」的假差异
+	getOriginalContent: () =>
+		JSON.stringify(cleanItems(originalDynamics), null, 2),
 	setOriginalContent: (v) => {
 		try {
 			originalDynamics = JSON.parse(v);
@@ -279,7 +310,7 @@ async function loadDynamics() {
 			}
 		} catch {}
 	}
-	dynamics = sortDynamics(items);
+	dynamics = sortDynamics(items.map(withRowKey));
 	originalDynamics = deepClone(dynamics);
 	initialLoaded = true;
 	repoLoaded = true;
@@ -348,7 +379,9 @@ function cancelEdit() {
 	if (hasChanges && !confirm("你有未保存的更改，确定要取消吗？")) {
 		return;
 	}
-	dynamics = deepClone(originalDynamics);
+	// 回滚快照可能来自 setOriginalContent（已被 cleanItems 剥掉 _uid），
+	// 补齐后才能继续作为 keyed each 的 key
+	dynamics = deepClone(originalDynamics).map(withRowKey);
 	editingIndex = -1;
 	editPreview = "";
 	editMode = false;
@@ -356,7 +389,8 @@ function cancelEdit() {
 
 /**
  * 新增一条动态：
- *  - id 使用 yyyy-mm-dd-<random> 格式（与动态 markdown 命名习惯一致）；
+ *  - id 使用 yyyy-mm-dd-<unique> 格式（与动态 markdown 命名习惯一致），
+ *    唯一性由 makeDynamicId 保证——同一天连续新增不会撞 id；
  *  - author/avatar 默认取自 profileConfig；
  *  - 标记 _draft=true，submit 阶段会被实际写入；
  *  - 插入后立即展开该条目进入编辑态。
@@ -364,8 +398,8 @@ function cancelEdit() {
 function startAdd() {
 	const now = new Date();
 	const dateStr = now.toISOString().split("T")[0];
-	const newItem: DynamicItem = {
-		id: `${dateStr}-${genId().slice(0, 8)}`,
+	const newItem: DynamicItem = withRowKey({
+		id: makeDynamicId(dateStr, new Set(dynamics.map((d) => d.id))),
 		published: now.toISOString(),
 		pinned: false,
 		tags: [],
@@ -375,9 +409,11 @@ function startAdd() {
 		avatar: profileConfig.avatar || "",
 		body: "",
 		_draft: true,
-	};
+	});
 	dynamics = sortDynamics([newItem, ...dynamics]);
-	editingIndex = dynamics.findIndex((d) => d.id === newItem.id);
+	// 用 _uid 定位而非 id：即便仓库里存在同 id 的历史脏数据，
+	// 展开的也一定是刚新增的这一条
+	editingIndex = dynamics.findIndex((d) => d._uid === newItem._uid);
 	updatePreview(newItem.body);
 	tagsInput = "";
 }
@@ -424,7 +460,8 @@ async function submitChanges() {
 			showToast("提交成功！页面稍后将刷新", "success");
 			const cleaned = cleanItems(dynamics);
 			originalDynamics = deepClone(cleaned);
-			dynamics = deepClone(cleaned);
+			// cleaned 已无 _uid，回填时补齐（刷新前的这 1.5s 列表仍要能渲染）
+			dynamics = deepClone(cleaned).map(withRowKey);
 			editingIndex = -1;
 			setTimeout(() => window.location.reload(), 1500);
 		} else {
@@ -511,10 +548,12 @@ function formatDate(dateStr: string): string {
 	{#if editMode}
 		<div class="dynamic-edit-list">
 			<!--
-			  列表：使用 (item.id) 作为 keyed 标识，确保新增/删除时
+			  列表：使用 (item._uid) 作为 keyed 标识，确保新增/删除时
 			  Svelte 能正确复用 DOM。已删除项通过 {#if !item._deleted} 过滤。
+			  key 不能用 item.id：脏数据里的重复 id 会触发
+			  each_key_duplicate，整个列表（含删除按钮）都渲染不出来。
 			-->
-			{#each dynamics as item, index (item.id)}
+			{#each dynamics as item, index (item._uid)}
 				{#if !item._deleted}
 					<div class="dynamic-edit-item" class:dynamic-edit-item--expanded={editingIndex === index}>
 						<!-- 标题行：点击切换展开/折叠 -->

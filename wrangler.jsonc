@@ -8,17 +8,26 @@
     "binding": "ASSETS",
     // 未命中资源时返回 Astro 生成的 404 页面
     "not_found_handling": "404-page",
-    // /api/github* 永远先走 Worker：dist/api/github 是 Astro 构建时预渲染的死文件，
-    // 不能让它拦截代理请求
-    "run_worker_first": ["/api/github*"]
+    // /api/github*、/api/ai-chat* 永远先走 Worker：dist/api/* 是 Astro 构建时
+    // 预渲染的死文件，不能让它们拦截代理请求
+    "run_worker_first": ["/api/github*", "/api/ai-chat*"]
   },
   "vars": {
     // 在线编辑目标仓库（公开值；构建时也会注入客户端 bundle）
     "PUBLIC_GITHUB_OWNER": "864568437",
     "PUBLIC_GITHUB_REPO": "my-blog",
     // GitHub App ID（数字，App 设置页可见）——部署前必填，填错会导致在线编辑无法认证
-    "PUBLIC_GITHUB_APP_ID": "4899171"
-    // GH_PRIVATE_KEY 是机密，不要写在这里：
-    // 用 `wrangler secret put GH_PRIVATE_KEY < 私钥.pem` 或控制台 Settings → Variables 添加
+    "PUBLIC_GITHUB_APP_ID": "4899171",
+    // ===== AI 对话代理（对应 CC Switch 的 Claude 自定义配置）=====
+    // AI_BASE_URL 填 root，不要带 /v1（SDK 会自己拼 /v1/messages）
+    "AI_BASE_URL": "",
+    "AI_MODEL": "",
+    // anthropic（默认）| openai
+    "AI_API_FORMAT": "anthropic",
+    // bearer（默认，对应 ANTHROPIC_AUTH_TOKEN）| x-api-key（对应 ANTHROPIC_API_KEY）
+    "AI_AUTH_STYLE": "bearer"
+    // GH_PRIVATE_KEY / AI_API_KEY 是机密，不要写在这里：
+    // 用 `wrangler secret put GH_PRIVATE_KEY < 私钥.pem`
+    // 用 `wrangler secret put AI_API_KEY`（或控制台 Settings → Variables 添加）
   }
 }
