@@ -2,7 +2,8 @@ import type { CommentConfig } from "../types/config";
 
 export const commentConfig: CommentConfig = {
 	// 评论系统类型: none, twikoo, waline, giscus, disqus, artalk，默认为none，即不启用评论系统
-	type: "waline",
+	// 暂时关闭：等 Waline 后端（waline.fqzlr.com）重新部署完成后改回 "waline"
+	type: "none",
 
 	//twikoo评论系统配置
 	twikoo: {
