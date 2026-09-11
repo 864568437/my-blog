@@ -6,7 +6,7 @@
   // KV 存储：友链/笔记本/规划的实时数据（首次使用需
   // `npx wrangler kv namespace create BLOG_KV` 并把输出的 id 填到下面）
   "kv_namespaces": [
-    { "binding": "BLOG_KV", "id": "1bfbb988c4a847c9ac9787d293f00eda" }
+    { "binding": "KV", "id": "1bfbb988c4a847c9ac9787d293f00eda" }
   ],
   "assets": {
     "directory": "./dist",
