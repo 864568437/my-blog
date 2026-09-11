@@ -67,14 +67,15 @@ async function getCached(type, env, force = false) {
 
 /**
  * 验证 Bearer token 是本博客 GitHub App（xiaozhu-blog）签发的 installation token，
- * 且对目标仓库可用。结果缓存 5 分钟，避免每次写都打 GitHub。
+ * 且覆盖目标仓库。结果缓存 5 分钟，避免每次写都打 GitHub。
  *
- * 为什么不能查 GET /repos 的 permissions.push：installation token 不代表协作者，
- * 即使 App 已授予 Contents 读写权限，permissions.push 也恒为 false
- * （见 github.com/orgs/community/discussions/158869），导致写鉴权永远失败。
- * 改用两步组合验证：
- *   1) GET /user            → token 有效，且身份是本 App 的 bot（{slug}[bot]）
- *   2) GET /repos/{o}/{r}   → installation 覆盖目标仓库（请求可达）
+ * 为什么不能用这两个端点（都实测踩坑）：
+ *   - GET /repos/{o}/{r} 的 permissions.push：installation token 非协作者，恒为
+ *     false（github.com/orgs/community/discussions/158869），写鉴权永远失败；
+ *   - GET /user：App 未申请 user 权限时返回 403 Resource not accessible by
+ *     integration（本 App 就没申请），不能用作验证。
+ * 正确方案：GET /installation/repositories 是 installation token 的专用端点，
+ * token 无效直接 401；有效则返回该 installation 覆盖的仓库列表，核对目标仓库在列即可。
  */
 async function verifyWriteToken(env, token) {
 	const cached = tokenCache.get(token);
@@ -82,34 +83,30 @@ async function verifyWriteToken(env, token) {
 
 	const owner = env?.PUBLIC_GITHUB_OWNER || "fqzlr";
 	const repo = env?.PUBLIC_GITHUB_REPO || "my-blog";
-	const expectedBot = env?.PUBLIC_GITHUB_APP_BOT || "xiaozhu-blog[bot]";
-	const ghHeaders = {
-		Accept: "application/vnd.github+json",
-		"X-GitHub-Api-Version": "2022-11-28",
-		"User-Agent": "Blog-KV-Proxy",
-	};
 	let result = { ok: false, ownerLogin: "" };
 	try {
-		// 1. token 有效 + bot 身份属于本 App（App 为私有，只有站长可创建 installation）
-		const userResp = await fetch("https://api.github.com/user", {
-			headers: { Authorization: `Bearer ${token}`, ...ghHeaders },
-		});
-		if (userResp.ok) {
-			const user = await userResp.json();
-			if (user?.login === expectedBot) {
-				// 2. installation 能访问目标仓库
-				const repoResp = await fetch(
-					`https://api.github.com/repos/${owner}/${repo}`,
-					{ headers: { Authorization: `Bearer ${token}`, ...ghHeaders } },
-				);
-				if (repoResp.ok) {
-					const data = await repoResp.json();
-					result = {
-						ok: true,
-						ownerLogin: data?.owner?.login || owner,
-						expiry: Date.now() + TOKEN_CACHE_MS,
-					};
-				}
+		const resp = await fetch(
+			"https://api.github.com/installation/repositories",
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+					Accept: "application/vnd.github+json",
+					"X-GitHub-Api-Version": "2022-11-28",
+					"User-Agent": "Blog-KV-Proxy",
+				},
+			},
+		);
+		if (resp.ok) {
+			const data = await resp.json();
+			const target = (data?.repositories || []).find(
+				(r) => r?.full_name === `${owner}/${repo}`,
+			);
+			if (target) {
+				result = {
+					ok: true,
+					ownerLogin: target.owner?.login || owner,
+					expiry: Date.now() + TOKEN_CACHE_MS,
+				};
 			}
 		}
 	} catch {
