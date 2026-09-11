@@ -64,8 +64,9 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 		},
 		{
 			// 组件类型：编辑按钮
+			// 暂时下线：在线编辑（GitHub API 代理）暂停使用，需要时改回 enable: true
 			type: "editPostButton",
-			enable: true,
+			enable: false,
 			position: "sticky",
 			showOnPostPage: true,
 			showOnNonPostPage: true,
