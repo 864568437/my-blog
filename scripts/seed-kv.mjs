@@ -21,12 +21,12 @@ const local = process.argv.includes("--local");
 // 读取 wrangler.jsonc 中的 namespace id（jsonc 有注释，简单提取）
 import { readFileSync } from "node:fs";
 const wranglerText = readFileSync(resolve(ROOT, "wrangler.jsonc"), "utf-8");
-const idMatch = wranglerText.match(/"binding":\s*"BLOG_KV",\s*"id":\s*"([^"]+)"/);
+const idMatch = wranglerText.match(/"binding":\s*"KV",\s*"id":\s*"([^"]+)"/);
 const namespaceId = idMatch?.[1];
 if (!namespaceId || namespaceId === "PLACEHOLDER_CREATE_KV_NAMESPACE") {
 	console.error(
-		"❌ wrangler.jsonc 里 BLOG_KV 的 id 还是占位符。\n" +
-			"   先运行: npx wrangler kv namespace create BLOG_KV\n" +
+		"❌ wrangler.jsonc 里 KV 的 id 还是占位符。\n" +
+			"   先运行: npx wrangler kv namespace create KV\n" +
 			"   再把输出的 id 填进 wrangler.jsonc",
 	);
 	process.exit(1);

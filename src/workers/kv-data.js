@@ -37,9 +37,9 @@ const tokenCache = new Map(); // token → { ok, ownerLogin, expiry }
 /* ========== 读取 ========== */
 
 async function readFromKv(env, type) {
-	if (!env?.BLOG_KV) return null;
+	if (!env?.KV) return null;
 	try {
-		const raw = await env.BLOG_KV.get(KV_PREFIX + type);
+		const raw = await env.KV.get(KV_PREFIX + type);
 		if (!raw) return null;
 		return JSON.parse(raw);
 	} catch {
@@ -228,7 +228,7 @@ export async function handleDataApi(request, env) {
 			updatedBy: verified.ownerLogin,
 		};
 		try {
-			await env.BLOG_KV.put(KV_PREFIX + type, JSON.stringify(record));
+			await env.KV.put(KV_PREFIX + type, JSON.stringify(record));
 		} catch (e) {
 			return jsonResponse(
 				{ error: "KV 写入失败", message: e?.message || String(e) },

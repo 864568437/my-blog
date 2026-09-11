@@ -1038,11 +1038,14 @@ html.is-page-transitioning .banner-home-text-overlay {
     grid-template-columns: 1fr !important;
 }
 
-/* 首页隐藏 Banner 相关元素 */
-.lg\:is-home #wallpaper-wrapper,
-.lg\:is-home #banner-overlay-container,
-.lg\:is-home #banner-dim-container {
-    display: none !important;
+/* 首页隐藏 Banner 相关元素（仅桌面：移动端首页无影像揭示层，壁纸需正常显示，
+   否则被此处的 !important 压制 JS 设置的 display:block 而整页无背景） */
+@media (min-width: 769px) {
+    .lg\:is-home #wallpaper-wrapper,
+    .lg\:is-home #banner-overlay-container,
+    .lg\:is-home #banner-dim-container {
+        display: none !important;
+    }
 }
 
 /* 首页主内容区不需要偏移 */
