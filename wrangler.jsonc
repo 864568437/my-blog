@@ -24,6 +24,8 @@
     "PUBLIC_GITHUB_REPO": "my-blog",
     // GitHub App ID（数字，App 设置页可见）——部署前必填，填错会导致在线编辑无法认证
     "PUBLIC_GITHUB_APP_ID": "4899171",
+    // App 的 bot 登录名（{slug}[bot]）——KV 写鉴权用它核对 token 归属（见 kv-data.js）
+    "PUBLIC_GITHUB_APP_BOT": "xiaozhu-blog[bot]",
     // ===== AI 对话代理（newapi 网关 ps.air-outer.com，与 agentrouter.org 同站点）=====
     // base URL 填 root 不带 /v1（SDK 自己拼 /v1/messages）；
     // Bearer 鉴权（AI_API_KEY secret，在网关控制台获取）

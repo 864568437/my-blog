@@ -17,12 +17,12 @@
  *   - KV 是唯一活跃数据源，last-write-wins，无版本控制；
  *   - TS 配置文件冻结，仅作构建期 SSR 兜底与种子；
  *   - 读 30s 内存缓存（KV 边缘最终一致 ≤60s，30s 缓存不损新鲜度）；
- *   - 写鉴权：installation token 对目标仓库有 push 权限；
+ *   - 写鉴权：installation token 属于本 App 的 bot 且覆盖目标仓库（见 verifyWriteToken）；
  *   - 不做乐观锁/限流（个人博客，token 验证即门槛）。
  */
 
-import { corsHeaders, jsonResponse } from "./http-utils.js";
 import { getInstallationTokenServer } from "./github-proxy.js";
+import { corsHeaders, jsonResponse } from "./http-utils.js";
 
 const TYPES = ["friends", "notebooks", "routines", "projects"];
 const KV_PREFIX = "data:";
@@ -66,9 +66,15 @@ async function getCached(type, env, force = false) {
 /* ========== 写入鉴权 ========== */
 
 /**
- * 验证 Bearer token 对目标仓库有 push 权限。
- * 用 GET /repos/{owner}/{repo}：一次调用同时验证 token 有效性 + 权限。
- * 结果缓存 5 分钟，避免每次写都打 GitHub。
+ * 验证 Bearer token 是本博客 GitHub App（xiaozhu-blog）签发的 installation token，
+ * 且对目标仓库可用。结果缓存 5 分钟，避免每次写都打 GitHub。
+ *
+ * 为什么不能查 GET /repos 的 permissions.push：installation token 不代表协作者，
+ * 即使 App 已授予 Contents 读写权限，permissions.push 也恒为 false
+ * （见 github.com/orgs/community/discussions/158869），导致写鉴权永远失败。
+ * 改用两步组合验证：
+ *   1) GET /user            → token 有效，且身份是本 App 的 bot（{slug}[bot]）
+ *   2) GET /repos/{o}/{r}   → installation 覆盖目标仓库（请求可达）
  */
 async function verifyWriteToken(env, token) {
 	const cached = tokenCache.get(token);
@@ -76,24 +82,34 @@ async function verifyWriteToken(env, token) {
 
 	const owner = env?.PUBLIC_GITHUB_OWNER || "fqzlr";
 	const repo = env?.PUBLIC_GITHUB_REPO || "my-blog";
+	const expectedBot = env?.PUBLIC_GITHUB_APP_BOT || "xiaozhu-blog[bot]";
+	const ghHeaders = {
+		Accept: "application/vnd.github+json",
+		"X-GitHub-Api-Version": "2022-11-28",
+		"User-Agent": "Blog-KV-Proxy",
+	};
 	let result = { ok: false, ownerLogin: "" };
 	try {
-		const resp = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
-			headers: {
-				Authorization: `Bearer ${token}`,
-				Accept: "application/vnd.github+json",
-				"X-GitHub-Api-Version": "2022-11-28",
-				"User-Agent": "Blog-KV-Proxy",
-			},
+		// 1. token 有效 + bot 身份属于本 App（App 为私有，只有站长可创建 installation）
+		const userResp = await fetch("https://api.github.com/user", {
+			headers: { Authorization: `Bearer ${token}`, ...ghHeaders },
 		});
-		if (resp.ok) {
-			const data = await resp.json();
-			if (data?.permissions?.push) {
-				result = {
-					ok: true,
-					ownerLogin: data?.owner?.login || owner,
-					expiry: Date.now() + TOKEN_CACHE_MS,
-				};
+		if (userResp.ok) {
+			const user = await userResp.json();
+			if (user?.login === expectedBot) {
+				// 2. installation 能访问目标仓库
+				const repoResp = await fetch(
+					`https://api.github.com/repos/${owner}/${repo}`,
+					{ headers: { Authorization: `Bearer ${token}`, ...ghHeaders } },
+				);
+				if (repoResp.ok) {
+					const data = await repoResp.json();
+					result = {
+						ok: true,
+						ownerLogin: data?.owner?.login || owner,
+						expiry: Date.now() + TOKEN_CACHE_MS,
+					};
+				}
 			}
 		}
 	} catch {

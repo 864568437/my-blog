@@ -886,7 +886,8 @@ export function deleteDraft(pageKey: string): void {
 	clearDraftsByPage(pageKey);
 }
 
-type SubmitHandler = (change: DraftChange, token: string) => Promise<boolean>;
+// server-auth 模式下代理自动附加 token，handler 收到的 token 可能为 null
+type SubmitHandler = (change: DraftChange, token: string | null) => Promise<boolean>;
 
 const submitHandlers = new Map<string, SubmitHandler>();
 
@@ -903,8 +904,10 @@ export async function submitAllDrafts(): Promise<{
 	errors: string[];
 	submittedPageKeys: Set<string>;
 }> {
+	// server-auth 模式下 getAuthToken() 按约定返回 null（代理自动附加 token），
+	// 所以这里用 hasValidToken() 判断能否提交，而不是检查 token 是否非空
 	const token = await getAuthToken();
-	if (!token) {
+	if (!hasValidToken()) {
 		return {
 			success: 0,
 			failed: 0,
