@@ -1,12 +1,7 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import { setupKvDrafts } from "@/utils/draftHelpers";
-import {
-	deepClone,
-	ensureIconify,
-	genId,
-	showToast,
-} from "@/utils/editMode";
+import { deepClone, ensureIconify, genId, showToast } from "@/utils/editMode";
 import { fetchKvData } from "@/utils/kvData";
 
 interface NotebookFolder {
@@ -242,6 +237,27 @@ function handleCancel() {
 	editingNoteIndex = -1;
 	drafts.clearDrafts();
 	showSSRContent();
+	notifyModeChange();
+}
+
+/** 通知侧边栏按钮（EditPostButton 监听 edit:modeChange 同步编辑态 UI） */
+function notifyModeChange() {
+	window.dispatchEvent(
+		new CustomEvent("edit:modeChange", {
+			detail: { editing: editMode, pageKey },
+		}),
+	);
+}
+
+/** 提交成功后退出编辑模式：恢复 SSR 显示 + 同步侧边栏按钮状态 */
+function exitEditModeAfterSubmit() {
+	editMode = false;
+	editingFolderIndex = -1;
+	editingNoteIndex = -1;
+	modalFolderItem = null;
+	modalNoteItem = null;
+	showSSRContent();
+	notifyModeChange();
 }
 
 function slugify(text: string): string {
@@ -513,7 +529,8 @@ async function handleSubmit() {
 		folders = cleanFolders;
 		notes = cleanNotes;
 		drafts.saveToDrafts();
-		await drafts.submitDrafts();
+		const ok = await drafts.submitDrafts();
+		if (ok) exitEditModeAfterSubmit();
 	} catch (err) {
 		showToast("保存出错：" + (err as Error).message, "error");
 		console.error(err);

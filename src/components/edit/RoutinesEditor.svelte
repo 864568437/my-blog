@@ -241,6 +241,24 @@ function handleCancel() {
 	editingIndex = -1;
 	drafts.clearDrafts();
 	showSSRContent();
+	notifyModeChange();
+}
+
+/** 通知侧边栏按钮（EditPostButton 监听 edit:modeChange 同步编辑态 UI） */
+function notifyModeChange() {
+	window.dispatchEvent(
+		new CustomEvent("edit:modeChange", {
+			detail: { editing: editMode, pageKey },
+		}),
+	);
+}
+
+/** 提交成功后退出编辑模式：恢复 SSR 显示 + 同步侧边栏按钮状态 */
+function exitEditModeAfterSubmit() {
+	editMode = false;
+	editingIndex = -1;
+	showSSRContent();
+	notifyModeChange();
 }
 
 function startEdit(index: number) {
@@ -389,7 +407,8 @@ async function handleSubmit() {
 		}));
 		routines = cleanData;
 		drafts.saveToDrafts();
-		await drafts.submitDrafts();
+		const ok = await drafts.submitDrafts();
+		if (ok) exitEditModeAfterSubmit();
 	} catch (err) {
 		showToast("保存出错：" + (err as Error).message, "error");
 		console.error(err);

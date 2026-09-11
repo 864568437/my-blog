@@ -1,13 +1,8 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import { setupKvDrafts } from "@/utils/draftHelpers";
+import { deepClone, ensureIconify, genId, showToast } from "@/utils/editMode";
 import { fetchKvData } from "@/utils/kvData";
-import {
-	deepClone,
-	ensureIconify,
-	genId,
-	showToast,
-} from "@/utils/editMode";
 
 interface DaohangItem {
 	id: string;
@@ -82,7 +77,6 @@ function collectionItemId(item: {
 	}
 	return `pj-${(h >>> 0).toString(36)}`;
 }
-
 
 // KV 实时数据：提交直接写 Cloudflare KV（/api/data/projects），秒级生效。
 // KV 统一存打平条目（含 category 字段），页面与编辑器各自按需分组
@@ -339,6 +333,25 @@ function handleCancel() {
 	editingIndex = -1;
 	activeTab = "all";
 	showSSRGrid();
+	notifyModeChange();
+}
+
+/** 通知侧边栏按钮（EditPostButton 监听 edit:modeChange 同步编辑态 UI） */
+function notifyModeChange() {
+	window.dispatchEvent(
+		new CustomEvent("edit:modeChange", {
+			detail: { editing: editMode, pageKey },
+		}),
+	);
+}
+
+/** 提交成功后退出编辑模式：恢复 SSR 显示 + 同步侧边栏按钮状态 */
+function exitEditModeAfterSubmit() {
+	editMode = false;
+	editingIndex = -1;
+	activeTab = "all";
+	showSSRGrid();
+	notifyModeChange();
 }
 
 function switchTab(tab: string) {
@@ -477,7 +490,8 @@ async function handleSubmit() {
 		}));
 		items = cleanData;
 		drafts.saveToDrafts();
-		await drafts.submitDrafts();
+		const ok = await drafts.submitDrafts();
+		if (ok) exitEditModeAfterSubmit();
 	} catch (err) {
 		showToast("保存出错：" + (err as Error).message, "error");
 		console.error(err);

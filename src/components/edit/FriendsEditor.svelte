@@ -199,7 +199,27 @@ function handleCancel() {
 	friends = deepClone(originalFriends);
 	drafts.clearDrafts();
 	editingIndex = -1;
+	selectedIds = new Set();
 	showSSRGrid();
+	notifyModeChange();
+}
+
+/** 通知侧边栏按钮（EditPostButton 监听 edit:modeChange 同步编辑态 UI） */
+function notifyModeChange() {
+	window.dispatchEvent(
+		new CustomEvent("edit:modeChange", {
+			detail: { editing: editMode, pageKey: "friends" },
+		}),
+	);
+}
+
+/** 提交成功后退出编辑模式：恢复 SSR 显示 + 同步侧边栏按钮状态 */
+function exitEditModeAfterSubmit() {
+	editMode = false;
+	editingIndex = -1;
+	selectedIds = new Set();
+	showSSRGrid();
+	notifyModeChange();
 }
 
 function moveUp(index: number) {
@@ -355,7 +375,8 @@ async function handleSubmit() {
 		}
 		friends = cleanData;
 		drafts.saveToDrafts();
-		await drafts.submitDrafts();
+		const ok = await drafts.submitDrafts();
+		if (ok) exitEditModeAfterSubmit();
 	} finally {
 		saving = false;
 	}
