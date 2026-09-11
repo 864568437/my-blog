@@ -336,6 +336,19 @@ const runtimeConfig = {
 	/>
 </div>
 
+<!-- 移动端首页文字层：HomeBlinds 仅桌面激活，移动端由本层居中展示职业 / 博客名 / 签名 -->
+{
+	heroEnabled && hero && (
+		<section class="home-mobile-hero" aria-label="站点名称与签名">
+			{hero.occupation && (
+				<p class="home-mobile-hero__occupation">{hero.occupation}</p>
+			)}
+			<h2 class="home-mobile-hero__name">{hero.displayName}</h2>
+			{hero.bio && <p class="home-mobile-hero__bio">{hero.bio}</p>}
+		</section>
+	)
+}
+
 <script>
 	import {
 		bootHomeBlinds,
