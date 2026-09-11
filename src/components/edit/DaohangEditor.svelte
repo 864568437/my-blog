@@ -1,12 +1,11 @@
 <script lang="ts">
 import { onMount } from "svelte";
-import { setupRepoDrafts } from "@/utils/draftHelpers";
+import { setupKvDrafts } from "@/utils/draftHelpers";
+import { fetchKvData } from "@/utils/kvData";
 import {
 	deepClone,
 	ensureIconify,
 	genId,
-	getRepoFile,
-	hasValidToken,
 	showToast,
 } from "@/utils/editMode";
 
@@ -63,263 +62,13 @@ let items = $state<any[]>([]);
 let originalItems = $state<any[]>([]);
 let editingIndex = $state(-1);
 let activeTab = $state("all");
-let fileSha = $state<string | null>(null);
 let repoLoaded = $state(false);
-let originalTS = $state<string>("");
 
 const pageKey = $derived(propPageKey);
 const pageName = $derived(
 	customPageName || (propPageKey === "projects" ? "网站导航" : "导航"),
 );
 const isCollectionApi = $derived(propPageKey === "projects");
-const configFilePath = $derived(
-	isCollectionApi
-		? "src/config/projectsConfig.ts"
-		: "src/config/daohangConfig.ts",
-);
-
-function stripLineComments(code: string): string {
-	const lines = code.split("\n");
-	return lines
-		.map((line) => {
-			let inStr = false;
-			let quotes = 0;
-			for (let i = 0; i < line.length - 1; i++) {
-				if (line[i] === '"' && (i === 0 || line[i - 1] !== "\\")) {
-					inStr = !inStr;
-					quotes++;
-				}
-				if (!inStr && line[i] === "/" && line[i + 1] === "/") {
-					if (quotes % 2 === 0) {
-						return line.substring(0, i);
-					}
-				}
-			}
-			return line;
-		})
-		.join("\n");
-}
-
-function parseArrayFromTS(tsContent: string, startMarker: string): any[] {
-	tsContent = tsContent.replace(/\r\n/g, "\n");
-	const startIdx = tsContent.indexOf(startMarker);
-	if (startIdx === -1) return [];
-	// marker 以 "[" 结尾（数组开括号）。不能用 indexOf("[") 向后搜索，
-	// 会命中类型注解 DaohangItem[] 的括号导致解析出空数组
-	let bracketStart = startIdx + startMarker.length - 1;
-	let depth = 1;
-	let idx = bracketStart + 1;
-	while (idx < tsContent.length && depth > 0) {
-		if (tsContent[idx] === "[") depth++;
-		else if (tsContent[idx] === "]") depth--;
-		if (depth > 0) idx++;
-	}
-	let arrayStr = tsContent.substring(bracketStart + 1, idx).trim();
-	arrayStr = stripLineComments(arrayStr);
-	arrayStr = arrayStr.replace(/,(\s*[\]}])/g, "$1");
-	arrayStr = arrayStr.replace(/,(\s*)$/, "$1");
-	arrayStr = arrayStr.replace(/^(\s*)(\w+)\s*:/gm, '$1"$2":');
-	try {
-		return JSON.parse(`[${arrayStr}]`);
-	} catch (e) {
-		console.error("Failed to parse array from TS:", e);
-		return [];
-	}
-}
-
-function parseDaohangFromTS(tsContent: string): DaohangItem[] {
-	const items = parseArrayFromTS(
-		tsContent,
-		"export const daohangConfig: DaohangItem[] = [",
-	);
-	return items.map((item: any, index: number) => ({
-		id: item.id || `dh-${index}`,
-		name: item.name || "",
-		url: item.url || "",
-		description: item.description || "",
-		category: item.category || "未分类",
-		icon: item.icon || "",
-		tags: Array.isArray(item.tags) ? item.tags : [],
-		color: item.color || "",
-		image: item.image || "",
-		featured: !!item.featured,
-		order: typeof item.order === "number" ? item.order : index * 10,
-		enabled: item.enabled !== false,
-	}));
-}
-
-function buildDaohangObject(item: DaohangItem): string {
-	const obj: any = {
-		id: item.id,
-		name: item.name,
-		url: item.url,
-		icon: item.icon,
-		description: item.description,
-		category: item.category,
-		tags: item.tags,
-		color: item.color,
-	};
-	if (item.image) obj.image = item.image;
-	obj.featured = item.featured;
-	obj.order = item.order;
-	obj.enabled = item.enabled !== false;
-
-	const json = JSON.stringify(obj, null, 2)
-		.split("\n")
-		.map((line, i, arr) =>
-			i === arr.length - 1 ? `\t\t${line},` : `\t\t${line}`,
-		)
-		.join("\n");
-	return json;
-}
-
-function replaceArrayInTS(
-	originalContent: string,
-	startMarker: string,
-	newArrayContent: string,
-): string {
-	const startIdx = originalContent.indexOf(startMarker);
-	if (startIdx === -1) return originalContent;
-	// 同 parseArrayFromTS：marker 以 "[" 结尾，避免 indexOf 命中类型注解括号
-	let bracketStart = startIdx + startMarker.length - 1;
-	let depth = 1;
-	let idx = bracketStart + 1;
-	while (idx < originalContent.length && depth > 0) {
-		if (originalContent[idx] === "[") depth++;
-		else if (originalContent[idx] === "]") depth--;
-		if (depth > 0) idx++;
-	}
-	return (
-		originalContent.substring(0, bracketStart + 1) +
-		"\n" +
-		newArrayContent +
-		"\n\t]" +
-		originalContent.substring(idx + 1)
-	);
-}
-
-function buildDaohangConfigTS(
-	daohangList: DaohangItem[],
-	originalContent?: string,
-): string {
-	const daohangEntries = daohangList.map((m) => buildDaohangObject(m));
-	const daohangArrayContent = daohangEntries.join("\n");
-
-	if (originalContent) {
-		let result = originalContent;
-		result = replaceArrayInTS(
-			result,
-			"export const daohangConfig: DaohangItem[] = [",
-			daohangArrayContent,
-		);
-		return result;
-	}
-
-	return `export interface DaohangItem {
-	id: string;
-	name: string;
-	url: string;
-	icon: string;
-	description: string;
-	category: string;
-	tags: string[];
-	color: string;
-	image?: string;
-	featured: boolean;
-	order: number;
-	enabled?: boolean;
-}
-
-export interface DaohangPageConfig {
-	title?: string;
-	description?: string;
-	showComment?: boolean;
-}
-
-export const daohangPageConfig: DaohangPageConfig = {
-	title: "网站导航",
-	description: "收录个人网站、常用工具和收藏网站",
-	showComment: false,
-};
-
-export const daohangConfig: DaohangItem[] = [
-${daohangArrayContent}
-];
-
-export const categoryOrder: Record<string, number> = {
-	"我的网站": 0,
-	"常用网站": 1,
-	"资源网站": 2,
-	"工具网站": 3,
-	"大佬博客": 4,
-	"学习网站": 5,
-	"设计资源": 6,
-	"开发工具": 7,
-	"学习资源": 8,
-	"AI 工具": 9,
-	"文档": 10,
-	"其他网站": 11,
-};
-
-export const categoryIcons: Record<string, string> = {
-	"我的网站": "material-symbols:person",
-	"常用网站": "material-symbols:star",
-	"资源网站": "material-symbols:folder",
-	"工具网站": "material-symbols:handyman",
-	"大佬博客": "material-symbols:menu-book",
-	"学习网站": "material-symbols:school",
-	"设计资源": "material-symbols:palette-outline",
-	"开发工具": "material-symbols:code-rounded",
-	"学习资源": "material-symbols:school",
-	"AI 工具": "material-symbols:smart-toy-outline",
-	"文档": "material-symbols:description",
-	"其他网站": "material-symbols:link",
-};
-
-export function getAllDaohang(): DaohangItem[] {
-	return [...daohangConfig].sort((a, b) => a.order - b.order);
-}
-
-export function getEnabledDaohang(): DaohangItem[] {
-	return daohangConfig
-		.filter((item) => item.enabled !== false)
-		.sort((a, b) => a.order - b.order);
-}
-
-export function getDaohangByCategory(category: string): DaohangItem[] {
-	return daohangConfig
-		.filter((item) => item.enabled !== false && item.category === category)
-		.sort((a, b) => a.order - b.order);
-}
-
-export function getFeaturedDaohang(): DaohangItem[] {
-	return daohangConfig
-		.filter((item) => item.enabled !== false && item.featured)
-		.sort((a, b) => a.order - b.order);
-}
-
-export function getAllCategories(): string[] {
-	const categories = new Set(daohangConfig.map((item) => item.category));
-	return [...categories].sort(
-		(a, b) => (categoryOrder[a] ?? 99) - (categoryOrder[b] ?? 99),
-	);
-}
-
-export function getEnabledCategories(): string[] {
-	const enabled = daohangConfig.filter((item) => item.enabled !== false);
-	const categories = new Set(enabled.map((item) => item.category));
-	return [...categories].sort(
-		(a, b) => (categoryOrder[a] ?? 99) - (categoryOrder[b] ?? 99),
-	);
-}
-
-export function getCategoryIcon(category: string): string {
-	return categoryIcons[category] || "material-symbols:link";
-}
-`;
-}
-
-// ============ CollectionApi 模式（projects 页面）============
 
 function collectionItemId(item: {
 	name: string;
@@ -334,163 +83,22 @@ function collectionItemId(item: {
 	return `pj-${(h >>> 0).toString(36)}`;
 }
 
-function parseCollectionApiFromTS(tsContent: string): CollectionApiItem[] {
-	const groups = parseArrayFromTS(
-		tsContent,
-		"export const projectsPageConfig: CollectionsApiConfig = {",
-	);
-	const result: CollectionApiItem[] = [];
-	if (
-		groups &&
-		Array.isArray(groups) &&
-		groups[0] &&
-		Array.isArray(groups[0].apis)
-	) {
-		for (const g of groups[0].apis) {
-			const cat = g.category || "未分类";
-			for (const item of g.items || []) {
-				result.push({
-					id: collectionItemId({
-						name: item.name,
-						url: item.url,
-						category: cat,
-					}),
-					name: item.name || "",
-					url: item.url || "",
-					description: item.description || "",
-					icon: item.icon || "",
-					category: cat,
-					enabled: item.enabled !== false,
-				});
-			}
-		}
-	}
-	return result;
-}
 
-function buildCollectionApiObject(item: CollectionApiItem): string {
-	const obj: any = {
-		name: item.name,
-		url: item.url,
-		description: item.description,
-		icon: item.icon,
-		enabled: item.enabled !== false,
-	};
-	const json = JSON.stringify(obj, null, 2)
-		.split("\n")
-		.map((line, i, arr) =>
-			i === arr.length - 1 ? `\t\t\t\t${line},` : `\t\t\t\t${line}`,
-		)
-		.join("\n");
-	return json;
-}
-
-function buildCollectionApiGroupsContent(groups: CollectionApiGroup[]): string {
-	return groups
-		.map((g) => {
-			const itemsContent = g.items
-				.map((it) => buildCollectionApiObject(it))
-				.join("\n");
-			return `\t\t{\n\t\t\tcategory: ${JSON.stringify(g.category)},\n\t\t\titems: [\n${itemsContent}\n\t\t\t],\n\t\t},`;
-		})
-		.join("\n");
-}
-
-function buildCollectionApiConfigTS(
-	apiList: CollectionApiItem[],
-	originalContent?: string,
-): string {
-	// 按 category 分组
-	const groupsMap = new Map<string, CollectionApiItem[]>();
-	for (const item of apiList) {
-		const cat = item.category || "未分类";
-		if (!groupsMap.has(cat)) groupsMap.set(cat, []);
-		groupsMap.get(cat)!.push(item);
-	}
-	const groups: CollectionApiGroup[] = Array.from(groupsMap.entries()).map(
-		([category, items]) => ({ category, items }),
-	);
-	const apisContent = buildCollectionApiGroupsContent(groups);
-
-	if (originalContent) {
-		let result = originalContent;
-		// 替换 apis: [...] 数组的内容
-		const startMarker = "apis: [";
-		const startIdx = result.indexOf(startMarker);
-		if (startIdx !== -1) {
-			const bracketStart = result.indexOf("[", startIdx);
-			if (bracketStart !== -1) {
-				let depth = 1;
-				let idx = bracketStart + 1;
-				while (idx < result.length && depth > 0) {
-					if (result[idx] === "[") depth++;
-					else if (result[idx] === "]") depth--;
-					if (depth > 0) idx++;
-				}
-				result =
-					result.substring(0, bracketStart + 1) +
-					"\n" +
-					apisContent +
-					"\n\t" +
-					result.substring(idx);
-			}
-		}
-		return result;
-	}
-
-	return `import type { CollectionsApiConfig } from "../types/config";
-
-export const projectsPageConfig: CollectionsApiConfig = {
-\ttitle: "网站导航",
-\tdescription: "收录个人网站、常用工具和收藏网站",
-\tapis: [
-${apisContent}
-\t],
-};
-`;
-}
-
-const drafts = setupRepoDrafts({
-	get pageKey() {
-		return pageKey;
+// KV 实时数据：提交直接写 Cloudflare KV（/api/data/projects），秒级生效。
+// KV 统一存打平条目（含 category 字段），页面与编辑器各自按需分组
+const drafts = setupKvDrafts({
+	pageKey,
+	pageName,
+	type: "projects",
+	getContent: () => ({
+		items: items.filter((m) => !m._deleted),
+	}),
+	setContent: (d) => {
+		if (Array.isArray(d.items)) items = d.items as any[];
 	},
-	get pageName() {
-		return pageName;
-	},
-	getContent: () => {
-		const visible = items.filter((m) => !m._deleted) as any[];
-		if (isCollectionApi) {
-			return buildCollectionApiConfigTS(visible, originalTS);
-		}
-		return buildDaohangConfigTS(visible, originalTS);
-	},
-	setContent: (v) => {
-		if (isCollectionApi) {
-			const parsed = parseCollectionApiFromTS(v);
-			if (parsed.length > 0 || v.includes("projectsPageConfig")) {
-				items = parsed as any;
-			}
-		} else {
-			const parsed = parseDaohangFromTS(v);
-			if (parsed.length > 0 || v.includes("daohangConfig")) {
-				items = parsed;
-			}
-		}
-	},
-	getPath: () => configFilePath,
-	getSha: () => fileSha,
-	setSha: (v) => (fileSha = v),
-	getOriginalContent: () => originalTS,
-	setOriginalContent: (v) => (originalTS = v),
-	getCommitMsg: (isEdit) => {
-		const prefix = isCollectionApi ? "projects" : "daohang";
-		const label = isCollectionApi ? "网站导航" : "导航";
-		return isEdit
-			? `chore(${prefix}): 更新${label}`
-			: `chore(${prefix}): 创建${label}配置`;
-	},
-	onSubmitted: () => {
-		setTimeout(() => window.location.reload(), 1200);
+	getOriginalContent: () => ({ items: originalItems }),
+	setOriginalContent: (d) => {
+		if (Array.isArray(d.items)) originalItems = d.items as any[];
 	},
 });
 
@@ -551,7 +159,7 @@ onMount(() => {
 	} else {
 		collectFromDOM();
 	}
-	loadRepoData();
+	loadKvData();
 
 	window.addEventListener("edit:sidebarModeChange", handleSidebarModeChange);
 	window.addEventListener("edit:sidebarSaveDraft", handleSidebarSaveDraft);
@@ -656,33 +264,12 @@ function collectFromDOM() {
 	}
 }
 
-async function loadRepoData() {
-	const existing = await getRepoFile(configFilePath);
-	if (existing && existing.content) {
-		try {
-			originalTS = existing.content;
-			fileSha = existing.sha || null;
-
-			if (isCollectionApi) {
-				const repoItems = parseCollectionApiFromTS(existing.content);
-				if (repoItems.length > 0) {
-					items = repoItems;
-				}
-			} else {
-				const repoItems: DaohangItem[] = parseDaohangFromTS(existing.content);
-				if (repoItems.length > 0) {
-					items = repoItems;
-				}
-			}
-
-			originalItems = deepClone(items);
-		} catch (e) {
-			console.error("Failed to parse repo data:", e);
-		}
-	} else {
-		originalTS = isCollectionApi
-			? buildCollectionApiConfigTS(items as any)
-			: buildDaohangConfigTS(items);
+/** 从 KV 拉取最新导航数据；失败回落 initialItems / collectFromDOM 的收集结果 */
+async function loadKvData() {
+	const data = await fetchKvData<{ items: any[] }>("projects");
+	if (data && Array.isArray(data.items) && data.items.length > 0) {
+		items = data.items;
+		originalItems = deepClone(data.items);
 	}
 	repoLoaded = true;
 	drafts.restoreFromDrafts();
@@ -879,10 +466,6 @@ async function handleSubmit() {
 	if (editingIndex >= 0) {
 		finishEdit(editingIndex);
 		if (editingIndex >= 0) return;
-	}
-	if (!hasValidToken()) {
-		showToast("GitHub 代理未配置，请联系管理员", "warning");
-		return;
 	}
 	saving = true;
 	try {

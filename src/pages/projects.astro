@@ -197,6 +197,144 @@ const enabledApisCount = enabledGroups.reduce(
     </div>
   </div>
 
+  <!-- KV 动态刷新：SSR 兜底 + fetch /api/data/projects 实时更新（失败静默回落） -->
+  <script>
+    /* ========== 客户端动态刷新：从 KV 端点获取最新导航数据，整块重渲染 ==========
+     * SSR 提供首屏（SEO），页面加载后 fetch /api/data/projects 实时更新。
+     * 编辑器提交 KV 后秒级生效（kv:data-updated 同帧重渲染）；fetch 失败回落 SSR。
+     * 数据形状：打平条目（含 category），此处按 category 重新分组渲染。
+     * Tab 切换事件是 document 级委托（下方 is:inline 脚本），对新 DOM 自动生效。
+     */
+    interface KvProjectItem {
+      name: string;
+      url: string;
+      description?: string;
+      icon?: string;
+      enabled?: boolean;
+      category?: string;
+    }
+
+    function escHtml(s: unknown): string {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function hostnameOf(url: string): string {
+      try {
+        return new URL(url).hostname;
+      } catch {
+        return url;
+      }
+    }
+
+    function renderCard(item: KvProjectItem, cat: string, index: number): string {
+      // 现网全部条目的 icon 都是 http URL；非 http（astro-icon 名称）无法在
+      // 客户端复刻构建期 SVG，降级为默认图标
+      const icon = item.icon && item.icon.startsWith("http")
+        ? '<img src="' + escHtml(item.icon) + '" alt="' + escHtml(item.name) + '" loading="lazy" decoding="async" class="w-6 h-6 rounded object-contain shrink-0" />'
+        : '<span class="text-2xl text-neutral-600 dark:text-neutral-300 shrink-0">🔗</span>';
+      return (
+        '<a href="' + escHtml(item.url) + '" target="_blank" rel="noopener noreferrer" class="tools-card group" data-category="' + escHtml(cat) + '" style="animation-delay: ' + index * 60 + 'ms">' +
+        '<div class="tools-card-jump-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7" /><path d="M7 7h10v10" /></svg></div>' +
+        '<div class="flex items-center gap-2 mb-3">' + icon +
+        '<h3 class="text-lg font-bold text-neutral-900 dark:text-neutral-100 truncate">' + escHtml(item.name) + "</h3></div>" +
+        '<p class="tools-card-desc">' + escHtml(item.description || "") + "</p>" +
+        '<div class="tools-card-footer"><span class="text-xs text-neutral-400 dark:text-neutral-500 truncate">' + escHtml(hostnameOf(item.url)) + "</span></div>" +
+        "</a>"
+      );
+    }
+
+    function applyProjects(items: KvProjectItem[]) {
+      const enabled = items.filter((i) => i.enabled !== false);
+      // 按 category 分组，保持首次出现顺序
+      const groups = new Map<string, KvProjectItem[]>();
+      for (const item of enabled) {
+        const cat = item.category || "未分类";
+        if (!groups.has(cat)) groups.set(cat, []);
+        groups.get(cat)!.push(item);
+      }
+      const grid = document.getElementById("projects-grid");
+      if (!grid) return;
+
+      // 1) Tab 按钮组（保留 indicator 元素）
+      const nav = grid.querySelector("[data-tools-tab-nav]");
+      if (nav) {
+        const total = enabled.length;
+        let tabs =
+          '<div class="tools-tab-indicator" data-tools-tab-indicator></div>' +
+          '<button data-tools-tab="all" class="tools-tab-btn tools-tab-btn-active">全部<span class="tools-tab-badge">' + total + "</span></button>";
+        for (const [cat, list] of groups) {
+          tabs +=
+            '<button data-tools-tab="' + escHtml(cat) + '" class="tools-tab-btn tools-tab-btn-inactive">' + escHtml(cat) + '<span class="tools-tab-badge">' + list.length + "</span></button>";
+        }
+        nav.innerHTML = tabs;
+      }
+
+      // 2) 内容区：「全部」分组 + 各分类独立区
+      const contentWrap = grid.querySelector(":scope > div:not(.tools-tab-wrapper)");
+      if (!contentWrap) return;
+      if (enabled.length === 0) {
+        contentWrap.innerHTML =
+          '<div class="text-center py-16"><p class="text-neutral-500 dark:text-neutral-400">暂无数据，点击"添加"创建第一条</p></div>';
+        return;
+      }
+
+      let html = '<div data-tools-section="all">';
+      for (const [cat, list] of groups) {
+        html +=
+          '<div class="tools-category-group mt-8 first:mt-0">' +
+          '<div class="flex items-center gap-3 mb-5">' +
+          '<div class="flex items-center gap-2"><span class="text-base font-bold text-neutral-900 dark:text-neutral-100">' + escHtml(cat) + '</span></div>' +
+          '<span class="text-xs text-neutral-400 dark:text-neutral-500">' + list.length + "</span>" +
+          '<div class="flex-1 h-[2px] bg-black dark:bg-white"></div>' +
+          "</div>" +
+          '<div class="tools-card-grid">' +
+          list.map((item, i) => renderCard(item, cat, i)).join("") +
+          "</div></div>";
+      }
+      html += "</div>";
+      for (const [cat, list] of groups) {
+        html +=
+          '<div data-tools-section="' + escHtml(cat) + '" class="hidden"><div class="tools-card-grid">' +
+          list.map((item, i) => renderCard(item, cat, i)).join("") +
+          "</div></div>";
+      }
+      contentWrap.innerHTML = html;
+    }
+
+    function doRefresh() {
+      fetch("/api/data/projects", { cache: "no-store" })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (!data || !Array.isArray(data.items)) return;
+          applyProjects(data.items);
+        })
+        .catch((e) => console.warn("[projects] 动态更新失败，使用 SSR 数据:", e));
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", doRefresh);
+    } else {
+      doRefresh();
+    }
+    document.addEventListener("astro:page-load", doRefresh);
+    document.addEventListener("astro:after-swap", doRefresh);
+
+    // KV 编辑提交后同帧重渲染
+    if (!(window as any).__kvProjectsBound) {
+      (window as any).__kvProjectsBound = true;
+      document.addEventListener("kv:data-updated", (e: Event) => {
+        const detail = (e as CustomEvent).detail;
+        if (detail?.type === "projects" && Array.isArray(detail?.data?.items)) {
+          applyProjects(detail.data.items);
+        }
+      });
+    }
+  </script>
+
   <!-- 事件委托：document 级别，只注册一次，swup 导航后自动生效 -->
   <script is:inline>
     (function() {

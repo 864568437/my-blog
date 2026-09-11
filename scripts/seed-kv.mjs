@@ -38,6 +38,19 @@ const { notebookFolders, notebookNotes } = await import(
 	"../src/config/notebooksConfig.ts"
 );
 const { routinesConfig } = await import("../src/config/routinesConfig.ts");
+const { projectsPageConfig } = await import("../src/config/projectsConfig.ts");
+
+// 网站导航：打平分组结构（页面/编辑器按 category 重新分组）
+const projectsFlat = (projectsPageConfig.apis || []).flatMap((g) =>
+	(g.items || []).map((item) => ({
+		name: item.name,
+		url: item.url,
+		description: item.description || "",
+		icon: item.icon || "",
+		enabled: item.enabled !== false,
+		category: g.category || "未分类",
+	})),
+);
 
 const seeds = {
 	"data:friends": {
@@ -53,6 +66,11 @@ const seeds = {
 	},
 	"data:routines": {
 		items: routinesConfig,
+		updatedAt: new Date().toISOString(),
+		updatedBy: "seed-script",
+	},
+	"data:projects": {
+		items: projectsFlat,
 		updatedAt: new Date().toISOString(),
 		updatedBy: "seed-script",
 	},

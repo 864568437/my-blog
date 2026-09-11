@@ -2,15 +2,16 @@
  * KV 数据 API —— 友链/笔记本/日常规划的实时读写
  * --------------------------------------------------------------
  * 路由（由 src/workers/index.js 分发）：
- *   GET  /api/data/{friends|notebooks|routines}  读取（页面客户端 fetch）
+ *   GET  /api/data/{friends|notebooks|routines|projects}  读取（页面客户端 fetch）
  *   GET  /api/data/auth                           取 installation token（编辑器写入用）
- *   POST /api/data/{friends|notebooks|routines}  写入（需 GitHub token 验证）
+ *   POST /api/data/{friends|notebooks|routines|projects}  写入（需 GitHub token 验证）
  *   GET  /friends.json                            check-flink 兼容形状（取代旧 Astro 端点）
  *
  * KV 数据形状（key = `data:{type}`）：
  *   friends  → { items: FriendLink[],       updatedAt, updatedBy }
  *   notebooks→ { folders: [], notes: [],     updatedAt, updatedBy }
  *   routines → { items: RoutineItem[],       updatedAt, updatedBy }
+ *   projects → { items: 打平的导航条目[]（含 category 字段）, updatedAt, updatedBy }
  *
  * 设计约定（见仓库 KV 迁移方案）：
  *   - KV 是唯一活跃数据源，last-write-wins，无版本控制；
@@ -23,7 +24,7 @@
 import { corsHeaders, jsonResponse } from "./http-utils.js";
 import { getInstallationTokenServer } from "./github-proxy.js";
 
-const TYPES = ["friends", "notebooks", "routines"];
+const TYPES = ["friends", "notebooks", "routines", "projects"];
 const KV_PREFIX = "data:";
 const MEM_CACHE_MS = 30 * 1000;
 const TOKEN_CACHE_MS = 5 * 60 * 1000;
@@ -128,6 +129,13 @@ const VALIDATORS = {
 		d.items.length <= MAX_ARRAY_LEN &&
 		d.items.every(
 			(i) => typeof i?.id === "string" && typeof i?.name === "string",
+		),
+	// 网站导航（/projects）：打平条目，category 字段分组
+	projects: (d) =>
+		Array.isArray(d.items) &&
+		d.items.length <= MAX_ARRAY_LEN &&
+		d.items.every(
+			(i) => typeof i?.name === "string" && typeof i?.url === "string",
 		),
 };
 
