@@ -302,9 +302,12 @@ const siteInfoText = _si
           cards.forEach((card) => {
             const cardEl = card;
             const tags = (cardEl.dataset.tags || "").split(",");
+            // 「全部」按钮 data-tag 为空字符串（历史 SSR 版本用 "all"，
+            // KV 重渲染版用 ""，两种都要兼容）
             if (
+              !selectedTag ||
               selectedTag === "all" ||
-              (selectedTag && tags.includes(selectedTag))
+              tags.includes(selectedTag)
             ) {
               cardEl.style.display = "";
               cardEl.classList.add("animate-fade-in-up");
@@ -687,7 +690,7 @@ const siteInfoText = _si
                     '<button type="button" data-tag="' + escAttr(t) + '" class="px-3 py-1.5 text-sm rounded-lg border transition-colors">' + escAttr(t) + "</button>",
                 )
                 .join("");
-              filterEl.innerHTML = '<button type="button" data-tag="" class="px-3 py-1.5 text-sm rounded-lg border transition-colors">全部</button>' + buttons;
+              filterEl.innerHTML = '<button type="button" data-tag="all" class="px-3 py-1.5 text-sm rounded-lg border transition-colors">全部</button>' + buttons;
             }
 
             // 更新 window.__FRIEND_LIST__（供失效分区脚本使用）
