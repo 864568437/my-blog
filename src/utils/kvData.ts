@@ -73,10 +73,35 @@ export async function fetchKvData<T>(type: KvDataType): Promise<T | null> {
 }
 
 /** 写入 KV 数据；成功返回 true，失败弹 toast 并返回 false */
+/** 数一份数据的条目数（items 或 folders+notes 合计）；非数组形状返回 -1 */
+function countEntries(d: unknown): number {
+	const o = d as Record<string, unknown>;
+	if (Array.isArray(o?.items)) return o.items.length;
+	if (Array.isArray(o?.folders) && Array.isArray(o?.notes))
+		return o.folders.length + o.notes.length;
+	return -1;
+}
+
 export async function putKvData(
 	type: KvDataType,
 	data: unknown,
 ): Promise<boolean> {
+	// 空数据保护：提交空列表会整体清掉线上数据（KV last-write-wins 无版本控制）。
+	// 编辑器加载失败（KV 拉取异常回落空 DOM 收集）时曾把整表写空，这里强制确认。
+	const newCount = countEntries(data);
+	if (newCount === 0) {
+		const current = await fetchKvData(type);
+		const currentCount = countEntries(current);
+		if (currentCount > 0) {
+			const ok = confirm(
+				`提交的数据是空列表，将清空线上现有的 ${currentCount} 条「${type}」数据且无法恢复。确定继续吗？`,
+			);
+			if (!ok) {
+				showToast("已取消提交（空数据保护）", "info");
+				return false;
+			}
+		}
+	}
 	const token = await getKvAuthToken();
 	if (!token) {
 		showToast("未获取到写入凭据（GitHub App 未配置）", "error");
